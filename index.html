@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MsSoftware - Desenvolvimento Web e Mobile</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="logo2.png" type="image/png" />
+  <meta name="description" content="MsSoftware - Sites, Sistemas e Aplicativos sob medida para sua empresa. Soluções digitais com foco em resultado.">
+<meta name="keywords" content="desenvolvimento web, sistemas, aplicativos, sites, mssoftware, tecnologia, agência digital">
+<meta name="author" content="MsSoftware">
+<meta property="og:title" content="MsSoftware - Soluções Digitais" />
+<meta property="og:description" content="Sites, Sistemas e Apps sob medida para empresas modernas." />
+<meta property="og:image" content="https://seusite.com/imagem-de-preview.png" />
+<meta property="og:url" content="https://seusite.com" />
+<meta property="og:type" content="website" />
+
+  <style>
+    body { font-family: 'Poppins', sans-serif; }
+    .fade-in { opacity: 0; transform: translateY(20px); transition: opacity 0.8s, transform 0.8s; }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+    @keyframes scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  .animate-scroll {
+    animation: scroll 40s linear infinite;
+  }
+  
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+  <!-- Header Melhorado -->
+<header id="mainHeader" class="fixed w-full bg-transparent transition-all duration-500 z-50">
+  <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+    <div class="flex items-center space-x-3">
+      <img src="logo2.png" alt="MsSoftware Logo" class="h-12 w-12 rounded-full shadow object-cover" />
+      <div>
+        <h1 class="text-2xl font-extrabold tracking-tight text-white">
+          <span class="text-blue-500">Ms</span>Software
+        </h1>
+        <p class="text-sm text-gray-300">Inovação Digital para sua Empresa</p>
+      </div>
+    </div>
+
+    <nav class="space-x-6 font-medium hidden md:flex">
+      <a href="#sobre" class="text-gray-100 hover:text-blue-400 transition">Sobre</a>
+      <a href="#servicos" class="text-gray-100 hover:text-blue-400 transition">Serviços</a>
+      <a href="#clientes" class="text-gray-100 hover:text-blue-400 transition">Clientes</a>
+       <a href="https://wa.me/5517996043167?text=Olá!%20Gostaria%20de%20saber%20mais%20sobre%20os%20serviços%20da%20MsSoftware." 
+     target="_blank" class="text-gray-200 hover:text-blue-400 transition">Contato</a>
+    </nav>
+
+    <a href="https://wa.me/5517996043167?text=Olá!%20Gostaria%20de%20saber%20mais%20sobre%20os%20serviços%20da%20MsSoftware." 
+       target="_blank"
+       class="hidden sm:inline-block bg-blue-600 text-white px-5 py-2 rounded-lg shadow hover:bg-blue-700 transition">
+      📧 Orçamento 
+    </a>
+  </div>
+</header>
+
+<!-- Hero com Estilo Premium -->
+<section class="relative bg-gradient-to-r from-gray-900 via-blue-800 to-gray-800 text-white py-32 md:py-40 overflow-hidden">
+  <div class="absolute inset-0 bg-black/30 backdrop-blur-sm z-0"></div>
+
+  <div class="relative z-10 max-w-6xl mx-auto text-center px-6 fade-in">
+    <h1 class="text-5xl md:text-6xl font-extrabold tracking-tight drop-shadow-md mb-6">
+      Transformamos Ideias em <span class="text-blue-400">Soluções Digitais</span>
+    </h1>
+    <p class="text-lg md:text-xl max-w-2xl mx-auto mb-10 text-gray-200 leading-relaxed">
+      Desenvolvimento Web e Mobile sob medida para o seu negócio crescer.
+    </p>
+
+    <div class="flex flex-wrap justify-center gap-4">
+      <a href="https://wa.me/5517996043167?text=Olá!%20Gostaria%20de%20saber%20mais%20sobre%20os%20serviços%20da%20MsSoftware." 
+         target="_blank"
+         class="bg-blue-600 hover:bg-blue-700 px-8 py-4 rounded-full shadow-lg font-semibold text-white text-lg transition transform hover:scale-105 flex items-center gap-2">
+        🚀 Solicitar Orçamento
+      </a>
+      <a href="#servicos"
+         class="bg-gray-700 hover:bg-gray-600 px-8 py-4 rounded-full shadow-lg font-semibold text-white text-lg transition transform hover:scale-105 flex items-center gap-2">
+        📌 Ver Serviços
+      </a>
+    </div>
+  </div>
+</section>
+
+ 
+<!-- Sobre -->
+<section id="sobre" class="py-20 px-6 bg-white fade-in">
+  <div class="max-w-6xl mx-auto text-center mb-12">
+    <h2 class="text-4xl font-bold text-gray-800">💻 Sobre a MsSoftware</h2>
+    <p class="text-lg text-gray-600 mt-4">
+   Sites, Apps e Sistemas rápidos, modernos e sob medida. Criamos o que seu negócio precisa, sem enrolação.</p>
+  </div>
+
+  <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto text-left">
+    <div class="bg-gray-50 p-6 rounded-xl shadow hover:shadow-lg transition">
+      <div class="text-4xl text-blue-600 mb-4">💡</div>
+      <h3 class="text-xl font-bold text-gray-800 mb-2">Inovação sob medida</h3>
+      <p class="text-gray-600">
+        Projetos personalizados com foco total na experiência do usuário e nos objetivos do seu negócio.
+      </p>
+    </div>
+
+    <div class="bg-gray-50 p-6 rounded-xl shadow hover:shadow-lg transition">
+      <div class="text-4xl text-blue-600 mb-4">🔧</div>
+      <h3 class="text-xl font-bold text-gray-800 mb-2">Tecnologia de ponta</h3>
+      <p class="text-gray-600">
+        Usamos as melhores práticas de desenvolvimento web e mobile, com ferramentas modernas e eficientes.
+      </p>
+    </div>
+
+    <div class="bg-gray-50 p-6 rounded-xl shadow hover:shadow-lg transition">
+      <div class="text-4xl text-blue-600 mb-4">🤝</div>
+      <h3 class="text-xl font-bold text-gray-800 mb-2">Parceria verdadeira</h3>
+      <p class="text-gray-600">
+        Estamos ao seu lado do início ao fim, oferecendo suporte contínuo e evolução constante para seus projetos.
+      </p>
+    </div>
+  </div>
+</section>
+
+
+
+
+  <!-- Serviços -->
+  <section id="servicos" class="py-20 px-6 bg-gray-100 fade-in">
+    <div class="max-w-6xl mx-auto text-center">
+      <h2 class="text-3xl font-bold mb-12 text-gray-800">Nossos Serviços</h2>
+      <div class="grid md:grid-cols-3 gap-8">
+        <div class="bg-white p-8 rounded-xl shadow hover:shadow-lg hover:-translate-y-1 transition">
+          <div class="text-blue-600 text-5xl mb-4">💻</div>
+          <h3 class="text-xl font-semibold text-gray-800 mb-3">Sites Institucionais</h3>
+          <p class="text-gray-600">Sites profissionais que transmitem confiança e credibilidade.</p>
+        </div>
+        <div class="bg-white p-8 rounded-xl shadow hover:shadow-lg hover:-translate-y-1 transition">
+          <div class="text-blue-600 text-5xl mb-4">🛒</div>
+          <h3 class="text-xl font-semibold text-gray-800 mb-3">Lojas Virtuais</h3>
+          <p class="text-gray-600">E-commerces completos, integrados com pagamento e frete.</p>
+        </div>
+        <div class="bg-white p-8 rounded-xl shadow hover:shadow-lg hover:-translate-y-1 transition">
+          <div class="text-blue-600 text-5xl mb-4">📱</div>
+          <h3 class="text-xl font-semibold text-gray-800 mb-3">Aplicativos</h3>
+          <p class="text-gray-600">Desenvolvimento de apps Android e WebApps personalizados.</p>
+        </div>
+        <div class="bg-white p-8 rounded-xl shadow hover:shadow-lg hover:-translate-y-1 transition">
+          <div class="text-blue-600 text-5xl mb-4">🔧</div>
+          <h3 class="text-xl font-semibold text-gray-800 mb-3">Manutenção</h3>
+          <p class="text-gray-600">Suporte, atualizações e melhorias contínuas em seus sistemas.</p>
+        </div>
+        <div class="bg-white p-8 rounded-xl shadow hover:shadow-lg hover:-translate-y-1 transition">
+          <div class="text-blue-600 text-5xl mb-4">🚀</div>
+          <h3 class="text-xl font-semibold text-gray-800 mb-3">SEO & Performance</h3>
+          <p class="text-gray-600">Melhore seu ranking no Google e acelere seu site.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+ 
+
+ <section id="clientes" class="py-24 bg-gradient-to-r from-white via-gray-50 to-white overflow-hidden fade-in relative">
+
+  <div class="max-w-6xl mx-auto text-center mb-12 px-4">
+    <h2 class="text-4xl font-bold text-gray-800">Nossos Clientes</h2>
+    <p class="text-gray-600 mt-2 text-lg">Empresas que confiam na MsSoftware</p>
+  </div>
+
+  <!-- Gradientes laterais -->
+  <div class="absolute left-0 top-0 w-24 h-full bg-gradient-to-r from-white to-transparent z-10 pointer-events-none"></div>
+  <div class="absolute right-0 top-0 w-24 h-full bg-gradient-to-l from-white to-transparent z-10 pointer-events-none"></div>
+
+  <!-- Carrossel contínuo -->
+  <div class="overflow-hidden w-full">
+    <div class="flex animate-scroll whitespace-nowrap">
+      <!-- Bloco duplicado contínuo -->
+      <div class="flex items-center space-x-20 px-8">
+        <img src="img22.png" loading="lazy" alt="Logo Cliente" class="transition duration-300 object-contain h-28"  />
+        <img src="favicon.png" loading="lazy" alt="Logo Cliente" class="transition duration-300 object-contain h-28"  />
+        <img src="icon.png" loading="lazy"alt="Logo Cliente" class="transition duration-300 object-contain h-28"  />
+        <img src="igreja.jpeg" loading="lazy"alt="Logo Cliente" class="transition duration-300 object-contain h-28"  />
+        <img src="Logo2025.jpeg" loading="lazy"alt="Logo Cliente" class="transition duration-300 object-contain h-28"  />
+
+        <!-- BLOCO DUPLICADO para efeito contínuo -->
+        <img src="img22.png" loading="lazy"alt="Logo Cliente" class="transition duration-300 object-contain h-28"  />
+        <img src="favicon.png" loading="lazy"alt="Logo Cliente" class="transition duration-300 object-contain h-28"  />
+        <img src="icon.png"loading="lazy" alt="Logo Cliente" class="transition duration-300 object-contain h-28"  />
+        <img src="igreja.jpeg" loading="lazy"alt="Logo Cliente" class="transition duration-300 object-contain h-28"  />
+        <img src="Logo2025.jpeg" loading="lazy"alt="Logo Cliente" class="transition duration-300 object-contain h-28"  />
+
+        <!-- BLOCO DUPLICADO para efeito contínuo -->
+        <img src="img22.png"loading="lazy" alt="Logo Cliente" class="transition duration-300 object-contain h-28"  />
+        <img src="favicon.png"loading="lazy" alt="Logo Cliente" class="transition duration-300 object-contain h-28"  />
+        <img src="icon.png"loading="lazy" alt="Logo Cliente" class="transition duration-300 object-contain h-28"  />
+        <img src="igreja.jpeg"loading="lazy" alt="Logo Cliente" class="transition duration-300 object-contain h-28"  />
+        <img src="Logo2025.jpeg"loading="lazy" alt="Logo Cliente" class="transition duration-300 object-contain h-28"  />
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- CTA Final -->
+<section class="bg-gradient-to-r from-blue-700 to-gray-800 text-white py-16 text-center fade-in">
+  <h2 class="text-3xl font-bold mb-6">Pronto para impulsionar seu negócio?</h2>
+  <p class="mb-6 text-gray-200">Entre em contato agora e dê o próximo passo no mundo digital.</p>
+  <a href="https://wa.me/5517996043167?text=Olá!%20Gostaria%20de%20saber%20mais%20sobre%20os%20serviços%20da%20MsSoftware." 
+     target="_blank"
+     class="bg-white text-blue-700 font-semibold px-8 py-3 rounded-lg shadow hover:bg-gray-100 transition">
+    📩 Falar com a MsSoftware
+  </a>
+</section>
+
+
+
+  <!-- Rodapé -->
+  <footer class="bg-gray-900 text-gray-300 py-12 fade-in">
+    <div class="max-w-6xl mx-auto px-6 grid md:grid-cols-3 gap-8">
+      <div>
+        <h3 class="text-xl font-bold text-white mb-4">MsSoftware</h3>
+        <p class="text-gray-400 text-sm">Especialistas em desenvolvimento web e mobile para alavancar seu negócio.</p>
+      </div>
+      <div>
+        <h4 class="font-semibold text-white mb-4">Links Rápidos</h4>
+        <ul class="space-y-2 text-sm">
+          <li><a href="#sobre" class="hover:text-white">Sobre</a></li>
+          <li><a href="#servicos" class="hover:text-white">Serviços</a></li>
+          <li><a href="#clientes" class="hover:text-white">Clientes</a></li>
+          <li><a href="#contato" class="hover:text-white">Contato</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-semibold text-white mb-4">Contato</h4>
+        <p class="text-sm">📧 msouzasoftware@gmail.com</p>
+        <p class="text-sm">📞 (17) 99604-3167</p>
+       
+      </div>
+    </div>
+    <div class="text-center text-gray-500 text-sm mt-8">
+      &copy; 2025 MsSoftware - Todos os direitos reservados.
+    </div>
+  </footer>
+
+  <!-- Script para animações de scroll -->
+  <script>
+    const elements = document.querySelectorAll('.fade-in');
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.2 });
+    elements.forEach(el => observer.observe(el));
+
+    // Header muda de cor ao rolar
+    const header = document.getElementById('mainHeader');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 50) {
+        header.classList.add('bg-gray-900/90', 'backdrop-blur-sm');
+        header.classList.remove('bg-transparent');
+      } else {
+        header.classList.add('bg-transparent');
+        header.classList.remove('bg-gray-900/90', 'backdrop-blur-sm');
+      }
+    });
+
+    // WhatsApp form
+    document.getElementById('formContato').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const nome = document.getElementById('nome').value;
+      const email = document.getElementById('email').value;
+      const mensagem = document.getElementById('mensagem').value;
+      const texto = `Olá! Meu nome é ${nome}%0AEmail: ${email}%0AMensagem: ${mensagem}`;
+      window.open(`https://wa.me/5517996043167?text=${texto}`, '_blank');
+    });
+  </script>
+
+</body>
+</html>
