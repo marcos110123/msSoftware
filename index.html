@@ -21,14 +21,17 @@
     .fade-in { opacity: 0; transform: translateY(20px); transition: opacity 0.8s, transform 0.8s; }
     .fade-in.visible { opacity: 1; transform: translateY(0); }
 
-    @keyframes scroll {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
-  }
+   @keyframes scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-100%); } /* Vai até o fim do conteúdo duplicado */
+}
 
-  .animate-scroll {
-    animation: scroll 10s linear infinite;
-  }
+.animate-scroll {
+  display: flex;
+  width: 200%; /* conteúdo duplicado */
+  animation: scroll 20s linear infinite;
+}
+
   
   </style>
 </head>
@@ -176,31 +179,28 @@
   <div class="absolute left-0 top-0 w-24 h-full bg-gradient-to-r from-white to-transparent z-10 pointer-events-none"></div>
   <div class="absolute right-0 top-0 w-24 h-full bg-gradient-to-l from-white to-transparent z-10 pointer-events-none"></div>
 
-  <!-- Carrossel contínuo -->
-<!-- Carrossel contínuo -->
+<!-- Container visível -->
 <div class="overflow-hidden w-full">
-  <div class="flex animate-scroll whitespace-nowrap">
+  <!-- Bloco que se move (com conteúdo duplicado) -->
+  <div class="animate-scroll">
+    <!-- Bloco 1 -->
     <div class="flex items-center space-x-10 sm:space-x-20 px-4 sm:px-8">
-      <!-- Imagens dos clientes -->
-      <img src="img22.png" class="transition duration-300 object-contain h-20 sm:h-28" />
-      <img src="favicon.png" class="transition duration-300 object-contain h-20 sm:h-28" />
-      <img src="icon.png" class="transition duration-300 object-contain h-20 sm:h-28" />
-      <img src="Logo2025.jpeg" class="transition duration-300 object-contain h-20 sm:h-28" />
+      <img src="img22.png" class="h-20 sm:h-28 object-contain" />
+      <img src="favicon.png" class="h-20 sm:h-28 object-contain" />
+      <img src="icon.png" class="h-20 sm:h-28 object-contain" />
+      <img src="Logo2025.jpeg" class="h-20 sm:h-28 object-contain" />
+    </div>
 
-      <!-- Bloco duplicado -->
-      <img src="img22.png" class="transition duration-300 object-contain h-20 sm:h-28" />
-      <img src="favicon.png" class="transition duration-300 object-contain h-20 sm:h-28" />
-      <img src="icon.png" class="transition duration-300 object-contain h-20 sm:h-28" />
-      <img src="Logo2025.jpeg" class="transition duration-300 object-contain h-20 sm:h-28" />
-
-      <!-- Bloco duplicado -->
-      <img src="img22.png" class="transition duration-300 object-contain h-20 sm:h-28" />
-      <img src="favicon.png" class="transition duration-300 object-contain h-20 sm:h-28" />
-      <img src="icon.png" class="transition duration-300 object-contain h-20 sm:h-28" />
-      <img src="Logo2025.jpeg" class="transition duration-300 object-contain h-20 sm:h-28" />
+    <!-- Bloco 2 (duplicado) -->
+    <div class="flex items-center space-x-10 sm:space-x-20 px-4 sm:px-8">
+      <img src="img22.png" class="h-20 sm:h-28 object-contain" />
+      <img src="favicon.png" class="h-20 sm:h-28 object-contain" />
+      <img src="icon.png" class="h-20 sm:h-28 object-contain" />
+      <img src="Logo2025.jpeg" class="h-20 sm:h-28 object-contain" />
     </div>
   </div>
 </div>
+
 
 </section>
 
