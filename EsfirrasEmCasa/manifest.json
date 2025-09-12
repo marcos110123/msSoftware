@@ -1,7 +1,7 @@
 {
   "name": "Esfirras em Casa",
   "short_name": "Esfirras em Casa",
-  "start_url": "/",
+  "start_url": "/EsfirrasEmCasa",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#B91C1C",
