@@ -7,8 +7,9 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <meta name="theme-color" content="#000000">
   <!-- Suporte para iOS -->
-  <link rel="apple-touch-icon" href="img/logo2.jpeg">
-  <link rel="manifest" href="manifest.json">
+  <link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./img/logo2.jpeg">
+
   <meta name="apple-mobile-web-app-status-bar" content="#B91C1C">
   <style>
     #modalAlerta {
@@ -150,13 +151,10 @@
 
 <script>
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js').then(reg => {
-    // Se já tem uma versão esperando
+  navigator.serviceWorker.register('./sw.js').then(reg => {
     if (reg.waiting) {
       reg.waiting.postMessage("skipWaiting");
     }
-
-    // Detecta atualização
     reg.addEventListener("updatefound", () => {
       const newWorker = reg.installing;
       newWorker?.addEventListener("statechange", () => {
@@ -168,10 +166,11 @@ if ('serviceWorker' in navigator) {
     });
   });
 }
+
 </script>
 
 <script>
-  const versaoSistema = "1.0.3"; // Atualize aqui também!
+  const versaoSistema = "1.0.4"; // Atualize aqui também!
 
   const script = document.createElement("script");
   script.type = "module";

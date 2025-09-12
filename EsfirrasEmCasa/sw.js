@@ -1,13 +1,14 @@
-const CACHE_VERSION = '1.0.3'; // aumente sempre que fizer mudanças
+const CACHE_VERSION = '1.0.4'; // aumente sempre que fizer mudanças
 const CACHE_NAME = `esfirras-cache-v${CACHE_VERSION}`;
 
 const urlsToCache = [
-  '/',
+  '/EsfirrasEmCasa/',
   '/EsfirrasEmCasa/index.html',
-  '/script.js?v=1.0.0',
-  '/img/logo-192.png',
-  '/img/logo-512.png'
+  '/EsfirrasEmCasa/script.js?v=1.0.3',
+  '/EsfirrasEmCasa/img/logo-192.png',
+  '/EsfirrasEmCasa/img/logo-512.png'
 ];
+
 
 // Instala
 self.addEventListener("install", (event) => {
