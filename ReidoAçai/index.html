@@ -199,20 +199,24 @@
 
 <script>
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js').then(reg => {
-    if (reg.waiting) {
-      reg.waiting.postMessage("skipWaiting");
-    }
-    reg.addEventListener("updatefound", () => {
-      const newWorker = reg.installing;
-      newWorker?.addEventListener("statechange", () => {
-        if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
-          console.log("🔄 Nova versão detectada, atualizando...");
-          window.location.reload();
-        }
+  navigator.serviceWorker.register('./ReidoAçai/sw.js', { scope: './ReidoAçai/' })
+    .then(reg => {
+      // Força ativação imediata caso já tenha um SW esperando
+      if (reg.waiting) {
+        reg.waiting.postMessage("skipWaiting");
+      }
+
+      // Detecta atualização do SW
+      reg.addEventListener("updatefound", () => {
+        const newWorker = reg.installing;
+        newWorker?.addEventListener("statechange", () => {
+          if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+            console.log("🔄 Nova versão detectada, atualizando...");
+            window.location.reload();
+          }
+        });
       });
     });
-  });
 }
 
 </script>

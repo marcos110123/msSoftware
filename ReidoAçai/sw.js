@@ -1,5 +1,5 @@
 const CACHE_VERSION = '1.0.1'; // aumente sempre que fizer mudanças
-const CACHE_NAME = `esfirras-cache-v${CACHE_VERSION}`;
+const CACHE_NAME = `acai-cache-v${CACHE_VERSION}`;
 
 const urlsToCache = [
   '/ReidoAçai/',
