@@ -1,12 +1,12 @@
-const CACHE_VERSION = '1.0.4'; // aumente sempre que fizer mudanças
+const CACHE_VERSION = '1.0.1'; // aumente sempre que fizer mudanças
 const CACHE_NAME = `esfirras-cache-v${CACHE_VERSION}`;
 
 const urlsToCache = [
-  '/EsfirrasEmCasa/',
-  '/EsfirrasEmCasa/index.html',
-  '/EsfirrasEmCasa/script.js?v=1.0.3',
-  '/EsfirrasEmCasa/img/logo-192.png',
-  '/EsfirrasEmCasa/img/logo-512.png'
+  '/ReidoAçai/',
+  '/ReidoAçai/index.html',
+  '/ReidoAçai/script.js?v=1.0.3',
+  '/ReidoAçai/img/logo-192.png',
+  '/ReidoAçai/img/logo-512.png'
 ];
 
 
