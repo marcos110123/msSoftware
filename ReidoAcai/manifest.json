@@ -1,8 +1,8 @@
 {
-  "name": "rei do acai",
-  "short_name": "rei do acai",
-  "start_url": "/rei do acai/",
-  "scope": "/rei do acai/",
+  "name": "Rei do Acai",
+  "short_name": "ReidoAcai",
+  "start_url": "/ReidoAcai/",
+  "scope": "/ReidoAcai/",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#B91C1C",

@@ -68,14 +68,14 @@ card.innerHTML = `
        decoding="async">
   <h3 class="text-xl font-semibold mt-4 text-white">${produto.nome}</h3>
   <p class="text-gray-300">${produto.descricao || ""}</p>
-  <p class="text-yellow-400 font-bold mt-2">R$ ${Number(produto.preco).toFixed(2)}</p>
+  <p class="text-white font-bold mt-2">R$ ${Number(produto.preco).toFixed(2)}</p>
   <button 
   onclick="${produto.categoria === 'acai' 
     ? `abrirModalOpcoes('acai', '${produto.nome}', ${produto.preco})` 
     : produto.categoria === 'sorvete'
       ? `abrirModalOpcoes('sorvete', '${produto.nome}', ${produto.preco})`
       : `adicionarAoCarrinho('${produto.nome}', ${produto.preco}, '')`}"
-  class="mt-4 bg-purple-800 text-yellow-400 px-4 py-2 rounded hover:bg-purple-900 w-full font-semibold shadow-md transition">
+  class="mt-4 bg-purple-800 text-white px-4 py-2 rounded hover:bg-purple-900 w-full font-semibold shadow-md transition">
   Adicionar ao Carrinho
 </button>
 `;
@@ -416,7 +416,7 @@ window.fecharModalSucesso = function () {
 // ----------------------
 function exibirNotificacao(nome) {
   const notificacao = document.createElement("div");
-  notificacao.className = "fixed bottom-4 right-4 bg-purple-800 text-yellow-400 px-4 py-2 rounded shadow-lg z-50 font-semibold";
+  notificacao.className = "fixed bottom-4 right-4 bg-purple-800 text-white px-4 py-2 rounded shadow-lg z-50 font-semibold";
   notificacao.textContent = `${nome} adicionado ao carrinho!`;
   document.body.appendChild(notificacao);
   setTimeout(() => notificacao.remove(), 2500);
@@ -530,7 +530,7 @@ async function abrirModalOpcoes(tipo, nomeProduto, precoProduto) {
   modal.innerHTML = `
     <div class="bg-white text-gray-800 rounded-2xl p-6 max-w-lg w-11/12 max-h-[90vh] overflow-y-auto shadow-2xl animate-fadeIn scale-95">
       <!-- Cabeçalho -->
-      <div class="bg-gradient-to-r from-purple-800 to-black text-yellow-400 -mx-6 -mt-6 px-6 py-4 rounded-t-2xl shadow-md">
+      <div class="bg-gradient-to-r from-purple-800 to-black text-white -mx-6 -mt-6 px-6 py-4 rounded-t-2xl shadow-md">
         <h2 class="text-2xl font-bold text-center flex items-center justify-center gap-2">
           🍨 Personalize seu ${tipo}
         </h2>
@@ -561,7 +561,7 @@ async function abrirModalOpcoes(tipo, nomeProduto, precoProduto) {
           Cancelar
         </button>
         <button id="btnConfirmarOpcoes" 
-                class="w-1/2 bg-purple-800 hover:bg-purple-900 text-yellow-400 py-3 rounded-lg font-semibold transition transform hover:scale-105 shadow">
+                class="w-1/2 bg-purple-800 hover:bg-purple-900 text-white py-3 rounded-lg font-semibold transition transform hover:scale-105 shadow">
           ➕ Adicionar
         </button>
       </div>
