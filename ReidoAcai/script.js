@@ -37,6 +37,33 @@ let tipoPedidoSelecionado = null;
 
 const taxaEntregaFixa = 2.00;
 
+// 🔹 Cache das opções de açaí e sorvete
+let opcoesAcaiCache = [];
+let opcoesSorveteCache = [];
+
+// ----------------------
+// Pré-carregar opções do Firestore
+// ----------------------
+async function carregarOpcoes() {
+  try {
+    const snapAcai = await getDocs(collection(db, "opcoesAcai"));
+    opcoesAcaiCache = snapAcai.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    const snapSorvete = await getDocs(collection(db, "opcoesSorvete"));
+    opcoesSorveteCache = snapSorvete.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    console.log("✅ Opções pré-carregadas:", {
+      acai: opcoesAcaiCache.length,
+      sorvete: opcoesSorveteCache.length
+    });
+  } catch (e) {
+    console.error("Erro ao carregar opções:", e);
+  }
+}
+
+// Já inicia o carregamento ao abrir o site
+carregarOpcoes();
+
 // ----------------------
 // Carregar produtos
 // ----------------------
@@ -83,17 +110,18 @@ card.innerHTML = `
 
 
       container.appendChild(card);
-      // Se for marcado como mais vendido, também mostra na seção "mais-vendidas"
-if (produto.maisVendido) {
-  const maisVendidosSecao = document.getElementById("mais-vendidas");
-  if (maisVendidosSecao) {
-    const maisVendidosContainer = maisVendidosSecao.querySelector(".produtos-grid");
-    if (maisVendidosContainer) {
+// Se for marcado como promoção, também mostra na seção "promocoes"
+if (produto.promocao) {
+  const promocoesSecao = document.getElementById("promocoes");
+  if (promocoesSecao) {
+    const promocoesContainer = promocoesSecao.querySelector(".produtos-grid");
+    if (promocoesContainer) {
       const clone = card.cloneNode(true); // clona o card
-      maisVendidosContainer.appendChild(clone);
+      promocoesContainer.appendChild(clone);
     }
   }
 }
+
     });
   });
 }
@@ -515,12 +543,13 @@ window.fecharModalTipoPedido = function () {
 };
 
 async function abrirModalOpcoes(tipo, nomeProduto, precoProduto) {
-  // pega a coleção certa
-  const colecao = tipo === "acai" ? "opcoesAcai" : "opcoesSorvete";
-  const querySnap = await getDocs(collection(db, colecao));
+  // pega do cache ao invés de consultar Firestore
+  const grupos = tipo === "acai" ? opcoesAcaiCache : opcoesSorveteCache;
 
-  let grupos = [];
-  querySnap.forEach(doc => grupos.push({ id: doc.id, ...doc.data() }));
+  if (!grupos || grupos.length === 0) {
+    mostrarAlerta("⚠️ Não foi possível carregar as opções. Tente novamente.");
+    return;
+  }
 
   // monta o HTML do modal
   const modal = document.createElement("div");
@@ -545,14 +574,13 @@ async function abrirModalOpcoes(tipo, nomeProduto, precoProduto) {
       <div id="gruposContainer" class="space-y-8"></div>
 
       <!-- Observação -->
-<div class="mt-6">
-  <label for="obsProduto" class="block text-sm font-medium text-gray-700 mb-2">📝 Observação</label>
-  <textarea id="obsProduto" 
-            class="w-full p-2 border border-gray-300 rounded resize-none focus:ring focus:ring-purple-200"
-            placeholder="Ex: sem granola, calda à parte..."
-            rows="2"></textarea>
-</div>
-
+      <div class="mt-6">
+        <label for="obsProduto" class="block text-sm font-medium text-gray-700 mb-2">📝 Observação</label>
+        <textarea id="obsProduto" 
+                  class="w-full p-2 border border-gray-300 rounded resize-none focus:ring focus:ring-purple-200"
+                  placeholder="Ex: sem granola, calda à parte..."
+                  rows="2"></textarea>
+      </div>
 
       <!-- Ações -->
       <div class="flex justify-between gap-4 mt-8">
@@ -572,31 +600,67 @@ async function abrirModalOpcoes(tipo, nomeProduto, precoProduto) {
 
   const container = modal.querySelector("#gruposContainer");
 
-  // 🔹 Define a ordem fixa
-  const ordemGrupos = {
+  // 🔹 Define a ordem fixa de grupos para cada tipo
+  const ordemAcai = {
     "Escolha seu açaí": 1,
     "Acompanhamentos grátis": 2,
-    "Acompanhamentos extras": 3,
+    "Acompanhamentos a mais": 3,
     "Recheio especial": 4
   };
+
+  const ordemSorvete = {
+    "Escolha seu sorvete (sabor)": 1,
+    "Acompanhamentos grátis": 2,
+    "Acompanhamentos a mais": 3,
+    "Recheio especial": 4
+  };
+
+  // 🔹 Pega a ordem correta de acordo com o tipo
+  const ordemGrupos = tipo === "acai" ? ordemAcai : ordemSorvete;
 
   // 🔹 Ordena os grupos
   const gruposOrdenados = [...grupos].sort((a, b) => {
     return (ordemGrupos[a.grupo] || 999) - (ordemGrupos[b.grupo] || 999);
   });
 
-  // 🔹 Monta grupos na ordem correta
+  // --- Tabela de limites por copo ---
+  const limitePorCopo = {
+    "250ml": 2,
+    "330ml": 3,
+    "550ml": 4,
+    "770ml": 5,
+    "1100ml": 6,
+    "marmita": 6
+  };
+
+  // --- Helpers ---
+  function normalizeStrLocal(s) {
+    return (s || '').toString().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+  }
+
+  function findLimiteKeyForValueLocal(val) {
+    if (!val) return null;
+    const vNorm = normalizeStrLocal(val);
+    return Object.keys(limitePorCopo).find(k => vNorm.includes(k.toLowerCase())) || null;
+  }
+
+  // 🔹 Detecta copo direto do nome do produto (ex: "Açaí 330ml")
+  const copoDetectado = findLimiteKeyForValueLocal(nomeProduto);
+
+  // --- Monta os grupos ---
   gruposOrdenados.forEach(grupo => {
-    let opcoes = grupo.itens.map(item => {
-      const precoExtra = item.preco && item.preco > 0 
-        ? ` <span class="text-sm text-gray-500">(+R$ ${item.preco})</span>` 
+    const grpNorm = normalizeStrLocal(grupo.grupo || '');
+
+    let opcoes = (grupo.itens || []).map(item => {
+      const precoExtra = item.preco && item.preco > 0
+        ? ` <span class="text-sm text-gray-500">(+R$ ${item.preco})</span>`
         : "";
 
       return `
         <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-100 transition">
-          <input type="checkbox" 
-                 value="${item.nome}" 
-                 data-preco="${item.preco}" 
+          <input type="checkbox"
+                 value="${item.nome}"
+                 data-preco="${item.preco}"
                  class="opcaoItem accent-purple-700 scale-125"
                  data-grupo="${grupo.grupo}"
                  ${grupo.obrigatorio ? "required" : ""}>
@@ -605,34 +669,93 @@ async function abrirModalOpcoes(tipo, nomeProduto, precoProduto) {
       `;
     }).join("");
 
-    container.innerHTML += `
-      <div class="pb-4 border-b border-gray-200 last:border-0">
-        <h3 class="font-bold mb-3 text-purple-800">${grupo.grupo} 
-          <span class="text-xs text-gray-500">(máx: ${grupo.maximo})</span>
-        </h3>
-        <div class="space-y-2">${opcoes}</div>
-      </div>
-    `;
+  const isAcompanhamentoGratis = grpNorm.includes("acompanhamentos gratis");
+
+container.innerHTML += `
+  <div class="pb-4 border-b border-gray-200 last:border-0" data-group-key="${grpNorm}">
+    <h3 class="font-bold mb-3 text-purple-800">${grupo.grupo} 
+      <span class="text-xs text-gray-500">
+        (máx: ${isAcompanhamentoGratis ? (limitePorCopo[copoDetectado] || grupo.maximo) : grupo.maximo})
+      </span>
+    </h3>
+    <div class="space-y-2">${opcoes}</div>
+  </div>
+`;
+
   });
 
- modal.querySelector("#btnConfirmarOpcoes").onclick = () => {
-  let selecionados = [...modal.querySelectorAll(".opcaoItem:checked")].map(i => ({
-    nome: i.value,
-    preco: Number(i.dataset.preco),
-    grupo: i.dataset.grupo
-  }));
+  // --- Botão confirmar ---
+  modal.querySelector("#btnConfirmarOpcoes").onclick = () => {
+    let selecionados = [...modal.querySelectorAll(".opcaoItem:checked")].map(i => ({
+      nome: i.value,
+      preco: Number(i.dataset.preco),
+      grupo: i.dataset.grupo
+    }));
 
-  // calcula valor extra
-  const extrasValor = selecionados.reduce((sum, s) => sum + (s.preco || 0), 0);
+    const extrasValor = selecionados.reduce((sum, s) => sum + (s.preco || 0), 0);
+    const observacao = modal.querySelector("#obsProduto").value.trim();
 
-  // pega observação
-  const observacao = modal.querySelector("#obsProduto").value.trim();
+    adicionarAoCarrinho(nomeProduto, precoProduto, selecionados, extrasValor, observacao);
+    modal.remove();
+  };
 
-  // chama carrinho com complementos + obs
-  adicionarAoCarrinho(nomeProduto, precoProduto, selecionados, extrasValor, observacao);
-  modal.remove();
-};
+  // --- Limite de acompanhamentos grátis ---
+  function aplicarLimiteGratisLocal(modalEl, changedInput) {
+    const nomeCopo = copoDetectado || ""; // vem do nome do produto
+    const limiteKey = findLimiteKeyForValueLocal(nomeCopo);
+    const limite = limiteKey ? limitePorCopo[limiteKey] : 0;
 
+    if (!limite) return;
 
+    // pega só o grupo "Acompanhamentos grátis"
+    const grupoDiv = [...modalEl.querySelectorAll('#gruposContainer > div')].find(div => {
+      const h3 = normalizeStrLocal(div.querySelector('h3')?.textContent || '');
+      return h3.includes('acompanhamentos gratis');
+    });
 
+    if (!grupoDiv) return;
+
+    const acompanhamentos = [...grupoDiv.querySelectorAll('.opcaoItem')];
+    const selecionados = acompanhamentos.filter(i => i.checked);
+
+    if (selecionados.length > limite) {
+      if (changedInput && acompanhamentos.includes(changedInput)) {
+        changedInput.checked = false;
+      } else {
+        selecionados[selecionados.length - 1].checked = false;
+      }
+      mostrarAlerta(`⚠️ Para o copo ${nomeCopo} você pode escolher até ${limite} acompanhamentos grátis.`);
+    }
+  }
+
+  // --- Limite de sabores ---
+  function aplicarLimiteSaboresLocal(modalEl, changedInput) {
+    const grupoSabor = [...modalEl.querySelectorAll('#gruposContainer > div')].find(div => {
+      const h = normalizeStrLocal(div.querySelector('h3')?.textContent || '');
+      return (h.includes('escolha') || h.includes('sabor')) && (h.includes('acai') || h.includes('sorvet'));
+    });
+
+    const sabores = grupoSabor
+      ? [...grupoSabor.querySelectorAll('.opcaoItem')]
+      : [];
+
+    const selecionados = sabores.filter(i => i.checked);
+
+    if (selecionados.length > 2) {
+      if (changedInput && sabores.includes(changedInput)) {
+        changedInput.checked = false;
+      } else {
+        selecionados[selecionados.length - 1].checked = false;
+      }
+      mostrarAlerta('⚠️ Você pode escolher no máximo 2 sabores.');
+    }
+  }
+
+  // --- Listeners ---
+  modal.querySelectorAll('.opcaoItem').forEach(input => {
+    input.addEventListener('change', (e) => {
+      aplicarLimiteGratisLocal(modal, e.target);
+      aplicarLimiteSaboresLocal(modal, e.target);
+    });
+  });
 }
