@@ -410,7 +410,7 @@ if (precisaTroco && valorTroco) {
 mensagem += `\n\n🙏 Obrigado pela preferência!\n🍴 *Rei do Açai*`;
 
 
-    const telefoneLoja = "5517996045305"; // 👈 coloque o número da loja
+    const telefoneLoja = "5517991886198"; // 👈 coloque o número da loja
     const url = `https://wa.me/${telefoneLoja}?text=${encodeURIComponent(mensagem)}`;
     window.open(url, "_blank");
 
@@ -623,15 +623,16 @@ async function abrirModalOpcoes(tipo, nomeProduto, precoProduto) {
     return (ordemGrupos[a.grupo] || 999) - (ordemGrupos[b.grupo] || 999);
   });
 
-  // --- Tabela de limites por copo ---
-  const limitePorCopo = {
-    "250ml": 2,
-    "330ml": 3,
-    "550ml": 4,
-    "770ml": 5,
-    "1100ml": 6,
-    "marmita": 6
-  };
+// --- Tabela de limites por copo ---
+const limitePorCopo = {
+  "250ml": { sabores: 1, acompanhamentos: 2 },
+  "330ml": { sabores: 1, acompanhamentos: 3 },
+  "550ml": { sabores: 2, acompanhamentos: 4 },
+  "770ml": { sabores: 2, acompanhamentos: 5 },
+  "1100ml": { sabores: 4, acompanhamentos: 6 },
+  "marmita": { sabores: 4, acompanhamentos: 6 }
+};
+
 
   // --- Helpers ---
   function normalizeStrLocal(s) {
@@ -644,8 +645,8 @@ async function abrirModalOpcoes(tipo, nomeProduto, precoProduto) {
     return Object.keys(limitePorCopo).find(k => vNorm.includes(k.toLowerCase())) || null;
   }
 
-  // 🔹 Detecta copo direto do nome do produto (ex: "Açaí 330ml")
-  const copoDetectado = findLimiteKeyForValueLocal(nomeProduto);
+// Detecta copo pelo nome do produto
+const copoDetectado = findLimiteKeyForValueLocal(nomeProduto);
 
   // --- Monta os grupos ---
   gruposOrdenados.forEach(grupo => {
@@ -669,13 +670,20 @@ async function abrirModalOpcoes(tipo, nomeProduto, precoProduto) {
       `;
     }).join("");
 
-  const isAcompanhamentoGratis = grpNorm.includes("acompanhamentos gratis");
+const isAcompanhamentoGratis = grpNorm.includes("acompanhamentos gratis");
+const isSabores = grpNorm.includes("escolha seu acai") || grpNorm.includes("sabor");
 
 container.innerHTML += `
   <div class="pb-4 border-b border-gray-200 last:border-0" data-group-key="${grpNorm}">
     <h3 class="font-bold mb-3 text-purple-800">${grupo.grupo} 
       <span class="text-xs text-gray-500">
-        (máx: ${isAcompanhamentoGratis ? (limitePorCopo[copoDetectado] || grupo.maximo) : grupo.maximo})
+        ${
+          isAcompanhamentoGratis
+            ? `(máx: ${limitePorCopo[copoDetectado]?.acompanhamentos || grupo.maximo})`
+            : isSabores
+              ? `(máx: ${limitePorCopo[copoDetectado]?.sabores || grupo.maximo})`
+              : `(máx: ${grupo.maximo || ""})`
+        }
       </span>
     </h3>
     <div class="space-y-2">${opcoes}</div>
@@ -699,57 +707,52 @@ container.innerHTML += `
     modal.remove();
   };
 
-  // --- Limite de acompanhamentos grátis ---
   function aplicarLimiteGratisLocal(modalEl, changedInput) {
-    const nomeCopo = copoDetectado || ""; // vem do nome do produto
-    const limiteKey = findLimiteKeyForValueLocal(nomeCopo);
-    const limite = limiteKey ? limitePorCopo[limiteKey] : 0;
+  const limite = copoDetectado ? limitePorCopo[copoDetectado]?.acompanhamentos : 0;
+  if (!limite) return;
 
-    if (!limite) return;
+  const grupoDiv = [...modalEl.querySelectorAll('#gruposContainer > div')].find(div => {
+    const h3 = normalizeStrLocal(div.querySelector('h3')?.textContent || '');
+    return h3.includes('acompanhamentos gratis');
+  });
 
-    // pega só o grupo "Acompanhamentos grátis"
-    const grupoDiv = [...modalEl.querySelectorAll('#gruposContainer > div')].find(div => {
-      const h3 = normalizeStrLocal(div.querySelector('h3')?.textContent || '');
-      return h3.includes('acompanhamentos gratis');
-    });
+  if (!grupoDiv) return;
 
-    if (!grupoDiv) return;
+  const acompanhamentos = [...grupoDiv.querySelectorAll('.opcaoItem')];
+  const selecionados = acompanhamentos.filter(i => i.checked);
 
-    const acompanhamentos = [...grupoDiv.querySelectorAll('.opcaoItem')];
-    const selecionados = acompanhamentos.filter(i => i.checked);
-
-    if (selecionados.length > limite) {
-      if (changedInput && acompanhamentos.includes(changedInput)) {
-        changedInput.checked = false;
-      } else {
-        selecionados[selecionados.length - 1].checked = false;
-      }
-      mostrarAlerta(`⚠️ Para o copo ${nomeCopo} você pode escolher até ${limite} acompanhamentos grátis.`);
+  if (selecionados.length > limite) {
+    if (changedInput && acompanhamentos.includes(changedInput)) {
+      changedInput.checked = false;
+    } else {
+      selecionados[selecionados.length - 1].checked = false;
     }
+    mostrarAlerta(`⚠️ Para o copo ${copoDetectado}, você pode escolher até ${limite} acompanhamentos grátis.`);
   }
+}
+function aplicarLimiteSaboresLocal(modalEl, changedInput) {
+  const limite = copoDetectado ? limitePorCopo[copoDetectado]?.sabores : 2;
 
-  // --- Limite de sabores ---
-  function aplicarLimiteSaboresLocal(modalEl, changedInput) {
-    const grupoSabor = [...modalEl.querySelectorAll('#gruposContainer > div')].find(div => {
-      const h = normalizeStrLocal(div.querySelector('h3')?.textContent || '');
-      return (h.includes('escolha') || h.includes('sabor')) && (h.includes('acai') || h.includes('sorvet'));
-    });
+  const grupoSabor = [...modalEl.querySelectorAll('#gruposContainer > div')].find(div => {
+    const h = normalizeStrLocal(div.querySelector('h3')?.textContent || '');
+    return (h.includes('escolha') || h.includes('sabor')) && (h.includes('acai') || h.includes('sorvet'));
+  });
 
-    const sabores = grupoSabor
-      ? [...grupoSabor.querySelectorAll('.opcaoItem')]
-      : [];
+  if (!grupoSabor) return;
 
-    const selecionados = sabores.filter(i => i.checked);
+  const sabores = [...grupoSabor.querySelectorAll('.opcaoItem')];
+  const selecionados = sabores.filter(i => i.checked);
 
-    if (selecionados.length > 2) {
-      if (changedInput && sabores.includes(changedInput)) {
-        changedInput.checked = false;
-      } else {
-        selecionados[selecionados.length - 1].checked = false;
-      }
-      mostrarAlerta('⚠️ Você pode escolher no máximo 2 sabores.');
+  if (selecionados.length > limite) {
+    if (changedInput && sabores.includes(changedInput)) {
+      changedInput.checked = false;
+    } else {
+      selecionados[selecionados.length - 1].checked = false;
     }
+    mostrarAlerta(`⚠️ Para o copo ${copoDetectado}, você pode escolher até ${limite} sabores.`);
   }
+}
+
 
   // --- Listeners ---
   modal.querySelectorAll('.opcaoItem').forEach(input => {

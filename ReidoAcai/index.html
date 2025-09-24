@@ -87,13 +87,6 @@
   </div>
 </button>
 
-<!-- Bebidas -->
-<button onclick="mostrarSecao('bebidas')" class="relative group overflow-hidden rounded-xl shadow-md hover:shadow-xl transition">
-  <img src="img/bebidas.jpeg" alt="Bebidas" class="w-full h-40 object-cover group-hover:scale-110 transition-transform duration-500">
-  <div class="absolute bottom-0 bg-gradient-to-t from-black/80 to-black/20 text-center w-full py-2 font-semibold text-white">
-    BEBIDAS
-  </div>
-</button>
 
 <!-- Milk Shakes -->
 <button onclick="mostrarSecao('milkshakes')" class="relative group overflow-hidden rounded-xl shadow-md hover:shadow-xl transition">
@@ -102,6 +95,17 @@
     MILK SHAKES
   </div>
 </button>
+
+
+<!-- Bebidas -->
+<button onclick="mostrarSecao('bebidas')" class="relative group overflow-hidden rounded-xl shadow-md hover:shadow-xl transition">
+  <img src="img/bebidas.jpeg" alt="Bebidas" class="w-full h-40 object-cover group-hover:scale-110 transition-transform duration-500">
+  <div class="absolute bottom-0 bg-gradient-to-t from-black/80 to-black/20 text-center w-full py-2 font-semibold text-white">
+    BEBIDAS
+  </div>
+</button>
+
+
 
 
   </div>
@@ -222,7 +226,7 @@ if ('serviceWorker' in navigator) {
 </script>
 
 <script>
-  const versaoSistema = "1.0.2"; // Atualize aqui também!
+  const versaoSistema = "1.0.1"; // Atualize aqui também!
 
   const script = document.createElement("script");
   script.type = "module";
