@@ -1,4 +1,4 @@
-const CACHE_VERSION = '1.0.2'; // aumente sempre que fizer mudanças
+const CACHE_VERSION = '1.0.1'; // aumente sempre que fizer mudanças
 const CACHE_NAME = `acai-cache-v${CACHE_VERSION}`;
 
 const urlsToCache = [
