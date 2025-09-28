@@ -1,10 +1,10 @@
-const CACHE_VERSION = '1.0.1'; // aumente sempre que fizer mudanças
+const CACHE_VERSION = '1.0.2'; 
 const CACHE_NAME = `esfirras-cache-v${CACHE_VERSION}`;
 
 const urlsToCache = [
   '/EsfirrasEmCasa/',
   '/EsfirrasEmCasa/index.html',
-  '/EsfirrasEmCasa/script.js?v=1.0.3',
+  `/EsfirrasEmCasa/script.js?v=${CACHE_VERSION}`,
   '/EsfirrasEmCasa/img/logo-192.png',
   '/EsfirrasEmCasa/img/logo-512.png'
 ];
