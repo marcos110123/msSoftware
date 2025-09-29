@@ -1,0 +1,35 @@
+{
+  "name": "Esfirras em Casa",
+  "short_name": "Esfirras em Casa",
+  "start_url": "/EsfirrasEmCasa/",
+  "scope": "/EsfirrasEmCasa/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#B91C1C",
+  "orientation": "portrait",
+  "icons": [
+  {
+    "src": "img/logo-192.png",
+    "sizes": "192x192",
+    "type": "image/png"
+  },
+  {
+    "src": "img/logo-512.png",
+    "sizes": "512x512",
+    "type": "image/png"
+  },
+  {
+    "src": "img/logo-192-maskable.png",
+    "sizes": "192x192",
+    "type": "image/png",
+    "purpose": "maskable"
+  },
+  {
+    "src": "img/logo-512-maskable.png",
+    "sizes": "512x512",
+    "type": "image/png",
+    "purpose": "maskable"
+  }
+]
+
+}
