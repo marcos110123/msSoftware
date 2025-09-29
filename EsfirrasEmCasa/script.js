@@ -399,6 +399,27 @@ function exibirNotificacao(nome) {
 }
 
 // ----------------------
+// PWA
+// ----------------------
+let deferredPrompt;
+const installButton = document.getElementById("install-button");
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  installButton.style.display = "block";
+});
+installButton.addEventListener("click", async () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    installButton.style.display = "none";
+  }
+});
+window.addEventListener("appinstalled", () => {
+  installButton.style.display = "none";
+});
+// ----------------------
 // Aviso aberto/fechado
 // ----------------------
 const estadoRef = doc(db, "config", "estadoPedidos");

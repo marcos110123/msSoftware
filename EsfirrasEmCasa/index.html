@@ -81,6 +81,11 @@
 </nav>
 
 
+  <!-- Botão de Instalação -->
+  <button id="install-button" style="display: none; position: fixed; bottom: 20px; right: 20px; padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+    Instalar App
+  </button>
+
   <section id="mais-vendidas" class="section-produto py-10 px-4 bg-gray-900 hidden">
   <h2 class="text-3xl font-bold text-center mb-6 text-white">Mais Vendidas</h2>
   <div class="produtos-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
@@ -166,7 +171,7 @@ if ('serviceWorker' in navigator) {
 </script>
 
 <script>
-  const versaoSistema = "1.0.2"; // Atualize aqui também!
+  const versaoSistema = "1.0.5"; // Atualize aqui também!
 
   const script = document.createElement("script");
   script.type = "module";

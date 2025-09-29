@@ -1,4 +1,4 @@
-const CACHE_VERSION = '1.0.2'; 
+const CACHE_VERSION = '1.0.5'; 
 const CACHE_NAME = `esfirras-cache-v${CACHE_VERSION}`;
 
 const urlsToCache = [
