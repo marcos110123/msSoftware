@@ -8,7 +8,9 @@ import {
   onSnapshot,
   serverTimestamp,
   query,
-  orderBy 
+  orderBy,
+  where,
+getDocs 
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
 // ----------------------
@@ -464,23 +466,130 @@ window.confirmarEntrega = confirmarDadosEntrega;
 let produtoSelecionado = null;
 let precoSelecionado = 0;
 
-window.abrirModalObservacao = function(nome, preco) {
+window.abrirModalObservacao = async function(nome, preco) {
+
   produtoSelecionado = nome;
   precoSelecionado = preco;
 
   document.getElementById("modalProdutoNome").textContent = nome;
   document.getElementById("observacaoInput").value = "";
 
+  const container = document.getElementById("listaAdicionais");
+  container.innerHTML = "Carregando adicionais...";
+
+  const q = query(
+    collection(db, "opcoesLanche"),
+    where("status", "==", "ativo")
+  );
+
+  const snapshot = await getDocs(q);
+
+  container.innerHTML = "";
+
+container.innerHTML = "";
+
+// organizar por grupo
+const grupos = {};
+
+snapshot.forEach((docSnap) => {
+
+  const item = docSnap.data();
+
+  if (!grupos[item.grupo]) {
+    grupos[item.grupo] = [];
+  }
+
+  grupos[item.grupo].push(item);
+
+});
+
+// criar grupos na tela
+const ordemGrupos = ["extras", "extrasDoces"];
+
+ordemGrupos.forEach((grupo) => {
+
+  if (!grupos[grupo]) return;
+
+
+  const titulo = document.createElement("p");
+  titulo.textContent = grupo.replace(/([A-Z])/g, " $1").toUpperCase();
+  titulo.className = "font-bold text-sm mt-3 mb-1 text-gray-700";
+
+  container.appendChild(titulo);
+
+  grupos[grupo].forEach((item) => {
+
+    const label = document.createElement("label");
+    label.className = "flex items-center justify-between py-1 text-sm text-gray-800 cursor-pointer";
+
+    const esquerda = document.createElement("div");
+    esquerda.className = "flex items-center gap-2";
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.name = "adicional";
+    checkbox.value = `${item.nome}|${item.valor}`;
+    checkbox.className = "accent-red-500";
+
+    const texto = document.createElement("span");
+    texto.textContent = item.nome;
+
+    esquerda.appendChild(checkbox);
+    esquerda.appendChild(texto);
+
+    const preco = document.createElement("span");
+    preco.textContent = `+ R$ ${parseFloat(item.valor).toFixed(2)}`;
+    preco.className = "text-gray-600 text-xs";
+
+    label.appendChild(esquerda);
+    label.appendChild(preco);
+
+    container.appendChild(label);
+
+  });
+
+});
+
+
+
   document.getElementById("modalObservacao").classList.remove("hidden");
+
 };
+
 
 window.fecharModalObservacao = function() {
   document.getElementById("modalObservacao").classList.add("hidden");
 };
 
 window.confirmarObservacao = function() {
+
   const obs = document.getElementById("observacaoInput").value.trim();
 
-  adicionarAoCarrinho(produtoSelecionado, precoSelecionado, obs);
+  const selecionados = document.querySelectorAll(
+    'input[name="adicional"]:checked'
+  );
+
+  let precoFinal = precoSelecionado;
+  const adicionais = [];
+
+  selecionados.forEach((item) => {
+
+    const [nome, valor] = item.value.split("|");
+
+    adicionais.push(nome);
+    precoFinal += parseFloat(valor);
+
+  });
+
+  let nomeFinal = produtoSelecionado;
+
+  if (adicionais.length > 0) {
+    nomeFinal += ` + (${adicionais.join(", ")})`;
+  }
+
+  adicionarAoCarrinho(nomeFinal, precoFinal, obs);
+
   fecharModalObservacao();
+
 };
+

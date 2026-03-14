@@ -180,7 +180,7 @@ if ('serviceWorker' in navigator) {
 </script>
 
 <script>
-  const versaoSistema = "1.0.3"; // Atualize aqui também!
+  const versaoSistema = "1.0.4"; // Atualize aqui também!
 
   const script = document.createElement("script");
   script.type = "module";
@@ -337,30 +337,51 @@ if ('serviceWorker' in navigator) {
   </div>
 </div>
 
-<!-- Modal Observação do Item -->
+<!-- Modal Adicionais e Observação -->
 <div id="modalObservacao" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden z-50">
-  <div class="bg-white rounded-xl p-6 w-11/12 max-w-md shadow-xl text-gray-900">
-    <h2 class="text-xl font-bold mb-4 text-center">📝 Observação</h2>
-    <p id="modalProdutoNome" class="mb-2 text-center font-semibold"></p>
 
-    <textarea id="observacaoInput" 
-      class="w-full p-2 border border-gray-300 rounded resize-none focus:ring focus:ring-red-200"
-      placeholder="Ex: sem cebola, bem passada..."
-      rows="3"></textarea>
+  <div class="bg-white rounded-xl p-4 w-11/12 max-w-md max-h-[90vh] flex flex-col shadow-xl text-gray-900">
 
-    <div class="flex justify-between gap-4 mt-6">
-      <button onclick="fecharModalObservacao()" 
-        class="w-1/2 bg-gray-500 hover:bg-gray-600 text-white py-2 rounded-md font-semibold">
+    <h2 class="text-lg font-bold mb-2 text-center">
+      🧾 Personalize sua Esfirra
+    </h2>
+
+    <p id="modalProdutoNome" class="mb-2 text-center font-semibold text-base"></p>
+
+    <!-- LISTA DE ADICIONAIS -->
+    <div class="flex-1 mb-2">
+      <p class="text-xs font-semibold mb-1 text-gray-700">Escolha adicionais:</p>
+
+      <div id="listaAdicionais"
+        class="h-full overflow-y-auto border border-gray-200 rounded-md p-2 space-y-1 bg-gray-50">
+      </div>
+    </div>
+
+    <!-- OBSERVAÇÃO -->
+    <div class="mb-2">
+      <textarea id="observacaoInput"
+        class="w-full p-2 text-sm border border-gray-300 rounded resize-none focus:ring focus:ring-red-200"
+        placeholder="Observação (opcional)"
+        rows="1"></textarea>
+    </div>
+
+    <!-- BOTÕES -->
+    <div class="flex gap-2 mt-1">
+
+      <button onclick="fecharModalObservacao()"
+        class="w-1/2 bg-gray-500 hover:bg-gray-600 text-white py-2 rounded-md text-sm font-semibold">
         Cancelar
       </button>
-      <button onclick="confirmarObservacao()" 
-        class="w-1/2 bg-green-600 hover:bg-green-700 text-white py-2 rounded-md font-semibold">
+
+      <button onclick="confirmarObservacao()"
+        class="w-1/2 bg-green-600 hover:bg-green-700 text-white py-2 rounded-md text-sm font-semibold">
         Confirmar
       </button>
+
     </div>
+
   </div>
 </div>
-
 
 </body>
 </html>
