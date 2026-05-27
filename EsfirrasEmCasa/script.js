@@ -58,23 +58,50 @@ function carregarProdutosDoFirestore() {
       const container = secao.querySelector(".produtos-grid");
       if (!container) return;
 
-      const card = document.createElement("div");
-      card.className = "menu-item bg-gray-800 rounded-lg shadow-lg p-4";
+   const card = document.createElement("div");
+
+card.className =
+  "menu-item bg-gray-800 rounded-lg shadow-lg p-4";
+
 card.innerHTML = `
   <img src="${produto.imagem || ""}" 
        alt="${produto.nome}" 
        class="w-full h-48 object-cover rounded-md shadow-lg" 
        loading="lazy" 
        decoding="async">
-  <h3 class="text-xl font-semibold mt-4 text-white">${produto.nome}</h3>
-  <p class="text-gray-300">${produto.descricao || ""}</p>
-  <p class="text-red-500 font-bold mt-2">R$ ${Number(produto.preco).toFixed(2)}</p>
+
+  <h3 class="text-xl font-semibold mt-4 text-white">
+    ${produto.nome}
+  </h3>
+
+  <p class="text-gray-300">
+    ${produto.descricao || ""}
+  </p>
+
+  <p class="text-red-500 font-bold mt-2">
+    R$ ${Number(produto.preco).toFixed(2)}
+  </p>
+
   <button 
-    onclick="${produto.categoria && produto.categoria.startsWith('esfihas') 
-      ? `abrirModalObservacao('${produto.nome}', ${produto.preco})` 
-      : `adicionarAoCarrinho('${produto.nome}', ${produto.preco}, '')`}"
+    onclick="${
+      produto.categoria &&
+      produto.categoria.startsWith('esfihas')
+        ? `abrirModalObservacao(
+            '${produto.nome}',
+            ${produto.preco},
+            '${produto.categoria}'
+          )`
+        : `adicionarAoCarrinho(
+            '${produto.nome}',
+            ${produto.preco},
+            ''
+          )`
+    }"
+
     class="mt-4 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+
     Adicionar ao Carrinho
+
   </button>
 `;
 
@@ -462,11 +489,10 @@ window.fecharCarrinho = fecharCarrinho;
 window.mostrarSecao = mostrarSecao;
 window.confirmarDadosEntrega = confirmarDadosEntrega;
 window.confirmarEntrega = confirmarDadosEntrega;
-
 let produtoSelecionado = null;
 let precoSelecionado = 0;
 
-window.abrirModalObservacao = async function(nome, preco) {
+window.abrirModalObservacao = async function(nome, preco, categoria) {
 
   produtoSelecionado = nome;
   precoSelecionado = preco;
@@ -486,79 +512,95 @@ window.abrirModalObservacao = async function(nome, preco) {
 
   container.innerHTML = "";
 
-container.innerHTML = "";
+  // organizar por grupo
+  const grupos = {};
 
-// organizar por grupo
-const grupos = {};
+  snapshot.forEach((docSnap) => {
 
-snapshot.forEach((docSnap) => {
+    const item = docSnap.data();
 
-  const item = docSnap.data();
+    if (!grupos[item.grupo]) {
+      grupos[item.grupo] = [];
+    }
 
-  if (!grupos[item.grupo]) {
-    grupos[item.grupo] = [];
-  }
-
-  grupos[item.grupo].push(item);
-
-});
-
-// criar grupos na tela
-const ordemGrupos = ["extras", "extrasDoces"];
-
-ordemGrupos.forEach((grupo) => {
-
-  if (!grupos[grupo]) return;
-
-
-  const titulo = document.createElement("p");
-  titulo.textContent = grupo.replace(/([A-Z])/g, " $1").toUpperCase();
-  titulo.className = "font-bold text-sm mt-3 mb-1 text-gray-700";
-
-  container.appendChild(titulo);
-
-  grupos[grupo].forEach((item) => {
-
-    const label = document.createElement("label");
-    label.className = "flex items-center justify-between py-1 text-sm text-gray-800 cursor-pointer";
-
-    const esquerda = document.createElement("div");
-    esquerda.className = "flex items-center gap-2";
-
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.name = "adicional";
-    checkbox.value = `${item.nome}|${item.valor}`;
-    checkbox.className = "accent-red-500";
-
-    const texto = document.createElement("span");
-    texto.textContent = item.nome;
-
-    esquerda.appendChild(checkbox);
-    esquerda.appendChild(texto);
-
-    const preco = document.createElement("span");
-    preco.textContent = `+ R$ ${parseFloat(item.valor).toFixed(2)}`;
-    preco.className = "text-gray-600 text-xs";
-
-    label.appendChild(esquerda);
-    label.appendChild(preco);
-
-    container.appendChild(label);
+    grupos[item.grupo].push(item);
 
   });
 
-});
+  // definir grupos conforme categoria
+  let ordemGrupos = [];
 
+  if (categoria === "esfihas-doces") {
+    ordemGrupos = ["extrasDoces"];
+  } 
+  else if (categoria === "esfihas-salgadas") {
+    ordemGrupos = ["extras"];
+  }
 
+  // criar grupos na tela
+  ordemGrupos.forEach((grupo) => {
 
-  document.getElementById("modalObservacao").classList.remove("hidden");
+    if (!grupos[grupo]) return;
+
+    const titulo = document.createElement("p");
+
+    titulo.textContent =
+      grupo === "extrasDoces"
+        ? "EXTRAS DOCES"
+        : "EXTRAS";
+
+    titulo.className =
+      "font-bold text-sm mt-3 mb-1 text-gray-700";
+
+    container.appendChild(titulo);
+
+    grupos[grupo].forEach((item) => {
+
+      const label = document.createElement("label");
+
+      label.className =
+        "flex items-center justify-between py-1 text-sm text-gray-800 cursor-pointer";
+
+      const esquerda = document.createElement("div");
+      esquerda.className = "flex items-center gap-2";
+
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.name = "adicional";
+      checkbox.value = `${item.nome}|${item.valor}`;
+      checkbox.className = "accent-red-500";
+
+      const texto = document.createElement("span");
+      texto.textContent = item.nome;
+
+      esquerda.appendChild(checkbox);
+      esquerda.appendChild(texto);
+
+      const preco = document.createElement("span");
+      preco.textContent =
+        `+ R$ ${parseFloat(item.valor).toFixed(2)}`;
+
+      preco.className = "text-gray-600 text-xs";
+
+      label.appendChild(esquerda);
+      label.appendChild(preco);
+
+      container.appendChild(label);
+
+    });
+
+  });
+
+  document
+    .getElementById("modalObservacao")
+    .classList.remove("hidden");
 
 };
 
-
 window.fecharModalObservacao = function() {
-  document.getElementById("modalObservacao").classList.add("hidden");
+  document
+    .getElementById("modalObservacao")
+    .classList.add("hidden");
 };
 
 window.confirmarObservacao = function() {
