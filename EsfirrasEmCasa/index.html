@@ -20,108 +20,279 @@
     #modalAlerta {
   z-index: 9999 !important;
 }
+  #saboresPizzaContainer label,
+  #bordasPizzaContainer label {
+    font-size: 1.125rem; /* equivale ao Tailwind text-lg */
+    padding: 0.75rem;    /* aumenta o padding */
+  }
+
+  #bordasPizzaContainer label {
+    font-size: 1.125rem;
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 4px; /* reduz o espaçamento entre opções */
+  }
+
+  /* Remove o espaçamento vertical padrão da div container */
+  #bordasPizzaContainer {
+    gap: 0 !important;
+  }
+    #obsPizza {
+    font-size: 0.95rem;
+    padding: 6px 10px;
+    height: 40px; /* altura mais baixa */
+    resize: none;
+  }
+
+body{
+  background:
+  radial-gradient(circle at top, rgba(255,215,0,.08), transparent 30%),
+  linear-gradient(to bottom, #012d18, #00150a);
+}
+
+/* efeito vidro nos cards */
+.card-copa{
+  background: rgba(0, 39, 118, .75);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,215,0,.3);
+}
+
+/* scrollbar tema copa */
+::-webkit-scrollbar{
+  width:8px;
+}
+
+::-webkit-scrollbar-track{
+  background:#374151;
+}
+
+::-webkit-scrollbar-thumb{
+  background:#9ca3af; /* cinza */
+  border-radius:20px;
+}
   </style>
 </head>
-<!-- HEADER / HERO MINI -->
-<header class="relative bg-gradient-to-r from-red-800 via-red-900 to-black text-center py-6 shadow-lg">
-  <!-- Glow de fundo -->
-  <div class="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40"></div>
 
-  <!-- Logo -->
-  <div class="relative">
-    <img src="img/logo.png" alt="Logo Esfirras em Casa" 
-         class="mx-auto w-3/4 max-w-[260px] md:max-w-[360px] h-auto rounded-full border-4 border-white/20 shadow-2xl hover:scale-105 hover:rotate-1 transition-transform duration-500">
+
+<!-- HEADER / HERO MINI --><header class="relative text-center py-10 shadow-2xl overflow-hidden
+bg-[radial-gradient(circle_at_center,_#14532d_0%,_#052e16_55%,_#02140b_100%)]">
+
+  <!-- efeito luz -->
+  <div class="absolute inset-0 bg-[url('img/fundo-copa.png')] opacity-10"></div>
+
+  <!-- glow amarelo -->
+  <div class="absolute inset-0 bg-gradient-to-b from-yellow-400/10 via-transparent to-black/40"></div>
+
+  <div class="relative z-10">
+    <img src="img/logocopa.png"
+      alt="Logo Esfirras em Casa"
+      class="mx-auto w-[85%] max-w-[420px]
+      drop-shadow-[0_0_35px_rgba(255,215,0,0.4)]
+      hover:scale-105 transition duration-500">
   </div>
 </header>
 
 
-<body class="bg-black font-sans text-white">
+<body class="font-sans text-white bg-gradient-to-b from-[#012d18] via-[#014421] to-[#001a0d] min-h-screen">
 
-  <div id="aviso-fechado" class="bg-red-600 text-white text-center py-2 font-bold hidden">
+  <div id="aviso-fechado" class="bg-green-600 text-white text-center py-2 font-bold hidden">
   ❌ Estamos fechados para novos pedidos.
 </div>
 
+<nav class="relative overflow-hidden
+bg-[radial-gradient(circle_at_center,_#14532d_0%,_#052e16_55%,_#02140b_100%)]
+text-white py-10 shadow-2xl">
 
-<nav class="bg-gradient-to-r from-red-800 via-red-900 to-black text-white py-8 shadow-lg">
-  <div class="grid grid-cols-2 sm:grid-cols-3 gap-6 max-w-5xl mx-auto px-4">
-    <!-- Esfihas Salgadas -->
-    <button onclick="mostrarSecao('mais-vendidas')" 
-      class="relative group overflow-hidden rounded-xl shadow-md hover:shadow-xl transition">
-      <img src="img/baianinha.jpeg" alt="MAIS VENDIDAS" 
-           class="w-full h-40 object-cover group-hover:scale-110 transition-transform duration-500">
-      <div class="absolute bottom-0 bg-gradient-to-t from-black/80 to-black/20 text-white w-full text-center py-2 text-sm font-semibold">
-        MAIS VENDIDAS
+  <!-- Glow amarelo -->
+  <div class="absolute inset-0 bg-gradient-to-r
+  from-yellow-400/5 via-transparent to-yellow-400/5"></div>
+
+  <div class="relative z-10 grid grid-cols-2 sm:grid-cols-3 gap-4 max-w-5xl mx-auto px-4">
+ 
+
+  
+<!--
+<button
+  data-card="mais-vendidas"
+  onclick="mostrarSecao('mais-vendidas')"
+  class="relative group overflow-hidden rounded-3xl
+border-2 border-yellow-400/70
+shadow-[0_0_30px_rgba(255,215,0,0.15)]
+hover:scale-[1.03]
+transition duration-300"
+>
+  <img src="img/baianinha.jpeg" alt="Mais Vendidas" class="w-full h-52 object-cover
+group-hover:scale-110 transition duration-500">
+  <div class="absolute bottom-0 bg-black/70 text-white w-full text-center py-2 text-sm">
+    Mais Vendidas
+  </div>
+</button>
+-->
+
+
+    <!-- BURGERS -->
+    <button
+      data-card="esfihas-salgadas"
+      onclick="mostrarSecao('esfihas-salgadas')"
+      class="relative group overflow-hidden rounded-3xl
+border-2 border-yellow-400/70
+shadow-[0_0_30px_rgba(255,215,0,0.15)]
+hover:scale-[1.03]
+transition duration-300"
+    >
+      <img src="img/esfirrasalgadanova.png" alt="Esfihas Salgadas" class="w-full h-52 object-cover
+group-hover:scale-110 transition duration-500">
+      <div class="absolute bottom-0 bg-black/70 text-white w-full text-center py-2 text-sm">
+        Esfirras Salgadas
       </div>
     </button>
-    <button onclick="mostrarSecao('esfihas-salgadas')" 
-      class="relative group overflow-hidden rounded-xl shadow-md hover:shadow-xl transition">
-      <img src="img/esfihasalgada.jpeg" alt="Esfihas Salgadas" 
-           class="w-full h-40 object-cover group-hover:scale-110 transition-transform duration-500">
-      <div class="absolute bottom-0 bg-gradient-to-t from-black/80 to-black/20 text-white w-full text-center py-2 text-sm font-semibold">
-        ESFIRRAS SALGADAS
+
+    <!-- ACOMPANHAMENTOS -->
+    <button
+      data-card="esfihas-doces"
+      onclick="mostrarSecao('esfihas-doces')"
+      class="relative group overflow-hidden rounded-3xl
+border-2 border-yellow-400/70
+shadow-[0_0_30px_rgba(255,215,0,0.15)]
+hover:scale-[1.03]
+transition duration-300"
+    >
+      <img src="img/esfirradocenova.png" alt="Esfihas Doces"  class="w-full h-52 object-cover
+group-hover:scale-110 transition duration-500">
+      <div class="absolute bottom-0 bg-black/70 text-white w-full text-center py-2 text-sm">
+        Esfirras Doces
       </div>
     </button>
 
-    <!-- Esfihas Doces -->
-    <button onclick="mostrarSecao('esfihas-doces')" 
-      class="relative group overflow-hidden rounded-xl shadow-md hover:shadow-xl transition">
-      <img src="img/esfihadoce.jpeg" alt="Esfihas Doces" 
-           class="w-full h-40 object-cover group-hover:scale-110 transition-transform duration-500">
-      <div class="absolute bottom-0 bg-gradient-to-t from-black/80 to-black/20 text-white w-full text-center py-2 text-sm font-semibold">
-        ESFIRRAS DOCES
-      </div>
-    </button>
-
-    <!-- Bebidas -->
-    <button onclick="mostrarSecao('bebidas')" 
-      class="relative group overflow-hidden rounded-xl shadow-md hover:shadow-xl transition">
-      <img src="img/bebidas.png" alt="Bebidas" 
-           class="w-full h-40 object-cover group-hover:scale-110 transition-transform duration-500">
-      <div class="absolute bottom-0 bg-gradient-to-t from-black/80 to-black/20 text-white w-full text-center py-2 text-sm font-semibold">
+    <!-- BEBIDAS -->
+    <button
+      data-card="bebidas"
+      onclick="mostrarSecao('bebidas')"
+      class="relative group overflow-hidden rounded-3xl
+border-2 border-yellow-400/70
+shadow-[0_0_30px_rgba(255,215,0,0.15)]
+hover:scale-[1.03]
+transition duration-300"
+    >
+      <img src="img/latasnova.png" alt="Bebidas"  class="w-full h-52 object-cover
+group-hover:scale-110 transition duration-500">
+      <div class="absolute bottom-0 bg-black/70 text-white w-full text-center py-2 text-sm">
         BEBIDAS
       </div>
     </button>
-  </div>
+
+    
+    <!-- CERVEJAS -->
+    <button
+      data-card="cervejas"
+      onclick="mostrarSecao('cervejas')"
+      class="relative group overflow-hidden rounded-3xl
+border-2 border-yellow-400/70
+shadow-[0_0_30px_rgba(255,215,0,0.15)]
+hover:scale-[1.03]
+transition duration-300"
+    >
+      <img src="img/longs2.png" alt="cervejas" class="w-full h-52 object-cover
+group-hover:scale-110 transition duration-500">
+      <div class="absolute bottom-0 bg-black/70 text-white w-full text-center py-2 text-sm">
+        CERVEJAS
+      </div>
+    </button>
+
 </nav>
 
+<button id="install-button"
+  class="hidden fixed bottom-5 left-5 z-50
+  bg-gradient-to-r from-[#15803D] to-[#22C55E]
+  text-white font-bold
+  px-5 py-3 rounded-2xl
+  shadow-xl shadow-green-900/30
+  border border-green-400/30
+  hover:scale-105 hover:brightness-110
+  active:scale-95
+  transition-all duration-300
+  flex items-center gap-2">
 
-  <!-- Botão de Instalação -->
-  <button id="install-button" style="display: none; position: fixed; bottom: 20px; right: 20px; padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
-    Instalar App
-  </button>
+  📲 Instalar App
+</button>
 
-  <section id="mais-vendidas" class="section-produto py-10 px-4 bg-gray-900 hidden">
-  <h2 class="text-3xl font-bold text-center mb-6 text-white">Mais Vendidas</h2>
-  <div class="produtos-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-    <!-- Produtos via JS -->
-  </div>
+
+<section id="bebidas" class="section-produto py-10 px-4 bg-[#032915]/60 backdrop-blur-sm hidden">
+  <h2 class="text-3xl md:text-4xl font-extrabold text-center mb-6 drop-shadow-lg flex items-center justify-center gap-2">
+    <span>🥛</span>
+    <span class="bg-clip-text text-transparent bg-gradient-to-r
+from-yellow-300
+via-yellow-400
+to-green-400">
+      Bebidas
+    </span>
+  </h2>
+  <div class="produtos-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto"></div>
 </section>
 
-<section id="esfihas-salgadas" class="section-produto py-10 px-4 bg-gray-900 hidden">
-  <h2 class="text-3xl font-bold text-center mb-6 text-white">Esfirras Salgadas</h2>
-  <div class="produtos-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-    <!-- Produtos via JS -->
-  </div>
+
+<section id="cervejas" class="section-produto py-10 px-4 bg-[#032915]/60 backdrop-blur-sm hidden">
+  <h2 class="text-3xl md:text-4xl font-extrabold text-center mb-6 drop-shadow-lg flex items-center justify-center gap-2">
+    <span>🍺</span>
+    <span class="bg-clip-text text-transparent bg-gradient-to-r
+from-yellow-300
+via-yellow-400
+to-green-400">
+      Cervejas
+    </span>
+  </h2>
+  <div class="produtos-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto"></div>
 </section>
 
-<section id="esfihas-doces" class="section-produto py-10 px-4 bg-gray-900 hidden">
-  <h2 class="text-3xl font-bold text-center mb-6 text-white">Esfirras Doces</h2>
-  <div class="produtos-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-    <!-- Produtos via JS -->
-  </div>
+<section id="esfihas-doces" class="section-produto py-10 px-4 bg-[#032915]/60 backdrop-blur-sm hidden">
+  <h2 class="text-3xl md:text-4xl font-extrabold text-center mb-6 drop-shadow-lg flex items-center justify-center gap-2">
+    <span></span>
+    <span class="bg-clip-text text-transparent bg-gradient-to-r
+from-yellow-300
+via-yellow-400
+to-green-400">
+      Esfirras Doces
+    </span>
+  </h2>
+
+
+  <div class="produtos-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto"></div>
 </section>
 
-<section id="bebidas" class="section-produto py-10 px-4 bg-gray-900 hidden">
-  <h2 class="text-3xl font-bold text-center mb-6 text-white">Bebidas</h2>
-  <div class="produtos-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-    <!-- Produtos via JS -->
-  </div>
+<section id="mais-vendidas" class="section-produto py-10 px-4 bg-[#032915]/60 backdrop-blur-sm hidden">
+  <h2 class="text-3xl md:text-4xl font-extrabold text-center mb-6 drop-shadow-lg flex items-center justify-center gap-2">
+    <span></span>
+    <span class="bg-clip-text text-transparent bg-gradient-to-r
+from-yellow-300
+via-yellow-400
+to-green-400">
+      Mais Vendidas
+    </span>
+  </h2>
+  <div class="produtos-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto"></div>
 </section>
+
+
+
+<section id="esfihas-salgadas" class="section-produto py-10 px-4 bg-[#032915]/60 backdrop-blur-sm hidden">
+  <h2 class="text-3xl md:text-4xl font-extrabold text-center mb-6 drop-shadow-lg flex items-center justify-center gap-2">
+    <span></span>
+    <span class="bg-clip-text text-transparent bg-gradient-to-r
+from-yellow-300
+via-yellow-400
+to-green-400">
+      Esfirras Salgadas
+    </span>
+    
+  </h2>
+
+  <div class="produtos-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto"></div>
+</section>
+
 
 
 <!-- Modal do Carrinho -->
 <div id="modalCarrinho" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden z-40">
-  <section id="carrinho-e-informacoes" class="bg-gray-900 text-white rounded-lg max-w-xl w-full p-6 shadow-xl relative">
+  <section id="carrinho-e-informacoes" class="bg-[#032915]/60 backdrop-blur-sm text-white rounded-lg max-w-xl w-full p-6 shadow-xl relative">
     <!-- Botão Fechar -->
     <button onclick="fecharCarrinho()" class="absolute top-2 right-2 text-gray-400 hover:text-white text-2xl font-bold">&times;</button>
 
@@ -133,6 +304,7 @@
 
     <p class="text-xl font-bold mt-4 text-green-400">Total: R$ <span id="total">0,00</span></p>
 
+
     <form id="orderForm" class="mt-6">
       <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 w-full">
         Avançar
@@ -143,16 +315,36 @@
 
 <!-- Botão Flutuante Ver Carrinho -->
 <button onclick="abrirCarrinho()" id="btnAbrirCarrinho"
-  class="fixed top-4 right-4 bg-red-600 text-white px-5 py-3 rounded-full shadow-xl hover:bg-red-700 z-50 flex items-center gap-2">
+  class="fixed top-4 right-4
+bg-yellow-400 text-[#002776]
+px-5 py-3 rounded-full
+shadow-[0_0_20px_rgba(255,215,0,0.5)]
+hover:scale-105
+transition z-50 flex items-center gap-2 font-bold" text-white px-5 py-3 rounded-full shadow-xl hover:bg-red-700 z-50 flex items-center gap-2">
   🛒 <span class="font-medium">Carrinho</span>
-  <span id="badgeCarrinho" class="ml-1 bg-white text-red-700 font-bold px-2 py-0.5 rounded-full text-sm hidden">0</span>
+  <span id="badgeCarrinho" class="ml-1 bg-green-700 text-white font-bold px-2 py-0.5 rounded-full text-sm hidden">0</span>
 </button>
 
-  <!-- Rodapé -->
-<footer class="bg-gradient-to-r from-gray-900 via-black to-gray-900 text-gray-400 text-center py-6 mt-10">
-  <p class="text-sm">© 2025 Esfirras em Casa — Desenvolvido por <span class="text-red-500 font-semibold">MSSoftware</span></p>
-  <p class="text-xs mt-1">Versão: <span id="versaoSistemaTexto" class="text-gray-300"></span></p>
-  <p class="text-xs mt-2">
+
+
+<!-- Rodapé -->
+<footer class="bg-[#032915]/70 backdrop-blur-md border-t border-yellow-500/20 text-white text-center py-5 space-y-2 text-sm">
+
+  <p class="text-green-100">
+    © 2025 Esfirras em Casa. Desenvolvido por
+    <span class="font-bold text-[#4ADE80]">
+      MSSoftware
+    </span>
+  </p>
+
+  <p class="text-green-200">
+    Versão:
+   <span id="versaoSistemaTexto"
+      class="font-bold text-yellow-400">
+</span>
+  </p>
+
+   <p class="text-xs mt-2">
   🔒 Suas informações são utilizadas apenas para entrega do pedido. 
   Nenhum dado é armazenado ou compartilhado com terceiros.
 </p>
@@ -180,7 +372,7 @@ if ('serviceWorker' in navigator) {
 </script>
 
 <script>
-  const versaoSistema = "1.0.6"; // Atualize aqui também!
+  const versaoSistema = "1.0.7"; // Atualize aqui também!
 
   const script = document.createElement("script");
   script.type = "module";
