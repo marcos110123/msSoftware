@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="description" content="Cardápio digital oficial do restaurante Pizzaria Fiorella. Desenvolvido por MSSoftware. Os dados são usados apenas para realizar pedidos.">
+  <meta name="author" content="MSSoftware">
+  <meta name="application-name" content="Pizzaria Fiorella - Cardápio Digital">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cardápio Digital - Pizzaria Fiorella</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <meta name="theme-color" content="#000000"> 
+  <link rel="manifest" href="./manifest.json">
+
+<link rel="apple-touch-icon" href="./img/logo2.jpeg">
+
+  <meta name="apple-mobile-web-app-status-bar" content="#B91C1C">
+  <style>
+    #modalAlerta {
+  z-index: 9999 !important;
+}
+  #saboresPizzaContainer label,
+  #bordasPizzaContainer label {
+    font-size: 1.125rem; /* equivale ao Tailwind text-lg */
+    padding: 0.75rem;    /* aumenta o padding */
+  }
+
+  #bordasPizzaContainer label {
+    font-size: 1.125rem;
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 4px; /* reduz o espaçamento entre opções */
+  }
+
+  /* Remove o espaçamento vertical padrão da div container */
+  #bordasPizzaContainer {
+    gap: 0 !important;
+  }
+    #obsPizza {
+    font-size: 0.95rem;
+    padding: 6px 10px;
+    height: 40px; /* altura mais baixa */
+    resize: none;
+  }
+
+body{
+  background:
+  radial-gradient(circle at top, rgba(200,16,46,.15), transparent 35%),
+  linear-gradient(to bottom, #1a1a1a, #0f0f0f);
+}
+
+/* efeito vidro nos cards */
+.card-copa{
+  background: rgba(0, 39, 118, .75);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,215,0,.3);
+}
+
+/* scrollbar tema copa */
+::-webkit-scrollbar{
+  width:8px;
+}
+
+::-webkit-scrollbar-track{
+  background:#374151;
+}
+
+::-webkit-scrollbar-thumb{
+  background:#9ca3af; /* cinza */
+  border-radius:20px;
+}
+  </style>
+</head>
+
+
+<!-- HEADER / HERO MINI --><header class="relative text-center py-10 shadow-2xl overflow-hidden
+bg-[radial-gradient(circle_at_center,_#C8102E_0%,_#7D0F22_55%,_#1A1A1A_100%)]">
+
+  <!-- efeito luz -->
+  <div class="absolute inset-0 bg-[url('img/fundo-copa.png')] opacity-10"></div>
+
+  <!-- glow amarelo -->
+  <div class="absolute inset-0 bg-gradient-to-b from-yellow-400/10 via-transparent to-black/40"></div>
+
+  <div class="relative z-10">
+    <img src="img/logo2.jpeg"
+      alt="Logo Pizzaria Fiorella"
+      class="mx-auto w-[85%] max-w-[420px]
+      drop-shadow-[0_0_35px_rgba(255,215,0,0.4)]
+      hover:scale-105 transition duration-500">
+  </div>
+</header>
+
+
+<body class="font-sans text-white bg-gradient-to-b from-[#012d18] via-[#014421] to-[#001a0d] min-h-screen">
+
+  <div id="aviso-fechado" class="bg-green-600 text-white text-center py-2 font-bold hidden">
+  ❌ Estamos fechados para novos pedidos.
+</div>
+
+<nav class="relative overflow-hidden
+bg-[radial-gradient(circle_at_center,_#C8102E_0%,_#7D0F22_55%,_#1A1A1A_100%)]
+text-white py-10 shadow-2xl">
+
+  <!-- Glow amarelo -->
+  <div class="absolute inset-0 bg-gradient-to-r
+  from-yellow-400/5 via-transparent to-yellow-400/5"></div>
+
+  <div class="relative z-10 grid grid-cols-2 sm:grid-cols-3 gap-4 max-w-5xl mx-auto px-4">
+ 
+
+  
+
+<button
+  data-card="promoção"
+  onclick="mostrarSecao('promoção')"
+  class="relative group overflow-hidden rounded-3xl
+border-2 border-red-600
+shadow-[0_0_25px_rgba(200,16,46,0.25)]
+hover:scale-[1.03]
+transition duration-300"
+>
+  <img src="img/promocao.jpeg" alt="Promoção" class="w-full h-52 object-cover
+group-hover:scale-110 transition duration-500">
+  <div class="absolute bottom-0 bg-black/70 text-white w-full text-center py-2 text-sm">
+    Promoção
+  </div>
+</button>
+
+
+
+   
+    <button
+      data-card="esfihas-salgadas"
+      onclick="mostrarSecao('esfihas-salgadas')"
+      class="relative group overflow-hidden rounded-3xl
+border-2 border-red-600
+shadow-[0_0_25px_rgba(200,16,46,0.25)]
+hover:scale-[1.03]
+transition duration-300"
+    >
+      <img src="img/pizzasalgada.jpeg" alt="Esfihas Salgadas" class="w-full h-52 object-cover
+group-hover:scale-110 transition duration-500">
+      <div class="absolute bottom-0 bg-black/70 text-white w-full text-center py-2 text-sm">
+        Pizzas Salgadas
+      </div>
+    </button>
+
+    <!-- ACOMPANHAMENTOS -->
+    <button
+      data-card="esfihas-doces"
+      onclick="mostrarSecao('esfihas-doces')"
+      class="relative group overflow-hidden rounded-3xl
+border-2 border-red-600
+shadow-[0_0_25px_rgba(200,16,46,0.25)]
+hover:scale-[1.03]
+transition duration-300"
+    >
+      <img src="img/pizzadoce.jpeg" alt="Esfihas Doces"  class="w-full h-52 object-cover
+group-hover:scale-110 transition duration-500">
+      <div class="absolute bottom-0 bg-black/70 text-white w-full text-center py-2 text-sm">
+        Pizzas Doces
+      </div>
+    </button>
+
+    <!-- BEBIDAS -->
+    <button
+      data-card="bebidas"
+      onclick="mostrarSecao('bebidas')"
+      class="relative group overflow-hidden rounded-3xl
+border-2 border-red-600
+shadow-[0_0_25px_rgba(200,16,46,0.25)]
+hover:scale-[1.03]
+transition duration-300"
+    >
+      <img src="img/bebidas.jpeg" alt="Bebidas"  class="w-full h-52 object-cover
+group-hover:scale-110 transition duration-500">
+      <div class="absolute bottom-0 bg-black/70 text-white w-full text-center py-2 text-sm">
+        BEBIDAS
+      </div>
+    </button>
+
+    
+    <!-- CERVEJAS -->
+    <button
+      data-card="cervejas"
+      onclick="mostrarSecao('cervejas')"
+      class="relative group overflow-hidden rounded-3xl
+border-2 border-red-600
+shadow-[0_0_25px_rgba(200,16,46,0.25)]
+hover:scale-[1.03]
+transition duration-300"
+    >
+      <img src="img/cervejas.jpeg" alt="cervejas" class="w-full h-52 object-cover
+group-hover:scale-110 transition duration-500">
+      <div class="absolute bottom-0 bg-black/70 text-white w-full text-center py-2 text-sm">
+        CERVEJAS
+      </div>
+    </button>
+
+</nav>
+
+<button id="install-button"
+  class="hidden fixed bottom-5 left-5 z-50
+  bg-gradient-to-r from-[#C8102E] to-[#E11D48]
+  text-white font-bold
+  px-5 py-3 rounded-2xl
+  shadow-xl shadow-green-900/30
+  border border-green-400/30
+  hover:scale-105 hover:brightness-110
+  active:scale-95
+  transition-all duration-300
+  flex items-center gap-2">
+
+  📲 Instalar App
+</button>
+
+
+<section id="bebidas" class="section-produto py-10 px-4 bg-[#032915]/60 backdrop-blur-sm hidden">
+  <h2 class="text-3xl md:text-4xl font-extrabold text-center mb-6 drop-shadow-lg flex items-center justify-center gap-2">
+    <span>🥛</span>
+    <span class="bg-clip-text text-transparent bg-gradient-to-r
+from-red-500
+via-red-600
+to-green-600">
+      Bebidas
+    </span>
+  </h2>
+  <div class="produtos-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto"></div>
+</section>
+
+
+<section id="cervejas" class="section-produto py-10 px-4 bg-[#032915]/60 backdrop-blur-sm hidden">
+  <h2 class="text-3xl md:text-4xl font-extrabold text-center mb-6 drop-shadow-lg flex items-center justify-center gap-2">
+    <span>🍺</span>
+    <span class="bg-clip-text text-transparent bg-gradient-to-r
+from-red-500
+via-red-600
+to-green-600">
+      Cervejas
+    </span>
+  </h2>
+  <div class="produtos-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto"></div>
+</section>
+
+<section id="esfihas-doces" class="section-produto py-10 px-4 bg-[#032915]/60 backdrop-blur-sm hidden">
+  <h2 class="text-3xl md:text-4xl font-extrabold text-center mb-6 drop-shadow-lg flex items-center justify-center gap-2">
+    <span></span>
+    <span class="bg-clip-text text-transparent bg-gradient-to-r
+from-red-500
+via-red-600
+to-green-600">
+      Pizzas Doces
+    </span>
+  </h2>
+
+
+  <div class="produtos-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto"></div>
+</section>
+
+<section id="promoção" class="section-produto py-10 px-4 bg-[#032915]/60 backdrop-blur-sm hidden">
+  <h2 class="text-3xl md:text-4xl font-extrabold text-center mb-6 drop-shadow-lg flex items-center justify-center gap-2">
+    <span></span>
+    <span class="bg-clip-text text-transparent bg-gradient-to-r
+from-red-500
+via-red-600
+to-green-600">
+      Promoção
+    </span>
+  </h2>
+  <div class="produtos-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto"></div>
+</section>
+
+
+
+<section id="esfihas-salgadas" class="section-produto py-10 px-4 bg-[#032915]/60 backdrop-blur-sm hidden">
+  <h2 class="text-3xl md:text-4xl font-extrabold text-center mb-6 drop-shadow-lg flex items-center justify-center gap-2">
+    <span></span>
+    <span class="bg-clip-text text-transparent bg-gradient-to-r
+from-red-500
+via-red-600
+to-green-600">
+      Pizzas Salgadas
+    </span>
+    
+  </h2>
+
+  <div class="produtos-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto"></div>
+</section>
+
+
+
+<!-- Modal do Carrinho -->
+<div id="modalCarrinho" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden z-40">
+  <section id="carrinho-e-informacoes" class="bg-[#032915]/60 backdrop-blur-sm text-white rounded-lg max-w-xl w-full p-6 shadow-xl relative">
+    <!-- Botão Fechar -->
+    <button onclick="fecharCarrinho()" class="absolute top-2 right-2 text-gray-400 hover:text-white text-2xl font-bold">&times;</button>
+
+    <h2 class="text-2xl font-bold text-center mb-4">Carrinho de Compras</h2>
+
+    <div id="carrinho-itens" class="bg-gray-800 rounded p-3 max-h-64 overflow-y-auto">
+      <p class="text-gray-400">Nenhum item no carrinho.</p>
+    </div>
+
+    <p class="text-xl font-bold mt-4 text-green-400">Total: R$ <span id="total">0,00</span></p>
+
+
+    <form id="orderForm" class="mt-6">
+      <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 w-full">
+        Avançar
+      </button>
+    </form>
+  </section>
+</div>
+
+<!-- Botão Flutuante Ver Carrinho -->
+<button onclick="abrirCarrinho()" id="btnAbrirCarrinho"
+  class="fixed top-4 right-4
+bg-red-600 text-white
+px-5 py-3 rounded-full
+shadow-[0_0_20px_rgba(200,16,46,0.4)]
+hover:scale-105
+transition z-50 flex items-center gap-2 font-bold" text-white px-5 py-3 rounded-full shadow-xl hover:bg-red-700 z-50 flex items-center gap-2">
+  🛒 <span class="font-medium">Carrinho</span>
+  <span id="badgeCarrinho" class="ml-1 bg-green-700 text-white font-bold px-2 py-0.5 rounded-full text-sm hidden">0</span>
+</button>
+
+
+
+<!-- Rodapé -->
+<footer class="bg-[#111111]/90 backdrop-blur-md border-t border-red-600/30 text-white text-center py-5 space-y-2 text-sm">
+
+  <p class="text-red-100">
+    © 2025 Pizzaria Fiorella. Desenvolvido por
+    <span class="font-bold text-[#4ADE80]">
+      MSSoftware
+    </span>
+  </p>
+
+  <p class="text-green-200">
+    Versão:
+   <span id="versaoSistemaTexto"
+      class="font-bold text-yellow-400">
+</span>
+  </p>
+
+   <p class="text-xs mt-2">
+  🔒 Suas informações são utilizadas apenas para entrega do pedido. 
+  Nenhum dado é armazenado ou compartilhado com terceiros.
+</p>
+
+</footer>
+
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js', { scope: './' }) // escopo relativo à pasta do HTML
+    .then(reg => {
+      if (reg.waiting) reg.waiting.postMessage("skipWaiting");
+
+      reg.addEventListener("updatefound", () => {
+        const newWorker = reg.installing;
+        newWorker?.addEventListener("statechange", () => {
+          if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+            console.log("🔄 Nova versão detectada, atualizando...");
+            window.location.reload();
+          }
+        });
+      });
+    });
+}
+
+</script>
+
+<script>
+  const versaoSistema = "1.0.1"; // Atualize aqui também!
+
+  const script = document.createElement("script");
+  script.type = "module";
+  script.src = `script.js?v=${versaoSistema}`;
+  document.body.appendChild(script);
+
+  window.addEventListener("DOMContentLoaded", () => {
+    const versaoEl = document.getElementById("versaoSistemaTexto");
+    if (versaoEl) versaoEl.textContent = versaoSistema;
+  });
+</script>
+
+<!-- Modal de Confirmação do Pedido -->
+<div id="modalConfirmacao" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-lg p-6 max-w-md w-11/12 max-h-screen overflow-y-auto text-center shadow-2xl">
+    <h2 class="text-xl font-bold mb-4 text-gray-800">Confirmar Pedido</h2>
+    <p id="textoConfirmacao" class="text-gray-700 mb-2">Você confirma o envio do pedido?</p>
+
+    <!-- Dados do cliente -->
+    <div id="infoEntrega" class="text-black text-sm mb-4 hidden space-y-1 text-left">
+      <p><strong>Nome:</strong> <span id="confNomeCliente"></span></p>
+      <p id="linhaTelefone"><strong>Telefone:</strong> <span id="confTelefoneCliente"></span></p>
+      <p id="linhaEndereco"><strong>Endereço:</strong> <span id="confEnderecoCliente"></span></p>
+    </div>
+
+    <!-- Lista de Itens (com rolagem própria se precisar) -->
+    <ul id="listaItensConfirmacao" class="text-sm text-gray-600 mb-4 space-y-1 text-left px-4 max-h-48 overflow-y-auto border rounded p-2"></ul>
+
+    <!-- Valor Total -->
+    <p id="valorTotalConfirmacao" class="text-lg font-semibold text-gray-800 mb-4"></p>
+
+    <!-- Botões -->
+    <div class="flex justify-center gap-4">
+      <button id="btnCancelarConfirmacao" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">
+        Cancelar
+      </button>
+      <button id="btnConfirmarPedido" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+        Confirmar
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal de Sucesso -->
+<div id="modalSucessoPedido" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
+  <div class="bg-green-600 text-white rounded-xl p-6 w-11/12 max-w-sm text-center shadow-xl">
+    <h2 class="text-2xl font-bold mb-2">✅ Pedido enviado!</h2>
+    <p class="mb-4">Seu pedido foi enviado com sucesso.</p>
+    <button onclick="fecharModalSucesso()" class="bg-white text-green-700 px-4 py-2 rounded font-semibold">Fechar</button>
+  </div>
+</div>
+
+
+<!-- Modal de Alerta -->
+<div id="modalAlerta" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[9999] hidden">
+
+  <div class="bg-white rounded-lg p-6 max-w-sm w-11/12 text-center shadow-xl text-gray-800 max-h-screen overflow-y-auto">
+    <h2 class="text-xl font-bold mb-4">⚠️ Atenção</h2>
+    <p id="mensagemAlerta" class="mb-6">Mensagem do alerta.</p>
+    <button onclick="fecharModalAlerta()" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Fechar</button>
+  </div>
+</div>
+
+
+<!-- Modal de Tipo de Pedido -->
+<div id="modalTipoPedido" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
+  <div class="relative bg-white rounded-xl p-6 w-11/12 max-w-md max-h-screen overflow-y-auto shadow-xl text-gray-900">
+
+ <!-- Botão de Fechar -->
+<button onclick="fecharModalTipoPedido()" 
+  class="absolute top-3 right-3 text-gray-500 hover:text-red-600 text-2xl font-bold transition">
+  &times;
+</button>
+
+    <h2 class="text-2xl font-bold mb-4 text-center">📦 Como deseja receber seu pedido?</h2>
+
+    <div class="flex flex-col gap-4">
+      <button onclick="selecionarTipoPedido('retirada')" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-md transition-all">
+        🏃‍♂️ Retirada no balcão
+      </button>
+      <button onclick="selecionarTipoPedido('entrega')" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-md transition-all">
+        🛵 Entrega em domicílio
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal de Dados para Entrega -->
+<div id="modalDadosEntrega" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
+  <div class="relative bg-white rounded-xl p-6 w-11/12 max-w-md max-h-screen overflow-y-auto shadow-xl text-gray-900">
+    <h2 class="text-2xl font-bold mb-4 text-center">📄Dados para entrega do pedido</h2>
+
+    <div class="space-y-4">
+      <!-- Nome -->
+      <div>
+        <p class="text-xs text-gray-600 mb-2">
+  🔒 As informações abaixo são utilizadas apenas para entrega do pedido. 
+  Este site é oficial e seguro.
+</p>
+        <label for="nomeCliente" class="block text-sm font-medium text-gray-700">Nome</label>
+        <input type="text" id="nomeCliente" placeholder="Seu nome completo" class="w-full p-2 rounded border border-gray-300 focus:ring focus:ring-red-200">
+      </div>
+
+      <!-- Telefone -->
+      <div>
+        <label for="telCliente" class="block text-sm font-medium text-gray-700">Telefone (WhatsApp)</label>
+        <input type="tel" id="telCliente" placeholder="(17) 99999-9999" class="w-full p-2 rounded border border-gray-300 focus:ring focus:ring-red-200">
+      </div>
+
+      <!-- Endereço -->
+      <div id="campoEndereco">
+        <label for="enderecoCliente" class="block text-sm font-medium text-gray-700">Endereço completo</label>
+        <textarea id="enderecoCliente" placeholder="Ex: Rua A, nº 123, casa B, próximo à praça" rows="2" class="w-full p-2 rounded border border-gray-300 focus:ring focus:ring-red-200 resize-none"></textarea>
+      </div>
+
+      <!-- Pagamento -->
+      <div id="blocoEntrega" class="space-y-2">
+        <label for="formaPagamento" class="block text-sm font-medium text-gray-700">💳 Forma de Pagamento</label>
+        <select id="formaPagamento" class="w-full p-2 rounded border border-gray-300 bg-white text-gray-800 focus:ring focus:ring-red-200">
+          <option value="">Selecione</option>
+          <option value="Dinheiro">Dinheiro</option>
+          <option value="Cartão de Crédito">Cartão de Crédito</option>
+          <option value="Cartão de Débito">Cartão de Débito</option>
+          <option value="PIX">PIX</option>
+        </select>
+
+        <!-- Total com Entrega -->
+        <p class="text-lg font-bold text-green-600 mt-3">
+          Total com entrega: R$ <span id="totalComEntregaPreview">0,00</span>
+        </p>
+
+        <!-- Troco -->
+        <div class="space-y-2">
+          <label class="inline-flex items-center text-sm text-gray-700">
+            <input type="checkbox" id="precisaTroco" class="mr-2 accent-red-600">
+            Precisa de troco?
+          </label>
+          <input type="number" step="0.01" id="valorTroco" placeholder="Troco para quanto?" class="w-full p-2 rounded border border-gray-300 focus:ring focus:ring-red-200">
+        </div>
+      </div>
+
+      <!-- Ações -->
+      <div class="flex justify-between gap-4 pt-6">
+        <button onclick="fecharModalEntrega()" class="w-1/2 bg-gray-500 hover:bg-gray-600 text-white py-2 rounded-md font-semibold">
+          Cancelar
+        </button>
+        <button onclick="confirmarEntrega()" class="w-1/2 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md font-semibold">
+          Confirmar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Adicionais e Observação -->
+<div id="modalObservacao"
+  class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden z-50">
+
+  <div class="bg-white rounded-xl p-4 w-11/12 max-w-md max-h-[90vh] flex flex-col shadow-xl text-gray-900">
+
+    <h2 class="text-lg font-bold mb-2 text-center">
+      🧾 Personalize sua Pizza
+    </h2>
+
+    <p id="modalProdutoNome"
+      class="mb-2 text-center font-semibold text-base"></p>
+
+    <!-- LISTA DE ADICIONAIS -->
+    <div class="mb-2">
+      <p class="text-xs font-semibold mb-1 text-gray-700">
+        Escolha adicionais:
+      </p>
+
+      <div id="listaAdicionais"
+        class="max-h-64 overflow-y-auto border border-gray-200 rounded-md p-2 space-y-1 bg-gray-50">
+      </div>
+    </div>
+
+    <!-- OBSERVAÇÃO -->
+    <div class="mb-2">
+      <textarea id="observacaoInput"
+        class="w-full p-2 text-sm border border-gray-300 rounded resize-none focus:ring focus:ring-red-200"
+        placeholder="Observação (opcional)"
+        rows="2"></textarea>
+    </div>
+
+    <!-- BOTÕES -->
+    <div class="flex gap-2 mt-1">
+
+      <button onclick="fecharModalObservacao()"
+        class="w-1/2 bg-gray-500 hover:bg-gray-600 text-white py-2 rounded-md text-sm font-semibold">
+        Cancelar
+      </button>
+
+      <button onclick="confirmarObservacao()"
+        class="w-1/2 bg-green-600 hover:bg-green-700 text-white py-2 rounded-md text-sm font-semibold">
+        Confirmar
+      </button>
+
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
