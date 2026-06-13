@@ -72,27 +72,87 @@ body{
   </style>
 </head>
 
+<!-- HEADER PREMIUM SEM TEXTOS -->
+<header class="relative overflow-hidden shadow-[0_10px_50px_rgba(0,0,0,0.6)]">
 
-<!-- HEADER / HERO MINI --><header class="relative text-center py-10 shadow-2xl overflow-hidden
-bg-[radial-gradient(circle_at_center,_#C8102E_0%,_#7D0F22_55%,_#1A1A1A_100%)]">
-
-  <!-- efeito luz -->
-  <div class="absolute inset-0 bg-[url('img/fundo-copa.png')] opacity-10"></div>
-
-  <!-- glow amarelo -->
-  <div class="absolute inset-0 bg-gradient-to-b from-yellow-400/10 via-transparent to-black/40"></div>
-
-  <div class="relative z-10">
-    <img src="img/logo2.jpeg"
-      alt="Logo Pizzaria Fiorella"
-      class="mx-auto w-[85%] max-w-[420px]
-      drop-shadow-[0_0_35px_rgba(255,215,0,0.4)]
-      hover:scale-105 transition duration-500">
+  <!-- Fundo principal -->
+  <div class="absolute inset-0 
+    bg-[radial-gradient(circle_at_top,_#D81F3A_0%,_#8B1028_30%,_#111111_85%)]">
   </div>
+
+  <!-- textura sutil -->
+  <div class="absolute inset-0 
+    bg-[url('img/fundo-copa.png')]
+    bg-cover bg-center opacity-[0.05] mix-blend-overlay">
+  </div>
+
+  <!-- luz dourada central -->
+  <div class="absolute top-0 left-1/2 -translate-x-1/2 
+    w-[600px] h-[350px]
+    bg-yellow-400/10 blur-[120px] rounded-full">
+  </div>
+
+  <!-- glow vermelho esquerda -->
+  <div class="absolute -top-24 -left-20 w-[300px] h-[300px]
+    bg-red-500/15 blur-[120px] rounded-full">
+  </div>
+
+  <!-- glow dourado direita -->
+  <div class="absolute -bottom-24 -right-20 w-[300px] h-[300px]
+    bg-yellow-500/10 blur-[120px] rounded-full">
+  </div>
+
+  <!-- vinheta escura -->
+  <div class="absolute inset-0
+    bg-gradient-to-b from-transparent via-transparent to-black/50">
+  </div>
+
+  <!-- conteúdo -->
+  <div class="relative z-10 flex justify-center items-center py-8 md:py-12 px-4">
+
+    <div class="relative group">
+
+      <!-- brilho atrás da logo -->
+      <div class="absolute inset-0 
+        bg-gradient-to-r from-red-500/10 via-yellow-400/20 to-red-500/10
+        blur-[55px] rounded-full scale-[1.15]">
+      </div>
+
+      <!-- borda glow -->
+      <div class="absolute inset-0 rounded-[28px]
+        bg-gradient-to-r from-yellow-500/10 via-white/10 to-red-500/10
+        blur-md scale-105">
+      </div>
+
+      <!-- logo -->
+      <img src="img/logo2.jpeg"
+        alt="Logo Pizzaria Fiorella"
+        class="relative mx-auto
+        w-[82%] max-w-[420px]
+        rounded-[28px]
+        border border-white/10
+        shadow-[0_10px_50px_rgba(0,0,0,0.45)]
+        group-hover:scale-[1.03]
+        transition duration-500 ease-out">
+
+    </div>
+
+  </div>
+
+  <!-- fade inferior elegante -->
+  <div class="absolute bottom-0 left-0 w-full h-24
+    bg-gradient-to-t from-black/60 to-transparent">
+  </div>
+
 </header>
 
 
-<body class="font-sans text-white bg-gradient-to-b from-[#012d18] via-[#014421] to-[#001a0d] min-h-screen">
+<body class="font-sans text-white
+bg-gradient-to-b
+from-[#1A0A0D]
+via-[#120608]
+to-[#090909]
+min-h-screen">
 
   <div id="aviso-fechado" class="bg-green-600 text-white text-center py-2 font-bold hidden">
   ❌ Estamos fechados para novos pedidos.
@@ -131,15 +191,15 @@ group-hover:scale-110 transition duration-500">
 
    
     <button
-      data-card="esfihas-salgadas"
-      onclick="mostrarSecao('esfihas-salgadas')"
+      data-card="pizzas-salgadas"
+      onclick="mostrarSecao('pizzas-salgadas')"
       class="relative group overflow-hidden rounded-3xl
 border-2 border-red-600
 shadow-[0_0_25px_rgba(200,16,46,0.25)]
 hover:scale-[1.03]
 transition duration-300"
     >
-      <img src="img/pizzasalgada.jpeg" alt="Esfihas Salgadas" class="w-full h-52 object-cover
+      <img src="img/pizzasalgada2.jpeg" alt="pizzas Salgadas" class="w-full h-52 object-cover
 group-hover:scale-110 transition duration-500">
       <div class="absolute bottom-0 bg-black/70 text-white w-full text-center py-2 text-sm">
         Pizzas Salgadas
@@ -148,15 +208,15 @@ group-hover:scale-110 transition duration-500">
 
     <!-- ACOMPANHAMENTOS -->
     <button
-      data-card="esfihas-doces"
-      onclick="mostrarSecao('esfihas-doces')"
+      data-card="pizzas-doces"
+      onclick="mostrarSecao('pizzas-doces')"
       class="relative group overflow-hidden rounded-3xl
 border-2 border-red-600
 shadow-[0_0_25px_rgba(200,16,46,0.25)]
 hover:scale-[1.03]
 transition duration-300"
     >
-      <img src="img/pizzadoce.jpeg" alt="Esfihas Doces"  class="w-full h-52 object-cover
+      <img src="img/pizzadoce.jpeg" alt="pizzas Doces"  class="w-full h-52 object-cover
 group-hover:scale-110 transition duration-500">
       <div class="absolute bottom-0 bg-black/70 text-white w-full text-center py-2 text-sm">
         Pizzas Doces
@@ -216,13 +276,15 @@ group-hover:scale-110 transition duration-500">
 </button>
 
 
-<section id="bebidas" class="section-produto py-10 px-4 bg-[#032915]/60 backdrop-blur-sm hidden">
+<section id="bebidas" class="section-produto py-10 px-4 bg-[#1A1A1A]/80
+backdrop-blur-sm
+border border-red-900/20 hidden">
   <h2 class="text-3xl md:text-4xl font-extrabold text-center mb-6 drop-shadow-lg flex items-center justify-center gap-2">
     <span>🥛</span>
     <span class="bg-clip-text text-transparent bg-gradient-to-r
 from-red-500
-via-red-600
-to-green-600">
+via-red-700
+to-yellow-500">
       Bebidas
     </span>
   </h2>
@@ -230,26 +292,30 @@ to-green-600">
 </section>
 
 
-<section id="cervejas" class="section-produto py-10 px-4 bg-[#032915]/60 backdrop-blur-sm hidden">
+<section id="cervejas" class="section-produto py-10 px-4 bg-[#1A1A1A]/80
+backdrop-blur-sm
+border border-red-900/20 hidden">
   <h2 class="text-3xl md:text-4xl font-extrabold text-center mb-6 drop-shadow-lg flex items-center justify-center gap-2">
     <span>🍺</span>
     <span class="bg-clip-text text-transparent bg-gradient-to-r
 from-red-500
-via-red-600
-to-green-600">
+via-red-700
+to-yellow-500">
       Cervejas
     </span>
   </h2>
   <div class="produtos-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto"></div>
 </section>
 
-<section id="esfihas-doces" class="section-produto py-10 px-4 bg-[#032915]/60 backdrop-blur-sm hidden">
+<section id="pizzas-doces" class="section-produto py-10 px-4 bg-[#1A1A1A]/80
+backdrop-blur-sm
+border border-red-900/20 hidden">
   <h2 class="text-3xl md:text-4xl font-extrabold text-center mb-6 drop-shadow-lg flex items-center justify-center gap-2">
     <span></span>
     <span class="bg-clip-text text-transparent bg-gradient-to-r
 from-red-500
-via-red-600
-to-green-600">
+via-red-700
+to-yellow-500">
       Pizzas Doces
     </span>
   </h2>
@@ -258,13 +324,15 @@ to-green-600">
   <div class="produtos-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto"></div>
 </section>
 
-<section id="promoção" class="section-produto py-10 px-4 bg-[#032915]/60 backdrop-blur-sm hidden">
+<section id="promoção" class="section-produto py-10 px-4 bg-[#1A1A1A]/80
+backdrop-blur-sm
+border border-red-900/20 hidden">
   <h2 class="text-3xl md:text-4xl font-extrabold text-center mb-6 drop-shadow-lg flex items-center justify-center gap-2">
     <span></span>
     <span class="bg-clip-text text-transparent bg-gradient-to-r
 from-red-500
-via-red-600
-to-green-600">
+via-red-700
+to-yellow-500">
       Promoção
     </span>
   </h2>
@@ -273,13 +341,15 @@ to-green-600">
 
 
 
-<section id="esfihas-salgadas" class="section-produto py-10 px-4 bg-[#032915]/60 backdrop-blur-sm hidden">
+<section id="pizzas-salgadas" class="section-produto py-10 px-4 bg-[#1A1A1A]/80
+backdrop-blur-sm
+border border-red-900/20 hidden">
   <h2 class="text-3xl md:text-4xl font-extrabold text-center mb-6 drop-shadow-lg flex items-center justify-center gap-2">
     <span></span>
     <span class="bg-clip-text text-transparent bg-gradient-to-r
 from-red-500
-via-red-600
-to-green-600">
+via-red-700
+to-yellow-500">
       Pizzas Salgadas
     </span>
     
@@ -288,28 +358,85 @@ to-green-600">
   <div class="produtos-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto"></div>
 </section>
 
-
-
 <!-- Modal do Carrinho -->
-<div id="modalCarrinho" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden z-40">
-  <section id="carrinho-e-informacoes" class="bg-[#032915]/60 backdrop-blur-sm text-white rounded-lg max-w-xl w-full p-6 shadow-xl relative">
-    <!-- Botão Fechar -->
-    <button onclick="fecharCarrinho()" class="absolute top-2 right-2 text-gray-400 hover:text-white text-2xl font-bold">&times;</button>
+<div id="modalCarrinho"
+  class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center hidden z-40">
 
-    <h2 class="text-2xl font-bold text-center mb-4">Carrinho de Compras</h2>
+  <section id="carrinho-e-informacoes"
+    class="bg-[#161616]/95
+    border border-red-800/30
+    rounded-3xl
+    max-w-xl w-[95%]
+    p-6
+    shadow-[0_0_40px_rgba(200,16,46,0.18)]
+    relative overflow-hidden">
 
-    <div id="carrinho-itens" class="bg-gray-800 rounded p-3 max-h-64 overflow-y-auto">
-      <p class="text-gray-400">Nenhum item no carrinho.</p>
+    <!-- glow -->
+    <div class="absolute top-0 left-0 w-full h-full pointer-events-none">
+      <div class="absolute -top-20 left-1/2 -translate-x-1/2
+        w-[300px] h-[180px]
+        bg-red-600/10 blur-[80px] rounded-full">
+      </div>
     </div>
 
-    <p class="text-xl font-bold mt-4 text-green-400">Total: R$ <span id="total">0,00</span></p>
+    <!-- Botão fechar -->
+    <button onclick="fecharCarrinho()"
+      class="absolute top-4 right-4
+      text-gray-400 hover:text-red-500
+      text-3xl font-light transition">
+      &times;
+    </button>
 
+    <!-- título -->
+    <h2 class="text-2xl font-bold text-center mb-5 text-white">
+      🛒 Carrinho de Compras
+    </h2>
 
+    <!-- itens -->
+    <div id="carrinho-itens"
+      class="bg-[#222222]
+      border border-white/5
+      rounded-2xl
+      p-4
+      max-h-64 overflow-y-auto">
+
+      <p class="text-gray-400 text-center">
+        Nenhum item no carrinho.
+      </p>
+    </div>
+
+    <!-- total -->
+    <div class="mt-5 flex justify-between items-center">
+
+      <span class="text-gray-300 text-lg">
+        Total:
+      </span>
+
+      <p class="text-2xl font-bold text-yellow-400">
+        R$ <span id="total">0,00</span>
+      </p>
+
+    </div>
+
+    <!-- botão -->
     <form id="orderForm" class="mt-6">
-      <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 w-full">
-        Avançar
+      <button type="submit"
+        class="w-full
+        bg-gradient-to-r
+        from-red-600
+        to-red-700
+        hover:brightness-110
+        text-white
+        font-bold
+        py-3 rounded-2xl
+        shadow-lg
+        transition duration-300
+        hover:scale-[1.02]">
+
+        Avançar Pedido
       </button>
     </form>
+
   </section>
 </div>
 
@@ -322,7 +449,7 @@ shadow-[0_0_20px_rgba(200,16,46,0.4)]
 hover:scale-105
 transition z-50 flex items-center gap-2 font-bold" text-white px-5 py-3 rounded-full shadow-xl hover:bg-red-700 z-50 flex items-center gap-2">
   🛒 <span class="font-medium">Carrinho</span>
-  <span id="badgeCarrinho" class="ml-1 bg-green-700 text-white font-bold px-2 py-0.5 rounded-full text-sm hidden">0</span>
+  <span id="badgeCarrinho" class="ml-1 bg-red-700 text-white font-bold px-2 py-0.5 rounded-full text-sm hidden">0</span>
 </button>
 
 
@@ -332,12 +459,12 @@ transition z-50 flex items-center gap-2 font-bold" text-white px-5 py-3 rounded-
 
   <p class="text-red-100">
     © 2025 Pizzaria Fiorella. Desenvolvido por
-    <span class="font-bold text-[#4ADE80]">
+    <span class="font-bold text-yellow-400">
       MSSoftware
     </span>
   </p>
 
-  <p class="text-green-200">
+  <p class="text-red-200">
     Versão:
    <span id="versaoSistemaTexto"
       class="font-bold text-yellow-400">
@@ -385,115 +512,438 @@ if ('serviceWorker' in navigator) {
   });
 </script>
 
+
 <!-- Modal de Confirmação do Pedido -->
-<div id="modalConfirmacao" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden">
-  <div class="bg-white rounded-lg p-6 max-w-md w-11/12 max-h-screen overflow-y-auto text-center shadow-2xl">
-    <h2 class="text-xl font-bold mb-4 text-gray-800">Confirmar Pedido</h2>
-    <p id="textoConfirmacao" class="text-gray-700 mb-2">Você confirma o envio do pedido?</p>
+<div id="modalConfirmacao"
+  class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+
+  <div class="relative
+    bg-[#161616]/95
+    border border-red-800/30
+    rounded-[28px]
+    p-6
+    max-w-md w-11/12
+    max-h-screen overflow-y-auto
+    text-center
+    shadow-[0_0_40px_rgba(200,16,46,0.18)]
+    text-white">
+
+    <!-- glow suave -->
+    <div class="absolute top-0 left-1/2 -translate-x-1/2
+      w-[240px] h-[120px]
+      bg-red-600/10 blur-[70px] rounded-full pointer-events-none">
+    </div>
+
+    <!-- título -->
+    <h2 class="relative text-2xl font-bold mb-3 text-white">
+      🍕 Confirmar Pedido
+    </h2>
+
+    <!-- texto -->
+    <p id="textoConfirmacao"
+      class="text-gray-300 mb-4">
+      Você confirma o envio do pedido?
+    </p>
 
     <!-- Dados do cliente -->
-    <div id="infoEntrega" class="text-black text-sm mb-4 hidden space-y-1 text-left">
-      <p><strong>Nome:</strong> <span id="confNomeCliente"></span></p>
-      <p id="linhaTelefone"><strong>Telefone:</strong> <span id="confTelefoneCliente"></span></p>
-      <p id="linhaEndereco"><strong>Endereço:</strong> <span id="confEnderecoCliente"></span></p>
+    <div id="infoEntrega"
+      class="bg-[#222222]
+      border border-white/10
+      rounded-2xl
+      text-sm
+      mb-4 hidden
+      space-y-2
+      text-left
+      p-4">
+
+      <p>
+        <strong class="text-red-400">Nome:</strong>
+        <span id="confNomeCliente"></span>
+      </p>
+
+      <p id="linhaTelefone">
+        <strong class="text-red-400">Telefone:</strong>
+        <span id="confTelefoneCliente"></span>
+      </p>
+
+      <p id="linhaEndereco">
+        <strong class="text-red-400">Endereço:</strong>
+        <span id="confEnderecoCliente"></span>
+      </p>
     </div>
 
-    <!-- Lista de Itens (com rolagem própria se precisar) -->
-    <ul id="listaItensConfirmacao" class="text-sm text-gray-600 mb-4 space-y-1 text-left px-4 max-h-48 overflow-y-auto border rounded p-2"></ul>
+    <!-- Lista de Itens -->
+    <ul id="listaItensConfirmacao"
+      class="text-sm text-gray-300
+      mb-4
+      space-y-2
+      text-left
+      px-4
+      max-h-48
+      overflow-y-auto
+      border border-white/10
+      rounded-2xl
+      p-3
+      bg-[#222222]">
+    </ul>
 
     <!-- Valor Total -->
-    <p id="valorTotalConfirmacao" class="text-lg font-semibold text-gray-800 mb-4"></p>
+    <p id="valorTotalConfirmacao"
+      class="text-2xl font-bold text-yellow-400 mb-5">
+    </p>
 
     <!-- Botões -->
-    <div class="flex justify-center gap-4">
-      <button id="btnCancelarConfirmacao" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">
+    <div class="flex justify-center gap-3">
+
+      <button id="btnCancelarConfirmacao"
+        class="flex-1 bg-gray-700 text-white px-4 py-3 rounded-2xl hover:bg-gray-600 transition font-semibold">
         Cancelar
       </button>
-      <button id="btnConfirmarPedido" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+
+      <button id="btnConfirmarPedido"
+        class="flex-1
+        bg-gradient-to-r
+        from-red-600
+        to-red-700
+        text-white
+        px-4 py-3
+        rounded-2xl
+        hover:brightness-110
+        transition
+        font-semibold
+        shadow-lg">
         Confirmar
       </button>
+
     </div>
+
   </div>
 </div>
-
 
 <!-- Modal de Sucesso -->
-<div id="modalSucessoPedido" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
-  <div class="bg-green-600 text-white rounded-xl p-6 w-11/12 max-w-sm text-center shadow-xl">
-    <h2 class="text-2xl font-bold mb-2">✅ Pedido enviado!</h2>
-    <p class="mb-4">Seu pedido foi enviado com sucesso.</p>
-    <button onclick="fecharModalSucesso()" class="bg-white text-green-700 px-4 py-2 rounded font-semibold">Fechar</button>
+<div id="modalSucessoPedido"
+  class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+
+  <div class="relative
+    bg-[#161616]/95
+    border border-red-800/30
+    rounded-[28px]
+    p-6
+    w-11/12 max-w-sm
+    text-center
+    shadow-[0_0_40px_rgba(200,16,46,0.18)]
+    text-white overflow-hidden">
+
+    <!-- glow -->
+    <div class="absolute top-0 left-1/2 -translate-x-1/2
+      w-[220px] h-[120px]
+      bg-red-600/10 blur-[70px] rounded-full pointer-events-none">
+    </div>
+
+    <!-- ícone -->
+    <div class="relative text-5xl mb-3">
+      🍕
+    </div>
+
+    <h2 class="relative text-2xl font-bold mb-2 text-yellow-400">
+      Pedido enviado!
+    </h2>
+
+    <p class="text-gray-300 mb-5">
+      Seu pedido foi enviado com sucesso.
+    </p>
+
+    <button onclick="fecharModalSucesso()"
+      class="w-full
+      bg-gradient-to-r
+      from-red-600
+      to-red-700
+      text-white
+      px-4 py-3
+      rounded-2xl
+      font-semibold
+      hover:brightness-110
+      transition
+      shadow-lg">
+
+      Fechar
+    </button>
+
   </div>
 </div>
-
 
 <!-- Modal de Alerta -->
-<div id="modalAlerta" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[9999] hidden">
+<div id="modalAlerta"
+  class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[9999] hidden">
 
-  <div class="bg-white rounded-lg p-6 max-w-sm w-11/12 text-center shadow-xl text-gray-800 max-h-screen overflow-y-auto">
-    <h2 class="text-xl font-bold mb-4">⚠️ Atenção</h2>
-    <p id="mensagemAlerta" class="mb-6">Mensagem do alerta.</p>
-    <button onclick="fecharModalAlerta()" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Fechar</button>
-  </div>
-</div>
+  <div class="relative
+    bg-[#161616]/95
+    border border-red-800/30
+    rounded-[28px]
+    p-6
+    max-w-sm w-11/12
+    text-center
+    shadow-[0_0_40px_rgba(200,16,46,0.18)]
+    text-white
+    max-h-screen overflow-y-auto">
 
-
-<!-- Modal de Tipo de Pedido -->
-<div id="modalTipoPedido" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
-  <div class="relative bg-white rounded-xl p-6 w-11/12 max-w-md max-h-screen overflow-y-auto shadow-xl text-gray-900">
-
- <!-- Botão de Fechar -->
-<button onclick="fecharModalTipoPedido()" 
-  class="absolute top-3 right-3 text-gray-500 hover:text-red-600 text-2xl font-bold transition">
-  &times;
-</button>
-
-    <h2 class="text-2xl font-bold mb-4 text-center">📦 Como deseja receber seu pedido?</h2>
-
-    <div class="flex flex-col gap-4">
-      <button onclick="selecionarTipoPedido('retirada')" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-md transition-all">
-        🏃‍♂️ Retirada no balcão
-      </button>
-      <button onclick="selecionarTipoPedido('entrega')" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-md transition-all">
-        🛵 Entrega em domicílio
-      </button>
+    <!-- glow -->
+    <div class="absolute top-0 left-1/2 -translate-x-1/2
+      w-[220px] h-[120px]
+      bg-red-600/10 blur-[70px] rounded-full pointer-events-none">
     </div>
+
+    <h2 class="relative text-2xl font-bold mb-4 text-yellow-400">
+      ⚠️ Atenção
+    </h2>
+
+    <p id="mensagemAlerta"
+      class="text-gray-300 mb-6">
+      Mensagem do alerta.
+    </p>
+
+    <button onclick="fecharModalAlerta()"
+      class="w-full
+      bg-gradient-to-r
+      from-red-600
+      to-red-700
+      text-white
+      px-4 py-3
+      rounded-2xl
+      font-semibold
+      hover:brightness-110
+      transition
+      shadow-lg">
+
+      Fechar
+    </button>
+
   </div>
 </div>
+<!-- Modal de Tipo de Pedido -->
+<div id="modalTipoPedido"
+  class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 hidden">
 
+  <div class="relative
+    bg-[#161616]/95
+    border border-red-800/30
+    rounded-[28px]
+    p-6
+    w-11/12 max-w-md
+    max-h-screen overflow-y-auto
+    shadow-[0_0_40px_rgba(200,16,46,0.18)]
+    text-white overflow-hidden">
+
+    <!-- glow -->
+    <div class="absolute top-0 left-1/2 -translate-x-1/2
+      w-[240px] h-[120px]
+      bg-red-600/10 blur-[70px]
+      rounded-full pointer-events-none">
+    </div>
+
+    <!-- botão fechar -->
+    <button onclick="fecharModalTipoPedido()"
+      class="absolute top-4 right-4
+      text-gray-400 hover:text-red-500
+      text-3xl font-light transition">
+      &times;
+    </button>
+
+    <!-- título -->
+    <h2 class="relative text-2xl font-bold mb-2 text-center text-white">
+      🍕 Como deseja receber?
+    </h2>
+
+    <p class="text-center text-gray-400 text-sm mb-5">
+      Escolha a melhor opção para o seu pedido
+    </p>
+
+    <!-- opções -->
+    <div class="flex flex-col gap-4">
+
+      <!-- retirada -->
+      <button
+        onclick="selecionarTipoPedido('retirada')"
+        class="group
+        bg-[#222]
+        border border-red-800/20
+        hover:border-red-600/40
+        hover:bg-[#2A1A1A]
+        text-white
+        font-semibold
+        py-4 px-5
+        rounded-2xl
+        transition-all duration-300
+        flex items-center gap-4">
+
+        <div class="w-12 h-12 rounded-xl
+          bg-gradient-to-br from-red-600 to-red-800
+          flex items-center justify-center text-xl shadow-lg">
+          🏃‍♂️
+        </div>
+
+        <div class="text-left">
+          <p class="font-bold text-white">
+            Retirada no balcão
+          </p>
+          <span class="text-sm text-gray-400">
+            Retire diretamente na pizzaria
+          </span>
+        </div>
+
+      </button>
+
+      <!-- entrega -->
+      <button
+        onclick="selecionarTipoPedido('entrega')"
+        class="group
+        bg-[#222]
+        border border-yellow-700/20
+        hover:border-yellow-500/40
+        hover:bg-[#2A2414]
+        text-white
+        font-semibold
+        py-4 px-5
+        rounded-2xl
+        transition-all duration-300
+        flex items-center gap-4">
+
+        <div class="w-12 h-12 rounded-xl
+          bg-gradient-to-br from-yellow-500 to-yellow-700
+          flex items-center justify-center text-xl shadow-lg text-black">
+          🛵
+        </div>
+
+        <div class="text-left">
+          <p class="font-bold text-white">
+            Entrega em domicílio
+          </p>
+          <span class="text-sm text-gray-400">
+            Receba no conforto da sua casa
+          </span>
+        </div>
+
+      </button>
+
+    </div>
+
+  </div>
+</div>
 
 <!-- Modal de Dados para Entrega -->
-<div id="modalDadosEntrega" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
-  <div class="relative bg-white rounded-xl p-6 w-11/12 max-w-md max-h-screen overflow-y-auto shadow-xl text-gray-900">
-    <h2 class="text-2xl font-bold mb-4 text-center">📄Dados para entrega do pedido</h2>
+<div id="modalDadosEntrega"
+  class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+
+  <div class="relative
+    bg-[#161616]/95
+    border border-red-800/30
+    rounded-[28px]
+    p-6
+    w-11/12 max-w-md
+    max-h-screen overflow-y-auto
+    shadow-[0_0_40px_rgba(200,16,46,0.18)]
+    text-white overflow-hidden">
+
+    <!-- glow -->
+    <div class="absolute top-0 left-1/2 -translate-x-1/2
+      w-[240px] h-[120px]
+      bg-red-600/10 blur-[70px]
+      rounded-full pointer-events-none">
+    </div>
+
+    <!-- título -->
+    <h2 class="relative text-2xl font-bold mb-4 text-center">
+      📄 Dados para entrega
+    </h2>
 
     <div class="space-y-4">
+
+      <!-- aviso -->
+      <div class="bg-[#222]
+        border border-white/10
+        rounded-2xl p-3">
+
+        <p class="text-xs text-gray-400 leading-relaxed">
+          🔒 As informações abaixo são utilizadas apenas
+          para entrega do pedido. Este site é oficial e seguro.
+        </p>
+
+      </div>
+
       <!-- Nome -->
       <div>
-        <p class="text-xs text-gray-600 mb-2">
-  🔒 As informações abaixo são utilizadas apenas para entrega do pedido. 
-  Este site é oficial e seguro.
-</p>
-        <label for="nomeCliente" class="block text-sm font-medium text-gray-700">Nome</label>
-        <input type="text" id="nomeCliente" placeholder="Seu nome completo" class="w-full p-2 rounded border border-gray-300 focus:ring focus:ring-red-200">
+        <label for="nomeCliente"
+          class="block text-sm font-medium text-gray-300 mb-2">
+          Nome
+        </label>
+
+        <input type="text"
+          id="nomeCliente"
+          placeholder="Seu nome completo"
+          class="w-full p-3 rounded-2xl
+          bg-[#222]
+          border border-white/10
+          text-white
+          placeholder:text-gray-500
+          focus:outline-none
+          focus:ring-2 focus:ring-red-500/30">
       </div>
 
       <!-- Telefone -->
       <div>
-        <label for="telCliente" class="block text-sm font-medium text-gray-700">Telefone (WhatsApp)</label>
-        <input type="tel" id="telCliente" placeholder="(17) 99999-9999" class="w-full p-2 rounded border border-gray-300 focus:ring focus:ring-red-200">
+        <label for="telCliente"
+          class="block text-sm font-medium text-gray-300 mb-2">
+          Telefone (WhatsApp)
+        </label>
+
+        <input type="tel"
+          id="telCliente"
+          placeholder="(17) 99999-9999"
+          class="w-full p-3 rounded-2xl
+          bg-[#222]
+          border border-white/10
+          text-white
+          placeholder:text-gray-500
+          focus:outline-none
+          focus:ring-2 focus:ring-red-500/30">
       </div>
 
       <!-- Endereço -->
       <div id="campoEndereco">
-        <label for="enderecoCliente" class="block text-sm font-medium text-gray-700">Endereço completo</label>
-        <textarea id="enderecoCliente" placeholder="Ex: Rua A, nº 123, casa B, próximo à praça" rows="2" class="w-full p-2 rounded border border-gray-300 focus:ring focus:ring-red-200 resize-none"></textarea>
+        <label for="enderecoCliente"
+          class="block text-sm font-medium text-gray-300 mb-2">
+          Endereço completo
+        </label>
+
+        <textarea id="enderecoCliente"
+          placeholder="Ex: Rua A, nº 123, casa B, próximo à praça"
+          rows="2"
+          class="w-full p-3 rounded-2xl
+          bg-[#222]
+          border border-white/10
+          text-white
+          placeholder:text-gray-500
+          resize-none
+          focus:outline-none
+          focus:ring-2 focus:ring-red-500/30"></textarea>
       </div>
 
       <!-- Pagamento -->
-      <div id="blocoEntrega" class="space-y-2">
-        <label for="formaPagamento" class="block text-sm font-medium text-gray-700">💳 Forma de Pagamento</label>
-        <select id="formaPagamento" class="w-full p-2 rounded border border-gray-300 bg-white text-gray-800 focus:ring focus:ring-red-200">
+      <div id="blocoEntrega" class="space-y-3">
+
+        <label for="formaPagamento"
+          class="block text-sm font-medium text-gray-300">
+          💳 Forma de Pagamento
+        </label>
+
+        <select id="formaPagamento"
+          class="w-full p-3 rounded-2xl
+          bg-[#222]
+          border border-white/10
+          text-white
+          focus:outline-none
+          focus:ring-2 focus:ring-red-500/30">
+
           <option value="">Selecione</option>
           <option value="Dinheiro">Dinheiro</option>
           <option value="Cartão de Crédito">Cartão de Crédito</option>
@@ -501,76 +951,183 @@ if ('serviceWorker' in navigator) {
           <option value="PIX">PIX</option>
         </select>
 
-        <!-- Total com Entrega -->
-        <p class="text-lg font-bold text-green-600 mt-3">
-          Total com entrega: R$ <span id="totalComEntregaPreview">0,00</span>
-        </p>
+        <!-- Total -->
+        <div class="bg-[#222]
+          border border-yellow-500/10
+          rounded-2xl p-4 text-center">
+
+          <p class="text-sm text-gray-400 mb-1">
+            Total com entrega
+          </p>
+
+          <p class="text-2xl font-bold text-yellow-400">
+            R$
+            <span id="totalComEntregaPreview">
+              0,00
+            </span>
+          </p>
+
+        </div>
 
         <!-- Troco -->
         <div class="space-y-2">
-          <label class="inline-flex items-center text-sm text-gray-700">
-            <input type="checkbox" id="precisaTroco" class="mr-2 accent-red-600">
+
+          <label class="inline-flex items-center text-sm text-gray-300">
+            <input type="checkbox"
+              id="precisaTroco"
+              class="mr-2 accent-red-600">
+
             Precisa de troco?
           </label>
-          <input type="number" step="0.01" id="valorTroco" placeholder="Troco para quanto?" class="w-full p-2 rounded border border-gray-300 focus:ring focus:ring-red-200">
+
+          <input type="number"
+            step="0.01"
+            id="valorTroco"
+            placeholder="Troco para quanto?"
+            class="w-full p-3 rounded-2xl
+            bg-[#222]
+            border border-white/10
+            text-white
+            placeholder:text-gray-500
+            focus:outline-none
+            focus:ring-2 focus:ring-red-500/30">
         </div>
+
       </div>
 
-      <!-- Ações -->
-      <div class="flex justify-between gap-4 pt-6">
-        <button onclick="fecharModalEntrega()" class="w-1/2 bg-gray-500 hover:bg-gray-600 text-white py-2 rounded-md font-semibold">
+      <!-- Botões -->
+      <div class="flex justify-between gap-4 pt-4">
+
+        <button onclick="fecharModalEntrega()"
+          class="w-1/2
+          bg-gray-700 hover:bg-gray-600
+          text-white py-3
+          rounded-2xl font-semibold transition">
+
           Cancelar
         </button>
-        <button onclick="confirmarEntrega()" class="w-1/2 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md font-semibold">
+
+        <button onclick="confirmarEntrega()"
+          class="w-1/2
+          bg-gradient-to-r
+          from-red-600
+          to-red-700
+          hover:brightness-110
+          text-white py-3
+          rounded-2xl font-semibold transition shadow-lg">
+
           Confirmar
         </button>
+
       </div>
+
     </div>
   </div>
 </div>
-
 <!-- Modal Adicionais e Observação -->
 <div id="modalObservacao"
-  class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden z-50">
+  class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center hidden z-50">
 
-  <div class="bg-white rounded-xl p-4 w-11/12 max-w-md max-h-[90vh] flex flex-col shadow-xl text-gray-900">
+  <div class="relative
+    bg-[#161616]/95
+    border border-red-800/30
+    rounded-[28px]
+    p-5
+    w-11/12 max-w-md
+    max-h-[90vh]
+    flex flex-col
+    shadow-[0_0_40px_rgba(200,16,46,0.18)]
+    text-white overflow-hidden">
 
-    <h2 class="text-lg font-bold mb-2 text-center">
-      🧾 Personalize sua Pizza
+    <!-- glow -->
+    <div class="absolute top-0 left-1/2 -translate-x-1/2
+      w-[240px] h-[120px]
+      bg-red-600/10 blur-[70px]
+      rounded-full pointer-events-none">
+    </div>
+
+    <!-- título -->
+    <h2 class="relative text-xl font-bold mb-2 text-center">
+      🍕 Personalize sua Pizza
     </h2>
 
+    <!-- nome produto -->
     <p id="modalProdutoNome"
-      class="mb-2 text-center font-semibold text-base"></p>
+      class="mb-3 text-center font-semibold text-lg text-yellow-400">
+    </p>
 
     <!-- LISTA DE ADICIONAIS -->
-    <div class="mb-2">
-      <p class="text-xs font-semibold mb-1 text-gray-700">
+    <div class="mb-3">
+
+      <p class="text-sm font-semibold mb-2 text-gray-300">
         Escolha adicionais:
       </p>
 
       <div id="listaAdicionais"
-        class="max-h-64 overflow-y-auto border border-gray-200 rounded-md p-2 space-y-1 bg-gray-50">
+        class="max-h-64 overflow-y-auto
+        border border-white/10
+        rounded-2xl
+        p-3
+        space-y-2
+        bg-[#222222]">
+
       </div>
+
     </div>
 
     <!-- OBSERVAÇÃO -->
-    <div class="mb-2">
+    <div class="mb-3">
+
+      <label class="block text-sm font-semibold text-gray-300 mb-2">
+        Observação
+      </label>
+
       <textarea id="observacaoInput"
-        class="w-full p-2 text-sm border border-gray-300 rounded resize-none focus:ring focus:ring-red-200"
-        placeholder="Observação (opcional)"
-        rows="2"></textarea>
+        class="w-full p-3 text-sm
+        bg-[#222222]
+        border border-white/10
+        rounded-2xl
+        resize-none
+        text-white
+        placeholder:text-gray-500
+        focus:outline-none
+        focus:ring-2 focus:ring-red-500/30"
+        placeholder="Ex: sem cebola, bem assada, cortar em 8 pedaços..."
+        rows="3"></textarea>
+
     </div>
 
     <!-- BOTÕES -->
-    <div class="flex gap-2 mt-1">
+    <div class="flex gap-3 mt-2">
 
       <button onclick="fecharModalObservacao()"
-        class="w-1/2 bg-gray-500 hover:bg-gray-600 text-white py-2 rounded-md text-sm font-semibold">
+        class="w-1/2
+        bg-gray-700
+        hover:bg-gray-600
+        text-white
+        py-3
+        rounded-2xl
+        text-sm
+        font-semibold
+        transition">
+
         Cancelar
       </button>
 
       <button onclick="confirmarObservacao()"
-        class="w-1/2 bg-green-600 hover:bg-green-700 text-white py-2 rounded-md text-sm font-semibold">
+        class="w-1/2
+        bg-gradient-to-r
+        from-red-600
+        to-red-700
+        hover:brightness-110
+        text-white
+        py-3
+        rounded-2xl
+        text-sm
+        font-semibold
+        transition
+        shadow-lg">
+
         Confirmar
       </button>
 

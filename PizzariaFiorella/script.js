@@ -85,7 +85,7 @@ card.innerHTML = `
   <button 
     onclick="${
       produto.categoria &&
-      produto.categoria.startsWith('esfihas')
+      produto.categoria.startsWith('pizzas')
         ? `abrirModalObservacao(
             '${produto.nome}',
             ${produto.preco},
@@ -421,12 +421,47 @@ window.fecharModalSucesso = function () {
 // ----------------------
 function exibirNotificacao(nome) {
   const notificacao = document.createElement("div");
-  notificacao.className = "fixed bottom-4 right-4 bg-green-600 text-white px-4 py-2 rounded shadow-lg z-50";
-  notificacao.textContent = `${nome} adicionado ao carrinho!`;
-  document.body.appendChild(notificacao);
-  setTimeout(() => notificacao.remove(), 2500);
-}
 
+  notificacao.className = `
+    fixed bottom-4 right-4
+    bg-[#161616]/95
+    border border-red-800/30
+    text-white
+    px-5 py-3
+    rounded-2xl
+    shadow-[0_0_30px_rgba(200,16,46,0.18)]
+    backdrop-blur-sm
+    z-50
+    animate-bounce
+  `;
+
+  notificacao.innerHTML = `
+    <div class="flex items-center gap-3">
+      <span class="text-2xl">🍕</span>
+      <div>
+        <p class="font-semibold text-yellow-400">
+          Adicionado ao carrinho
+        </p>
+        <p class="text-sm text-gray-300">
+          ${nome}
+        </p>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(notificacao);
+
+  setTimeout(() => {
+    notificacao.classList.add(
+      "opacity-0",
+      "translate-y-2",
+      "transition",
+      "duration-300"
+    );
+
+    setTimeout(() => notificacao.remove(), 300);
+  }, 2200);
+}
 // ----------------------
 // PWA
 // ----------------------
@@ -530,10 +565,10 @@ window.abrirModalObservacao = async function(nome, preco, categoria) {
   // definir grupos conforme categoria
   let ordemGrupos = [];
 
-  if (categoria === "esfihas-doces") {
+  if (categoria === "pizzas-doces") {
     ordemGrupos = ["extrasDoces"];
   } 
-  else if (categoria === "esfihas-salgadas") {
+  else if (categoria === "pizzas-salgadas") {
     ordemGrupos = ["extras"];
   }
 
