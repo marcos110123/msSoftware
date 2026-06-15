@@ -140,14 +140,17 @@ onclick='${
 
       container.appendChild(card);
       // Se for marcado como mais vendido, também mostra na seção "mais-vendidas"
-      if (produto.maisVendido) {
-        const maisVendidosSecao = document.getElementById("mais-vendidas");
-        if (maisVendidosSecao) {
-          const maisVendidosContainer =
-            maisVendidosSecao.querySelector(".produtos-grid");
-          if (maisVendidosContainer) {
-            const clone = card.cloneNode(true); // clona o card
-            maisVendidosContainer.appendChild(clone);
+      // Se estiver em promoção, também mostra na seção promoções
+      if (produto.promocao) {
+        const promocoesSecao = document.getElementById("promocoes");
+
+        if (promocoesSecao) {
+          const promocoesContainer =
+            promocoesSecao.querySelector(".produtos-grid");
+
+          if (promocoesContainer) {
+            const clone = card.cloneNode(true);
+            promocoesContainer.appendChild(clone);
           }
         }
       }
