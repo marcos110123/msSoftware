@@ -10,20 +10,20 @@ import {
   query,
   orderBy,
   where,
-getDocs 
+  getDocs,
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
 // ----------------------
 // Firebase Config
 // ----------------------
-  const firebaseConfig = {
-    apiKey: "AIzaSyDoQdr9IOehfDoyeemrTJjrAVurr72re2U",
-    authDomain: "pizzaria-fiorella-a1a98.firebaseapp.com",
-    projectId: "pizzaria-fiorella-a1a98",
-    storageBucket: "pizzaria-fiorella-a1a98.firebasestorage.app",
-    messagingSenderId: "268430312700",
-    appId: "1:268430312700:web:bb300ad881ee1dfc2cc379"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyDoQdr9IOehfDoyeemrTJjrAVurr72re2U",
+  authDomain: "pizzaria-fiorella-a1a98.firebaseapp.com",
+  projectId: "pizzaria-fiorella-a1a98",
+  storageBucket: "pizzaria-fiorella-a1a98.firebasestorage.app",
+  messagingSenderId: "268430312700",
+  appId: "1:268430312700:web:bb300ad881ee1dfc2cc379",
+};
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
@@ -35,7 +35,7 @@ let total = 0;
 let secaoAtiva = null;
 let tipoPedidoSelecionado = null;
 
-const taxaEntregaFixa = 2.00;
+const taxaEntregaFixa = 2.0;
 
 // ----------------------
 // Carregar produtos
@@ -45,8 +45,9 @@ function carregarProdutosDoFirestore() {
   const q = query(ref, orderBy("nome", "asc")); // ordena pelo campo "nome"
 
   onSnapshot(q, (snapshot) => {
-    document.querySelectorAll(".produtos-grid").forEach(grid => grid.innerHTML = "");
-
+    document
+      .querySelectorAll(".produtos-grid")
+      .forEach((grid) => (grid.innerHTML = ""));
 
     snapshot.forEach((docSnap) => {
       const produto = docSnap.data();
@@ -58,12 +59,11 @@ function carregarProdutosDoFirestore() {
       const container = secao.querySelector(".produtos-grid");
       if (!container) return;
 
-   const card = document.createElement("div");
+      const card = document.createElement("div");
 
-card.className =
-  "menu-item bg-gray-800 rounded-lg shadow-lg p-4";
+      card.className = "menu-item bg-gray-800 rounded-lg shadow-lg p-4";
 
-card.innerHTML = `
+      card.innerHTML = `
   <img src="${produto.imagem || ""}" 
        alt="${produto.nome}" 
        class="w-full h-48 object-cover rounded-md shadow-lg" 
@@ -77,26 +77,59 @@ card.innerHTML = `
   <p class="text-gray-300">
     ${produto.descricao || ""}
   </p>
+${
+  produto.categoria?.startsWith("pizzas") ||
+  (produto.categoria === "entradas" && produto["preco P"] && produto["preco G"])
+    ? `
+      <div class="mt-2 text-sm">
 
-  <p class="text-red-500 font-bold mt-2">
-    R$ ${Number(produto.preco).toFixed(2)}
-  </p>
+        <div class="flex gap-3 items-center flex-wrap">
+
+          <span class="bg-red-600/20 text-red-400 px-2 py-1 rounded-lg font-semibold">
+            P: R$ ${Number(produto["preco P"] || 0)
+              .toFixed(2)
+              .replace(".", ",")}
+          </span>
+
+          <span class="bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded-lg font-semibold">
+            G: R$ ${Number(produto["preco G"] || 0)
+              .toFixed(2)
+              .replace(".", ",")}
+          </span>
+
+        </div>
+
+      </div>
+    `
+    : `
+      <p class="text-red-500 font-bold mt-2">
+        R$ ${Number(produto.preco || 0)
+          .toFixed(2)
+          .replace(".", ",")}
+      </p>
+    `
+}
 
   <button 
-    onclick="${
-      produto.categoria &&
-      produto.categoria.startsWith('pizzas')
-        ? `abrirModalObservacao(
-            '${produto.nome}',
-            ${produto.preco},
-            '${produto.categoria}'
-          )`
-        : `adicionarAoCarrinho(
-            '${produto.nome}',
-            ${produto.preco},
-            ''
-          )`
-    }"
+onclick='${
+        produto.categoria === "entradas" &&
+        produto["preco P"] &&
+        produto["preco G"]
+          ? `abrirModalEntrada(${JSON.stringify(produto).replace(
+              /'/g,
+              "&apos;",
+            )})`
+          : produto.categoria?.startsWith("pizzas")
+            ? `abrirModalPizza(${JSON.stringify(produto).replace(
+                /'/g,
+                "&apos;",
+              )})`
+            : `adicionarAoCarrinho(
+          "${produto.nome}",
+          ${produto.preco || 0},
+          ""
+        )`
+      }'
 
     class="mt-4 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
 
@@ -105,19 +138,19 @@ card.innerHTML = `
   </button>
 `;
 
-
       container.appendChild(card);
       // Se for marcado como mais vendido, também mostra na seção "mais-vendidas"
-if (produto.maisVendido) {
-  const maisVendidosSecao = document.getElementById("mais-vendidas");
-  if (maisVendidosSecao) {
-    const maisVendidosContainer = maisVendidosSecao.querySelector(".produtos-grid");
-    if (maisVendidosContainer) {
-      const clone = card.cloneNode(true); // clona o card
-      maisVendidosContainer.appendChild(clone);
-    }
-  }
-}
+      if (produto.maisVendido) {
+        const maisVendidosSecao = document.getElementById("mais-vendidas");
+        if (maisVendidosSecao) {
+          const maisVendidosContainer =
+            maisVendidosSecao.querySelector(".produtos-grid");
+          if (maisVendidosContainer) {
+            const clone = card.cloneNode(true); // clona o card
+            maisVendidosContainer.appendChild(clone);
+          }
+        }
+      }
     });
   });
 }
@@ -147,7 +180,7 @@ function mostrarSecao(id) {
 // ----------------------
 function adicionarAoCarrinho(nome, preco, observacao = "") {
   const itemExistente = carrinho.find(
-    (item) => item.nome === nome && item.observacao === observacao
+    (item) => item.nome === nome && item.observacao === observacao,
   );
 
   if (itemExistente) {
@@ -161,8 +194,6 @@ function adicionarAoCarrinho(nome, preco, observacao = "") {
   atualizarCarrinho();
   exibirNotificacao(nome);
 }
-
-
 
 function removerDoCarrinho(index) {
   const item = carrinho[index];
@@ -180,7 +211,8 @@ function atualizarCarrinho() {
   carrinhoItens.innerHTML = "";
 
   if (carrinho.length === 0) {
-    carrinhoItens.innerHTML = '<p class="text-gray-300">Nenhum item no carrinho.</p>';
+    carrinhoItens.innerHTML =
+      '<p class="text-gray-300">Nenhum item no carrinho.</p>';
   } else {
     carrinho.forEach((item, index) => {
       const div = document.createElement("div");
@@ -204,11 +236,14 @@ function atualizarCarrinho() {
   }
 
   total = carrinho.reduce((sum, item) => sum + item.subtotal, 0);
-const taxaEntrega = tipoPedidoSelecionado === "entrega" ? taxaEntregaFixa : 0;
+  const taxaEntrega = tipoPedidoSelecionado === "entrega" ? taxaEntregaFixa : 0;
 
-document.getElementById("total").textContent = total.toFixed(2);
-document.getElementById("totalComEntregaPreview").textContent =
-  (total + taxaEntrega).toFixed(2).replace(".", ",");
+  document.getElementById("total").textContent = total.toFixed(2);
+  document.getElementById("totalComEntregaPreview").textContent = (
+    total + taxaEntrega
+  )
+    .toFixed(2)
+    .replace(".", ",");
 
   localStorage.setItem("carrinho", JSON.stringify(carrinho));
 }
@@ -223,27 +258,29 @@ function fecharCarrinho() {
 // ----------------------
 // Fluxo de Pedido
 // ----------------------
-document.getElementById("orderForm").addEventListener("submit", async function (event) {
-  event.preventDefault();
+document
+  .getElementById("orderForm")
+  .addEventListener("submit", async function (event) {
+    event.preventDefault();
 
-  const estadoRef = doc(db, "config", "estadoPedidos");
-  const snap = await getDoc(estadoRef);
-  const recebendo = snap.exists() ? snap.data().recebendo : true;
+    const estadoRef = doc(db, "config", "estadoPedidos");
+    const snap = await getDoc(estadoRef);
+    const recebendo = snap.exists() ? snap.data().recebendo : true;
 
-  if (!recebendo) {
-    mostrarAlerta("⚠️ O sistema está temporariamente fechado para pedidos.");
-    return;
-  }
+    if (!recebendo) {
+      mostrarAlerta("⚠️ O sistema está temporariamente fechado para pedidos.");
+      return;
+    }
 
-  if (carrinho.length === 0) {
-    mostrarAlerta("Seu carrinho está vazio!");
-    return;
-  }
+    if (carrinho.length === 0) {
+      mostrarAlerta("Seu carrinho está vazio!");
+      return;
+    }
 
-  document.getElementById("modalTipoPedido").classList.remove("hidden");
-});
+    document.getElementById("modalTipoPedido").classList.remove("hidden");
+  });
 
-window.selecionarTipoPedido = function(tipo) {
+window.selecionarTipoPedido = function (tipo) {
   tipoPedidoSelecionado = tipo;
 
   if (tipo === "retirada") {
@@ -277,11 +314,10 @@ window.selecionarTipoPedido = function(tipo) {
     blocoEntrega?.classList.remove("hidden");
   }
 
-   atualizarCarrinho();
+  atualizarCarrinho();
 
   document.getElementById("modalDadosEntrega")?.classList.remove("hidden");
 };
-
 
 window.fecharModalEntrega = function () {
   document.getElementById("modalDadosEntrega").classList.add("hidden");
@@ -296,7 +332,11 @@ window.confirmarDadosEntrega = function () {
   const endereco = document.getElementById("enderecoCliente").value.trim();
   const formaPagamento = document.getElementById("formaPagamento").value;
 
- if (!nome || !tel || (tipoPedidoSelecionado === "entrega" && (!endereco || !formaPagamento))) {
+  if (
+    !nome ||
+    !tel ||
+    (tipoPedidoSelecionado === "entrega" && (!endereco || !formaPagamento))
+  ) {
     mostrarAlerta("Preencha todos os dados obrigatórios.");
     return;
   }
@@ -305,24 +345,25 @@ window.confirmarDadosEntrega = function () {
   document.getElementById("confNomeCliente").textContent = nome;
   document.getElementById("confTelefoneCliente").textContent = tel;
   document.getElementById("confEnderecoCliente").textContent = endereco;
-  document.getElementById("linhaEndereco").style.display = tipoPedidoSelecionado === "entrega" ? "block" : "none";
+  document.getElementById("linhaEndereco").style.display =
+    tipoPedidoSelecionado === "entrega" ? "block" : "none";
 
   const listaItens = document.getElementById("listaItensConfirmacao");
   listaItens.innerHTML = "";
- carrinho.forEach(item => {
-  const li = document.createElement("li");
-  li.textContent = `${item.nome} x${item.quantidade} - R$ ${item.subtotal.toFixed(2)}`;
-  if (item.observacao) {
-    li.innerHTML += `<br><small>Obs: ${item.observacao}</small>`;
-  }
-  listaItens.appendChild(li);
-});
+  carrinho.forEach((item) => {
+    const li = document.createElement("li");
+    li.textContent = `${item.nome} x${item.quantidade} - R$ ${item.subtotal.toFixed(2)}`;
+    if (item.observacao) {
+      li.innerHTML += `<br><small>Obs: ${item.observacao}</small>`;
+    }
+    listaItens.appendChild(li);
+  });
 
+  const taxa = tipoPedidoSelecionado === "entrega" ? taxaEntregaFixa : 0;
+  const valorFinal = total + taxa;
 
- const taxa = tipoPedidoSelecionado === "entrega" ? taxaEntregaFixa : 0;
-const valorFinal = total + taxa;
-
-  document.getElementById("valorTotalConfirmacao").textContent = `Total: R$ ${valorFinal.toFixed(2)}`;
+  document.getElementById("valorTotalConfirmacao").textContent =
+    `Total: R$ ${valorFinal.toFixed(2)}`;
 
   document.getElementById("modalDadosEntrega").classList.add("hidden");
   document.getElementById("modalConfirmacao").classList.remove("hidden");
@@ -330,87 +371,92 @@ const valorFinal = total + taxa;
 
 // ----------------------
 // Envio Pedido (Firestore + WhatsApp)
-document.getElementById("btnConfirmarPedido").addEventListener("click", async () => {
-  const nome = document.getElementById("confNomeCliente").textContent;
-  const tel = document.getElementById("confTelefoneCliente").textContent;
-  const endereco = document.getElementById("confEnderecoCliente").textContent;
-  const formaPagamento = document.getElementById("formaPagamento").value;
+document
+  .getElementById("btnConfirmarPedido")
+  .addEventListener("click", async () => {
+    const nome = document.getElementById("confNomeCliente").textContent;
+    const tel = document.getElementById("confTelefoneCliente").textContent;
+    const endereco = document.getElementById("confEnderecoCliente").textContent;
+    const formaPagamento = document.getElementById("formaPagamento").value;
 
-  const precisaTroco = document.getElementById("precisaTroco").checked;
-  const valorTroco = precisaTroco ? parseFloat(document.getElementById("valorTroco").value || 0) : null;
+    const precisaTroco = document.getElementById("precisaTroco").checked;
+    const valorTroco = precisaTroco
+      ? parseFloat(document.getElementById("valorTroco").value || 0)
+      : null;
 
-  const taxa = tipoPedidoSelecionado === "entrega" ? taxaEntregaFixa : 0;
-  const totalProdutos = carrinho.reduce((sum, item) => sum + item.subtotal, 0);
-  const valorFinal = totalProdutos + taxa;
+    const taxa = tipoPedidoSelecionado === "entrega" ? taxaEntregaFixa : 0;
+    const totalProdutos = carrinho.reduce(
+      (sum, item) => sum + item.subtotal,
+      0,
+    );
+    const valorFinal = totalProdutos + taxa;
 
-  try {
-    await addDoc(collection(db, "orders"), {
-      items: carrinho,
-      totalProdutos: totalProdutos.toFixed(2),
-      taxaEntrega: taxa,
-      totalFinal: valorFinal.toFixed(2),
-      precisaTroco: precisaTroco,
-      valorTroco: valorTroco,
-      status: "pendente",
-      createdAt: serverTimestamp(),
-      formaPagamento,
-      nomeCliente: nome,
-      telefoneCliente: tel,
-      enderecoCliente: tipoPedidoSelecionado === "entrega" ? endereco : "",
-      tipo: tipoPedidoSelecionado
-    });
+    try {
+      await addDoc(collection(db, "orders"), {
+        items: carrinho,
+        totalProdutos: totalProdutos.toFixed(2),
+        taxaEntrega: taxa,
+        totalFinal: valorFinal.toFixed(2),
+        precisaTroco: precisaTroco,
+        valorTroco: valorTroco,
+        status: "pendente",
+        createdAt: serverTimestamp(),
+        formaPagamento,
+        nomeCliente: nome,
+        telefoneCliente: tel,
+        enderecoCliente: tipoPedidoSelecionado === "entrega" ? endereco : "",
+        tipo: tipoPedidoSelecionado,
+      });
 
- // --- WhatsApp ---
-let mensagem = `📦 *Novo Pedido* (${tipoPedidoSelecionado.toUpperCase()})\n\n👤 Cliente: ${nome}\n📞 Tel: ${tel}`;
-if (tipoPedidoSelecionado === "entrega") {
-  mensagem += `\n🏠 Endereço: ${endereco}`;
-  mensagem += `\n🚚 Taxa de entrega: R$ ${taxa.toFixed(2)}`;
-}
+      // --- WhatsApp ---
+      let mensagem = `📦 *Novo Pedido* (${tipoPedidoSelecionado.toUpperCase()})\n\n👤 Cliente: ${nome}\n📞 Tel: ${tel}`;
+      if (tipoPedidoSelecionado === "entrega") {
+        mensagem += `\n🏠 Endereço: ${endereco}`;
+        mensagem += `\n🚚 Taxa de entrega: R$ ${taxa.toFixed(2)}`;
+      }
 
-mensagem += `\n\n🛒 *Itens:*\n`;
-carrinho.forEach(item => {
-  mensagem += `- ${item.nome} x${item.quantidade} - R$ ${item.subtotal.toFixed(2)}`;
-  if (item.observacao) {
-    mensagem += ` (Obs: ${item.observacao})`;
-  }
-  mensagem += `\n`;
-});
+      mensagem += `\n\n🛒 *Itens:*\n`;
+      carrinho.forEach((item) => {
+        mensagem += `- ${item.nome} x${item.quantidade} - R$ ${item.subtotal.toFixed(2)}`;
+        if (item.observacao) {
+          mensagem += ` (Obs: ${item.observacao})`;
+        }
+        mensagem += `\n`;
+      });
 
-mensagem += `\n💳 Pagamento: ${formaPagamento}\n💰 Total: R$ ${valorFinal.toFixed(2)}`;
+      mensagem += `\n💳 Pagamento: ${formaPagamento}\n💰 Total: R$ ${valorFinal.toFixed(2)}`;
 
-if (precisaTroco && valorTroco) {
-  const troco = (valorTroco - valorFinal).toFixed(2);
-  mensagem += `\n💵 Troco para: R$ ${valorTroco.toFixed(2)} (Troco: R$ ${troco})`;
-}
+      if (precisaTroco && valorTroco) {
+        const troco = (valorTroco - valorFinal).toFixed(2);
+        mensagem += `\n💵 Troco para: R$ ${valorTroco.toFixed(2)} (Troco: R$ ${troco})`;
+      }
 
-// 👇 Agradecimento no final
-mensagem += `\n\n🙏 Obrigado pela preferência!\n🍴 *Pizzaria Fiorella*`;
+      // 👇 Agradecimento no final
+      mensagem += `\n\n🙏 Obrigado pela preferência!\n🍴 *Pizzaria Fiorella*`;
 
+      const telefoneLoja = "5517992362238"; // 👈 coloque o número da loja
+      const url = `https://wa.me/${telefoneLoja}?text=${encodeURIComponent(mensagem)}`;
+      window.open(url, "_blank");
 
-    const telefoneLoja = "5517992362238"; // 👈 coloque o número da loja
-    const url = `https://wa.me/${telefoneLoja}?text=${encodeURIComponent(mensagem)}`;
-    window.open(url, "_blank");
+      // Resetar carrinho
+      carrinho = [];
+      total = 0;
+      atualizarCarrinho();
 
-    // Resetar carrinho
-    carrinho = [];
-    total = 0;
-    atualizarCarrinho();
+      // Fechar modal do carrinho também
+      fecharCarrinho();
 
-        // Fechar modal do carrinho também
-    fecharCarrinho();
+      // Limpar todos os campos do modal
+      document.getElementById("formaPagamento").value = "";
+      document.getElementById("precisaTroco").checked = false;
+      document.getElementById("valorTroco").value = "";
 
-    // Limpar todos os campos do modal
-document.getElementById("formaPagamento").value = "";
-document.getElementById("precisaTroco").checked = false;
-document.getElementById("valorTroco").value = "";
-
-
-    document.getElementById("modalConfirmacao").classList.add("hidden");
-    document.getElementById("modalSucessoPedido").classList.remove("hidden");
-  } catch (e) {
-    mostrarAlerta("Erro ao enviar pedido. Tente novamente.");
-  }
-});
+      document.getElementById("modalConfirmacao").classList.add("hidden");
+      document.getElementById("modalSucessoPedido").classList.remove("hidden");
+    } catch (e) {
+      mostrarAlerta("Erro ao enviar pedido. Tente novamente.");
+    }
+  });
 
 window.fecharModalSucesso = function () {
   document.getElementById("modalSucessoPedido").classList.add("hidden");
@@ -456,7 +502,7 @@ function exibirNotificacao(nome) {
       "opacity-0",
       "translate-y-2",
       "transition",
-      "duration-300"
+      "duration-300",
     );
 
     setTimeout(() => notificacao.remove(), 300);
@@ -505,14 +551,15 @@ window.fecharModalAlerta = function () {
   document.getElementById("modalAlerta").classList.add("hidden");
 };
 
+document
+  .getElementById("btnCancelarConfirmacao")
+  .addEventListener("click", () => {
+    // Fecha o modal de confirmação
+    document.getElementById("modalConfirmacao").classList.add("hidden");
 
-document.getElementById("btnCancelarConfirmacao").addEventListener("click", () => {
-  // Fecha o modal de confirmação
-  document.getElementById("modalConfirmacao").classList.add("hidden");
-
-  // Reabre o modal de dados para edição
-  document.getElementById("modalDadosEntrega").classList.remove("hidden");
-});
+    // Reabre o modal de dados para edição
+    document.getElementById("modalDadosEntrega").classList.remove("hidden");
+  });
 
 // ----------------------
 // Expor globalmente
@@ -524,149 +571,368 @@ window.fecharCarrinho = fecharCarrinho;
 window.mostrarSecao = mostrarSecao;
 window.confirmarDadosEntrega = confirmarDadosEntrega;
 window.confirmarEntrega = confirmarDadosEntrega;
-let produtoSelecionado = null;
-let precoSelecionado = 0;
 
-window.abrirModalObservacao = async function(nome, preco, categoria) {
+let pizzaSelecionada = null;
+let saboresPizza = [];
 
-  produtoSelecionado = nome;
-  precoSelecionado = preco;
+window.abrirModalPizza = async function (produto) {
+  pizzaSelecionada = produto;
 
-  document.getElementById("modalProdutoNome").textContent = nome;
-  document.getElementById("observacaoInput").value = "";
+  document.getElementById("pizzaNome").textContent = produto.nome;
 
-  const container = document.getElementById("listaAdicionais");
+  document.getElementById("precoP").textContent =
+    `R$ ${produto["preco P"].toFixed(2)}`;
+
+  document.getElementById("precoG").textContent =
+    `R$ ${produto["preco G"].toFixed(2)}`;
+
+  document.getElementById("modalPizza").classList.remove("hidden");
+
+  document.getElementById("obsPizza").value = "";
+
+  saboresPizza = [produto];
+
+  carregarAdicionaisPizza(produto.categoria);
+};
+
+window.fecharModalPizza = function () {
+  // fecha modal
+  document.getElementById("modalPizza").classList.add("hidden");
+
+  // esconde seções
+  document.getElementById("segundoSaborBox").classList.add("hidden");
+
+  document.getElementById("tipoPizzaBox").classList.add("hidden");
+
+  // limpa tamanho
+  document.querySelectorAll('input[name="tamanhoPizza"]').forEach((input) => {
+    input.checked = false;
+  });
+
+  // limpa tipo pizza
+  document.querySelectorAll('input[name="tipoPizza"]').forEach((input) => {
+    input.checked = false;
+  });
+
+  // volta inteira como padrão
+  const inteira = document.querySelector(
+    'input[name="tipoPizza"][value="inteira"]',
+  );
+
+  if (inteira) {
+    inteira.checked = true;
+  }
+
+  // limpa segundo sabor
+  document.querySelectorAll('input[name="segundoSabor"]').forEach((input) => {
+    input.checked = false;
+  });
+
+  // limpa lista carregada
+  document.getElementById("listaSabores").innerHTML = "";
+
+  // limpa adicionais
+  document.querySelectorAll('input[name="adicionalPizza"]').forEach((input) => {
+    input.checked = false;
+  });
+
+  // limpa observação
+  document.getElementById("obsPizza").value = "";
+
+  // limpa referência atual
+  pizzaSelecionada = null;
+};
+
+document.addEventListener("change", async (e) => {
+  // tamanho
+  if (e.target.name === "tamanhoPizza") {
+    const tamanho = e.target.value;
+
+    if (tamanho === "G") {
+      document.getElementById("tipoPizzaBox").classList.remove("hidden");
+    } else {
+      document.getElementById("tipoPizzaBox").classList.add("hidden");
+
+      document.getElementById("segundoSaborBox").classList.add("hidden");
+    }
+  }
+
+  // tipo pizza
+  if (e.target.name === "tipoPizza") {
+    const tipo = e.target.value;
+
+    if (tipo === "meio") {
+      const lista = document.getElementById("listaSabores");
+
+      lista.innerHTML = "Carregando...";
+
+      document.getElementById("segundoSaborBox").classList.remove("hidden");
+
+      const q = query(
+        collection(db, "produtos"),
+        where("status", "==", "ativo"),
+      );
+
+      const snap = await getDocs(q);
+
+      lista.innerHTML = "";
+
+      snap.forEach((docSnap) => {
+        const pizza = docSnap.data();
+
+        // só categorias de pizza
+        if (!pizza.categoria?.startsWith("pizzas")) return;
+
+        // remove a própria pizza
+        if (pizza.nome === pizzaSelecionada.nome) return;
+
+        lista.innerHTML += `
+    <label class="flex items-center bg-[#222] p-3 rounded-xl cursor-pointer">
+
+      <input
+        type="radio"
+        name="segundoSabor"
+        value="${pizza.nome}"
+        class="mr-2">
+
+      ${pizza.nome}
+
+    </label>
+  `;
+      });
+    } else {
+      document.getElementById("segundoSaborBox").classList.add("hidden");
+    }
+  }
+});
+
+async function carregarAdicionaisPizza() {
+  const container = document.getElementById("listaAdicionaisPizza");
+
   container.innerHTML = "Carregando adicionais...";
 
   const q = query(
     collection(db, "opcoesLanche"),
-    where("status", "==", "ativo")
+    where("grupo", "==", "extras"),
+    where("status", "==", "ativo"),
   );
 
-  const snapshot = await getDocs(q);
+  const snap = await getDocs(q);
+
+  let adicionais = [];
+
+  snap.forEach((docSnap) => {
+    adicionais.push(docSnap.data());
+  });
+
+  // ordenação
+  adicionais.sort((a, b) => {
+    const aBorda = a.nome.toLowerCase().includes("borda");
+
+    const bBorda = b.nome.toLowerCase().includes("borda");
+
+    // bordas primeiro
+    if (aBorda && !bBorda) return -1;
+    if (!aBorda && bBorda) return 1;
+
+    // depois ordem alfabética
+    return a.nome.localeCompare(b.nome, "pt-BR");
+  });
 
   container.innerHTML = "";
 
-  // organizar por grupo
-  const grupos = {};
+  adicionais.forEach((item) => {
+    container.innerHTML += `
+      <label class="flex items-center justify-between bg-[#2a2a2a] p-3 rounded-xl cursor-pointer hover:bg-[#333] transition">
 
-  snapshot.forEach((docSnap) => {
+        <div class="flex items-center">
 
-    const item = docSnap.data();
+          <input
+            type="checkbox"
+            name="adicionalPizza"
+            value="${item.nome}|${item.valor}"
+            class="mr-3 accent-red-600">
 
-    if (!grupos[item.grupo]) {
-      grupos[item.grupo] = [];
+          ${item.nome}
+
+        </div>
+
+        <span class="text-yellow-400 font-semibold">
+          +R$ ${parseFloat(item.valor).toFixed(2).replace(".", ",")}
+        </span>
+
+      </label>
+    `;
+  });
+}
+window.confirmarPizza = async function () {
+  const tamanho = document.querySelector('input[name="tamanhoPizza"]:checked');
+
+  if (!tamanho) {
+    mostrarAlerta("Escolha um tamanho.");
+    return;
+  }
+
+  const tamanhoSelecionado = tamanho.value;
+
+  let precoFinal =
+    tamanhoSelecionado === "P"
+      ? parseFloat(pizzaSelecionada["preco P"])
+      : parseFloat(pizzaSelecionada["preco G"]);
+
+  let nomeFinal = `🍕 Pizza ${tamanhoSelecionado}`;
+
+  // -------------------------
+  // PIZZA GRANDE
+  // -------------------------
+  if (tamanhoSelecionado === "G") {
+    const tipo = document.querySelector(
+      'input[name="tipoPizza"]:checked',
+    )?.value;
+
+    // -------------------------
+    // MEIO A MEIO
+    // -------------------------
+    if (tipo === "meio") {
+      const sabor2Input = document.querySelector(
+        'input[name="segundoSabor"]:checked',
+      );
+
+      if (!sabor2Input) {
+        mostrarAlerta("Escolha o 2º sabor.");
+        return;
+      }
+
+      // busca o segundo sabor
+      const q = query(
+        collection(db, "produtos"),
+        where("nome", "==", sabor2Input.value),
+      );
+
+      const snap = await getDocs(q);
+
+      if (snap.empty) {
+        mostrarAlerta("Erro ao localizar sabor.");
+        return;
+      }
+
+      const pizza2 = snap.docs[0].data();
+
+      const preco1 = parseFloat(pizzaSelecionada["preco G"]);
+
+      const preco2 = parseFloat(pizza2["preco G"]);
+
+      // média
+      let media = (preco1 + preco2) / 2;
+
+      // arredonda para .99
+      precoFinal = Math.floor(media) + 0.99;
+
+      nomeFinal += ` 
+1/2 ${pizzaSelecionada.nome}
+1/2 ${pizza2.nome}`;
     }
 
-    grupos[item.grupo].push(item);
-
-  });
-
-  // definir grupos conforme categoria
-  let ordemGrupos = [];
-
-  if (categoria === "pizzas-doces") {
-    ordemGrupos = ["extrasDoces"];
-  } 
-  else if (categoria === "pizzas-salgadas") {
-    ordemGrupos = ["extras"];
+    // -------------------------
+    // INTEIRA
+    // -------------------------
+    else {
+      nomeFinal += ` - ${pizzaSelecionada.nome}`;
+    }
   }
 
-  // criar grupos na tela
-  ordemGrupos.forEach((grupo) => {
+  // -------------------------
+  // PIZZA PEQUENA
+  // -------------------------
+  else {
+    nomeFinal += ` - ${pizzaSelecionada.nome}`;
+  }
 
-    if (!grupos[grupo]) return;
-
-    const titulo = document.createElement("p");
-
-    titulo.textContent =
-      grupo === "extrasDoces"
-        ? "EXTRAS DOCES"
-        : "EXTRAS";
-
-    titulo.className =
-      "font-bold text-sm mt-3 mb-1 text-gray-700";
-
-    container.appendChild(titulo);
-
-    grupos[grupo].forEach((item) => {
-
-      const label = document.createElement("label");
-
-      label.className =
-        "flex items-center justify-between py-1 text-sm text-gray-800 cursor-pointer";
-
-      const esquerda = document.createElement("div");
-      esquerda.className = "flex items-center gap-2";
-
-      const checkbox = document.createElement("input");
-      checkbox.type = "checkbox";
-      checkbox.name = "adicional";
-      checkbox.value = `${item.nome}|${item.valor}`;
-      checkbox.className = "accent-red-500";
-
-      const texto = document.createElement("span");
-      texto.textContent = item.nome;
-
-      esquerda.appendChild(checkbox);
-      esquerda.appendChild(texto);
-
-      const preco = document.createElement("span");
-      preco.textContent =
-        `+ R$ ${parseFloat(item.valor).toFixed(2)}`;
-
-      preco.className = "text-gray-600 text-xs";
-
-      label.appendChild(esquerda);
-      label.appendChild(preco);
-
-      container.appendChild(label);
-
-    });
-
-  });
-
-  document
-    .getElementById("modalObservacao")
-    .classList.remove("hidden");
-
-};
-
-window.fecharModalObservacao = function() {
-  document
-    .getElementById("modalObservacao")
-    .classList.add("hidden");
-};
-
-window.confirmarObservacao = function() {
-
-  const obs = document.getElementById("observacaoInput").value.trim();
-
-  const selecionados = document.querySelectorAll(
-    'input[name="adicional"]:checked'
-  );
-
-  let precoFinal = precoSelecionado;
+  // -------------------------
+  // ADICIONAIS
+  // -------------------------
   const adicionais = [];
 
-  selecionados.forEach((item) => {
+  document
+    .querySelectorAll('input[name="adicionalPizza"]:checked')
+    .forEach((item) => {
+      const [nome, valor] = item.value.split("|");
 
-    const [nome, valor] = item.value.split("|");
+      adicionais.push(nome);
 
-    adicionais.push(nome);
-    precoFinal += parseFloat(valor);
+      precoFinal += parseFloat(valor);
+    });
 
-  });
-
-  let nomeFinal = produtoSelecionado;
-
-  if (adicionais.length > 0) {
-    nomeFinal += ` + (${adicionais.join(", ")})`;
+  if (adicionais.length) {
+    nomeFinal += `\n+ ${adicionais.join(", ")}`;
   }
+
+  // -------------------------
+  // OBSERVAÇÃO
+  // -------------------------
+  const obs = document.getElementById("obsPizza").value.trim();
 
   adicionarAoCarrinho(nomeFinal, precoFinal, obs);
 
-  fecharModalObservacao();
-
+  fecharModalPizza();
 };
 
+let entradaSelecionada = null;
+
+window.abrirModalEntrada = function (produto) {
+  entradaSelecionada = produto;
+
+  document.getElementById("entradaNome").textContent = produto.nome;
+
+  document.getElementById("entradaPrecoP").textContent = `R$ ${produto[
+    "preco P"
+  ]
+    .toFixed(2)
+    .replace(".", ",")}`;
+
+  document.getElementById("entradaPrecoG").textContent = `R$ ${produto[
+    "preco G"
+  ]
+    .toFixed(2)
+    .replace(".", ",")}`;
+
+  document.getElementById("modalEntrada").classList.remove("hidden");
+};
+
+window.fecharModalEntrada = function () {
+  document.getElementById("modalEntrada").classList.add("hidden");
+
+  document.querySelectorAll('input[name="tamanhoEntrada"]').forEach((i) => {
+    i.checked = false;
+  });
+
+  document.getElementById("obsEntrada").value = "";
+
+  entradaSelecionada = null;
+};
+
+window.confirmarEntrada = function () {
+  const tamanho = document.querySelector(
+    'input[name="tamanhoEntrada"]:checked',
+  );
+
+  if (!tamanho) {
+    alert("Escolha um tamanho.");
+    return;
+  }
+
+  const tamanhoSelecionado = tamanho.value;
+
+  const preco =
+    tamanhoSelecionado === "P"
+      ? entradaSelecionada["preco P"]
+      : entradaSelecionada["preco G"];
+
+  const nome = `${entradaSelecionada.nome} ${tamanhoSelecionado}`;
+
+  const obs = document.getElementById("obsEntrada").value.trim();
+
+  adicionarAoCarrinho(nome, preco, obs);
+
+  fecharModalEntrada();
+};

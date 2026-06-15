@@ -1054,117 +1054,230 @@ if ('serviceWorker' in navigator) {
     </div>
   </div>
 </div>
-<!-- Modal Adicionais e Observação -->
-<div id="modalObservacao"
-  class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center hidden z-50">
 
-  <div class="relative
-    bg-[#161616]/95
-    border border-red-800/30
-    rounded-[28px]
-    p-5
-    w-11/12 max-w-md
-    max-h-[90vh]
-    flex flex-col
-    shadow-[0_0_40px_rgba(200,16,46,0.18)]
-    text-white overflow-hidden">
+<!-- Modal Pizza -->
+<div id="modalPizza"
+class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden z-50 flex items-center justify-center">
 
-    <!-- glow -->
-    <div class="absolute top-0 left-1/2 -translate-x-1/2
-      w-[240px] h-[120px]
-      bg-red-600/10 blur-[70px]
-      rounded-full pointer-events-none">
-    </div>
+<div class="bg-[#161616]/95 border border-red-800/30 rounded-[28px]
+w-11/12 max-w-lg p-5 text-white max-h-[90vh] overflow-y-auto">
 
-    <!-- título -->
-    <h2 class="relative text-xl font-bold mb-2 text-center">
-      🍕 Personalize sua Pizza
+<h2 class="text-2xl font-bold text-center mb-2">
+🍕 Monte sua Pizza
+</h2>
+
+<p id="pizzaNome"
+class="text-center text-yellow-400 font-semibold mb-4">
+</p>
+
+<!-- TAMANHO -->
+<div class="mb-5">
+
+<p class="font-semibold mb-2">
+Escolha o tamanho
+</p>
+
+<div class="space-y-2">
+
+<label class="flex items-center justify-between bg-[#222] p-3 rounded-xl cursor-pointer">
+
+<div>
+<input type="radio"
+name="tamanhoPizza"
+value="P"
+class="mr-2">
+
+Pequena
+</div>
+
+<span id="precoP"></span>
+
+</label>
+
+<label class="flex items-center justify-between bg-[#222] p-3 rounded-xl cursor-pointer">
+
+<div>
+<input type="radio"
+name="tamanhoPizza"
+value="G"
+class="mr-2">
+
+Grande
+</div>
+
+<span id="precoG"></span>
+
+</label>
+
+</div>
+</div>
+
+<!-- TIPO -->
+<div id="tipoPizzaBox" class="hidden mb-5">
+
+<p class="font-semibold mb-2">
+Como deseja?
+</p>
+
+<div class="space-y-2">
+
+<label class="flex items-center bg-[#222] p-3 rounded-xl cursor-pointer">
+<input type="radio" name="tipoPizza" value="inteira" checked class="mr-2">
+Pizza inteira
+</label>
+
+<label class="flex items-center bg-[#222] p-3 rounded-xl cursor-pointer">
+<input type="radio" name="tipoPizza" value="meio" class="mr-2">
+Meio a meio
+</label>
+
+</div>
+
+</div>
+
+<!-- SEGUNDO SABOR -->
+<div id="segundoSaborBox" class="hidden mb-5">
+
+<p class="font-semibold mb-2">
+Escolha o 2º sabor
+</p>
+
+<div id="listaSabores"
+class="space-y-2 max-h-56 overflow-y-auto">
+</div>
+
+</div>
+
+<!-- ADICIONAIS -->
+<div class="mb-5">
+
+<p class="font-semibold mb-2">
+Adicionais
+</p>
+
+<div id="listaAdicionaisPizza"
+class="space-y-2 max-h-52 overflow-y-auto bg-[#222] p-3 rounded-xl">
+</div>
+
+</div>
+
+<!-- OBS -->
+<div class="mb-5">
+
+<label class="block mb-2 font-semibold">
+Observação
+</label>
+
+<textarea id="obsPizza"
+class="w-full bg-[#222] rounded-xl p-3 resize-none"
+placeholder="Ex: bem assada..."
+rows="3"></textarea>
+
+</div>
+
+<div class="flex gap-3">
+
+<button onclick="fecharModalPizza()"
+class="w-1/2 bg-gray-700 py-3 rounded-xl">
+Cancelar
+</button>
+
+<button onclick="confirmarPizza()"
+class="w-1/2 bg-red-600 py-3 rounded-xl font-bold">
+Adicionar
+</button>
+
+</div>
+
+</div>
+</div>
+
+
+<!-- Modal Entrada -->
+<div id="modalEntrada"
+class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center">
+
+  <div class="bg-[#161616] rounded-[28px]
+  w-11/12 max-w-md p-5 text-white">
+
+    <h2 class="text-2xl font-bold text-center mb-2">
+      🍽 Escolha o tamanho
     </h2>
 
-    <!-- nome produto -->
-    <p id="modalProdutoNome"
-      class="mb-3 text-center font-semibold text-lg text-yellow-400">
+    <p id="entradaNome"
+    class="text-center text-yellow-400 mb-5">
     </p>
 
-    <!-- LISTA DE ADICIONAIS -->
-    <div class="mb-3">
+    <div class="space-y-3">
 
-      <p class="text-sm font-semibold mb-2 text-gray-300">
-        Escolha adicionais:
-      </p>
+      <label class="flex items-center justify-between bg-[#222] p-4 rounded-xl cursor-pointer">
 
-      <div id="listaAdicionais"
-        class="max-h-64 overflow-y-auto
-        border border-white/10
-        rounded-2xl
-        p-3
-        space-y-2
-        bg-[#222222]">
+        <div>
+          <input
+            type="radio"
+            name="tamanhoEntrada"
+            value="P"
+            class="mr-2">
 
-      </div>
+          Pequena
+        </div>
 
-    </div>
+        <span id="entradaPrecoP"></span>
 
-    <!-- OBSERVAÇÃO -->
-    <div class="mb-3">
-
-      <label class="block text-sm font-semibold text-gray-300 mb-2">
-        Observação
       </label>
 
-      <textarea id="observacaoInput"
-        class="w-full p-3 text-sm
-        bg-[#222222]
-        border border-white/10
-        rounded-2xl
-        resize-none
-        text-white
-        placeholder:text-gray-500
-        focus:outline-none
-        focus:ring-2 focus:ring-red-500/30"
-        placeholder="Ex: sem cebola, bem assada, cortar em 8 pedaços..."
-        rows="3"></textarea>
+      <label class="flex items-center justify-between bg-[#222] p-4 rounded-xl cursor-pointer">
+
+        <div>
+          <input
+            type="radio"
+            name="tamanhoEntrada"
+            value="G"
+            class="mr-2">
+
+          Grande
+        </div>
+
+        <span id="entradaPrecoG"></span>
+
+      </label>
 
     </div>
 
-    <!-- BOTÕES -->
-    <div class="flex gap-3 mt-2">
+    <div class="mt-5">
 
-      <button onclick="fecharModalObservacao()"
-        class="w-1/2
-        bg-gray-700
-        hover:bg-gray-600
-        text-white
-        py-3
-        rounded-2xl
-        text-sm
-        font-semibold
-        transition">
+      <textarea
+        id="obsEntrada"
+        class="w-full bg-[#222] rounded-xl p-3 resize-none"
+        rows="3"
+        placeholder="Observação (opcional)">
+      </textarea>
+
+    </div>
+
+    <div class="flex gap-3 mt-5">
+
+      <button
+        onclick="fecharModalEntrada()"
+        class="w-1/2 bg-gray-700 py-3 rounded-xl">
 
         Cancelar
+
       </button>
 
-      <button onclick="confirmarObservacao()"
-        class="w-1/2
-        bg-gradient-to-r
-        from-red-600
-        to-red-700
-        hover:brightness-110
-        text-white
-        py-3
-        rounded-2xl
-        text-sm
-        font-semibold
-        transition
-        shadow-lg">
+      <button
+        onclick="confirmarEntrada()"
+        class="w-1/2 bg-red-600 py-3 rounded-xl font-bold">
 
-        Confirmar
+        Adicionar
+
       </button>
 
     </div>
 
   </div>
 </div>
+
 
 </body>
 </html>
