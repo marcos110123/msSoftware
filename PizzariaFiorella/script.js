@@ -487,9 +487,9 @@ document
       }
 
       // 👇 Agradecimento no final
-      mensagem += `\n\n🙏 Obrigado pela preferência!\n🍴 *Pizzaria Fiorella*`;
+      mensagem += `\n\n🙏 Obrigado pela preferência!\n🍴 *Fiorella Pizzaria *`;
 
-      const telefoneLoja = "5517992362238"; // 👈 coloque o número da loja
+      const telefoneLoja = "5517992451988"; // 👈 coloque o número da loja
       const url = `https://wa.me/${telefoneLoja}?text=${encodeURIComponent(mensagem)}`;
       window.open(url, "_blank");
 
