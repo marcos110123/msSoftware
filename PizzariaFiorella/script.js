@@ -61,6 +61,12 @@ function carregarProdutosDoFirestore() {
 
       const card = document.createElement("div");
 
+      const precoOriginal = Number(produto.preco || 0);
+
+      const precoPromocional = produto.promocao
+        ? precoOriginal * 0.8
+        : precoOriginal;
+
       card.className = "menu-item bg-gray-800 rounded-lg shadow-lg p-4";
 
       card.innerHTML = `
@@ -85,28 +91,74 @@ ${
 
         <div class="flex gap-3 items-center flex-wrap">
 
-          <span class="bg-red-600/20 text-red-400 px-2 py-1 rounded-lg font-semibold">
-            P: R$ ${Number(produto["preco P"] || 0)
-              .toFixed(2)
-              .replace(".", ",")}
-          </span>
+ ${
+  produto.promocao
+    ? `
+      <span class="bg-red-600/20 text-red-400 px-2 py-1 rounded-lg font-semibold">
+        P: R$ ${Number(produto["preco P"] || 0)
+          .toFixed(2)
+          .replace(".", ",")}
+      </span>
 
-          <span class="bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded-lg font-semibold">
-            G: R$ ${Number(produto["preco G"] || 0)
-              .toFixed(2)
-              .replace(".", ",")}
-          </span>
+      <span class="bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded-lg font-semibold line-through">
+        G: R$ ${Number(produto["preco G"] || 0)
+          .toFixed(2)
+          .replace(".", ",")}
+      </span>
+
+      <span class="bg-green-600/20 text-green-400 px-2 py-1 rounded-lg font-semibold">
+        G Promo: R$ ${(Number(produto["preco G"] || 0) * 0.8)
+          .toFixed(2)
+          .replace(".", ",")}
+      </span>
+
+      <span class="bg-red-600 text-white text-xs px-2 py-1 rounded">
+        -20%
+      </span>
+    `
+    : `
+      <span class="bg-red-600/20 text-red-400 px-2 py-1 rounded-lg font-semibold">
+        P: R$ ${Number(produto["preco P"] || 0)
+          .toFixed(2)
+          .replace(".", ",")}
+      </span>
+
+      <span class="bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded-lg font-semibold">
+        G: R$ ${Number(produto["preco G"] || 0)
+          .toFixed(2)
+          .replace(".", ",")}
+      </span>
+    `
+}
 
         </div>
 
       </div>
     `
     : `
+     ${
+       produto.promocao
+         ? `
+      <div class="mt-2">
+        <p class="text-gray-400 line-through text-sm">
+          R$ ${precoOriginal.toFixed(2).replace(".", ",")}
+        </p>
+
+        <p class="text-green-400 font-bold text-xl">
+          R$ ${precoPromocional.toFixed(2).replace(".", ",")}
+        </p>
+
+        <span class="bg-red-600 text-white text-xs px-2 py-1 rounded">
+          -20%
+        </span>
+      </div>
+    `
+         : `
       <p class="text-red-500 font-bold mt-2">
-        R$ ${Number(produto.preco || 0)
-          .toFixed(2)
-          .replace(".", ",")}
+        R$ ${precoOriginal.toFixed(2).replace(".", ",")}
       </p>
+    `
+     }
     `
 }
 
@@ -124,11 +176,7 @@ onclick='${
                 /'/g,
                 "&apos;",
               )})`
-            : `adicionarAoCarrinho(
-          "${produto.nome}",
-          ${produto.preco || 0},
-          ""
-        )`
+            : `adicionarAoCarrinho("${produto.nome}", ${precoPromocional}, "")`
       }'
 
     class="mt-4 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
@@ -586,8 +634,12 @@ window.abrirModalPizza = async function (produto) {
   document.getElementById("precoP").textContent =
     `R$ ${produto["preco P"].toFixed(2)}`;
 
-  document.getElementById("precoG").textContent =
-    `R$ ${produto["preco G"].toFixed(2)}`;
+  const precoG = produto.promocao
+  ? produto["preco G"] * 0.8
+  : produto["preco G"];
+
+document.getElementById("precoG").textContent =
+  `R$ ${precoG.toFixed(2)}`;
 
   document.getElementById("modalPizza").classList.remove("hidden");
 
@@ -778,10 +830,18 @@ window.confirmarPizza = async function () {
 
   const tamanhoSelecionado = tamanho.value;
 
-  let precoFinal =
-    tamanhoSelecionado === "P"
-      ? parseFloat(pizzaSelecionada["preco P"])
-      : parseFloat(pizzaSelecionada["preco G"]);
+let precoFinal;
+
+if (tamanhoSelecionado === "P") {
+  precoFinal = parseFloat(pizzaSelecionada["preco P"]);
+} else {
+  precoFinal = parseFloat(pizzaSelecionada["preco G"]);
+
+  // desconto apenas na G
+  if (pizzaSelecionada.promocao) {
+    precoFinal *= 0.8;
+  }
+}
 
   let nomeFinal = `🍕 Pizza ${tamanhoSelecionado}`;
 
@@ -821,15 +881,17 @@ window.confirmarPizza = async function () {
 
       const pizza2 = snap.docs[0].data();
 
-      const preco1 = parseFloat(pizzaSelecionada["preco G"]);
+     const preco1 = parseFloat(pizzaSelecionada["preco G"]);
+const preco2 = parseFloat(pizza2["preco G"]);
 
-      const preco2 = parseFloat(pizza2["preco G"]);
+let media = (preco1 + preco2) / 2;
 
-      // média
-      let media = (preco1 + preco2) / 2;
+// se um dos dois sabores for promoção
+if (pizzaSelecionada.promocao || pizza2.promocao) {
+  media *= 0.8;
+}
 
-      // arredonda para .99
-      precoFinal = Math.floor(media) + 0.99;
+precoFinal = Math.floor(media) + 0.99;
 
       nomeFinal += ` 
 1/2 ${pizzaSelecionada.nome}
