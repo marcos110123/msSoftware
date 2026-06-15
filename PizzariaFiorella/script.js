@@ -35,7 +35,11 @@ let total = 0;
 let secaoAtiva = null;
 let tipoPedidoSelecionado = null;
 
-const taxaEntregaFixa = 2.0;
+const taxaEntregaFixa = 0.0;
+
+function arredondar99(valor) {
+  return Number((Math.ceil(valor) - 0.01).toFixed(2));
+}
 
 // ----------------------
 // Carregar produtos
@@ -92,8 +96,8 @@ ${
         <div class="flex gap-3 items-center flex-wrap">
 
  ${
-  produto.promocao
-    ? `
+   produto.promocao
+     ? `
       <span class="bg-red-600/20 text-red-400 px-2 py-1 rounded-lg font-semibold">
         P: R$ ${Number(produto["preco P"] || 0)
           .toFixed(2)
@@ -107,16 +111,16 @@ ${
       </span>
 
       <span class="bg-green-600/20 text-green-400 px-2 py-1 rounded-lg font-semibold">
-        G Promo: R$ ${(Number(produto["preco G"] || 0) * 0.8)
-          .toFixed(2)
-          .replace(".", ",")}
+       G Promo: R$ ${arredondar99(Number(produto["preco G"] || 0) * 0.8)
+         .toFixed(2)
+         .replace(".", ",")}
       </span>
 
       <span class="bg-red-600 text-white text-xs px-2 py-1 rounded">
         -20%
       </span>
     `
-    : `
+     : `
       <span class="bg-red-600/20 text-red-400 px-2 py-1 rounded-lg font-semibold">
         P: R$ ${Number(produto["preco P"] || 0)
           .toFixed(2)
@@ -129,7 +133,7 @@ ${
           .replace(".", ",")}
       </span>
     `
-}
+ }
 
         </div>
 
@@ -137,7 +141,7 @@ ${
     `
     : `
      ${
-       produto.promocao
+       produto.promocao && produto.categoria === "pizzas-salgadas"
          ? `
       <div class="mt-2">
         <p class="text-gray-400 line-through text-sm">
@@ -632,18 +636,27 @@ window.abrirModalPizza = async function (produto) {
   document.getElementById("pizzaNome").textContent = produto.nome;
 
   document.getElementById("precoP").textContent =
-    `R$ ${produto["preco P"].toFixed(2)}`;
+    `R$ ${produto["preco P"].toFixed(2).replace(".", ",")}`;
 
-  const precoG = produto.promocao
-  ? produto["preco G"] * 0.8
-  : produto["preco G"];
+  let precoG = Number(produto["preco G"]);
 
-document.getElementById("precoG").textContent =
-  `R$ ${precoG.toFixed(2)}`;
+  if (produto.promocao && produto.categoria === "pizzas-salgadas") {
+    precoG *= 0.8;
+
+    // arredonda para terminar em ,99
+    precoG = Math.ceil(precoG) - 0.01;
+    precoG = Number(precoG.toFixed(2));
+  }
+
+  document.getElementById("precoG").textContent =
+    `R$ ${precoG.toFixed(2).replace(".", ",")}`;
 
   document.getElementById("modalPizza").classList.remove("hidden");
 
   document.getElementById("obsPizza").value = "";
+
+  // esconde os adicionais até concluir a seleção
+  document.getElementById("listaAdicionaisPizza")?.classList.add("hidden");
 
   saboresPizza = [produto];
 
@@ -669,15 +682,6 @@ window.fecharModalPizza = function () {
     input.checked = false;
   });
 
-  // volta inteira como padrão
-  const inteira = document.querySelector(
-    'input[name="tipoPizza"][value="inteira"]',
-  );
-
-  if (inteira) {
-    inteira.checked = true;
-  }
-
   // limpa segundo sabor
   document.querySelectorAll('input[name="segundoSabor"]').forEach((input) => {
     input.checked = false;
@@ -700,23 +704,39 @@ window.fecharModalPizza = function () {
 
 document.addEventListener("change", async (e) => {
   // tamanho
-  if (e.target.name === "tamanhoPizza") {
-    const tamanho = e.target.value;
+if (e.target.name === "tamanhoPizza") {
+  const tamanho = e.target.value;
 
-    if (tamanho === "G") {
-      document.getElementById("tipoPizzaBox").classList.remove("hidden");
-    } else {
-      document.getElementById("tipoPizzaBox").classList.add("hidden");
+ if (tamanho === "G") {
+  document.getElementById("tipoPizzaBox").classList.remove("hidden");
 
-      document.getElementById("segundoSaborBox").classList.add("hidden");
-    }
+  // padrão = inteira
+  document
+    .getElementById("listaAdicionaisPizza")
+    ?.classList.remove("hidden");
+} else {
+    document.getElementById("tipoPizzaBox").classList.add("hidden");
+    document.getElementById("segundoSaborBox").classList.add("hidden");
+
+    // pizza P já pode mostrar adicionais
+    document
+      .getElementById("listaAdicionaisPizza")
+      ?.classList.remove("hidden");
   }
+}
 
   // tipo pizza
   if (e.target.name === "tipoPizza") {
     const tipo = e.target.value;
 
+    
+
     if (tipo === "meio") {
+
+      document
+  .getElementById("listaAdicionaisPizza")
+  ?.classList.add("hidden");
+
       const lista = document.getElementById("listaSabores");
 
       lista.innerHTML = "Carregando...";
@@ -755,10 +775,24 @@ document.addEventListener("change", async (e) => {
     </label>
   `;
       });
-    } else {
-      document.getElementById("segundoSaborBox").classList.add("hidden");
-    }
+   } else {
+
+  document.getElementById("segundoSaborBox").classList.add("hidden");
+
+  document
+    .getElementById("listaAdicionaisPizza")
+    ?.classList.remove("hidden");
+}
   }
+
+   // segundo sabor escolhido
+if (e.target.name === "segundoSabor") {
+
+  document
+    .getElementById("listaAdicionaisPizza")
+    ?.classList.remove("hidden");
+
+}
 });
 
 async function carregarAdicionaisPizza() {
@@ -820,6 +854,7 @@ async function carregarAdicionaisPizza() {
     `;
   });
 }
+
 window.confirmarPizza = async function () {
   const tamanho = document.querySelector('input[name="tamanhoPizza"]:checked');
 
@@ -830,18 +865,18 @@ window.confirmarPizza = async function () {
 
   const tamanhoSelecionado = tamanho.value;
 
-let precoFinal;
+  let precoFinal;
 
-if (tamanhoSelecionado === "P") {
-  precoFinal = parseFloat(pizzaSelecionada["preco P"]);
-} else {
-  precoFinal = parseFloat(pizzaSelecionada["preco G"]);
+  if (tamanhoSelecionado === "P") {
+    precoFinal = parseFloat(pizzaSelecionada["preco P"]);
+  } else {
+    precoFinal = parseFloat(pizzaSelecionada["preco G"]);
 
-  // desconto apenas na G
-  if (pizzaSelecionada.promocao) {
-    precoFinal *= 0.8;
+    // desconto apenas na G
+    if (pizzaSelecionada.promocao) {
+      precoFinal *= 0.8;
+    }
   }
-}
 
   let nomeFinal = `🍕 Pizza ${tamanhoSelecionado}`;
 
@@ -881,17 +916,25 @@ if (tamanhoSelecionado === "P") {
 
       const pizza2 = snap.docs[0].data();
 
-     const preco1 = parseFloat(pizzaSelecionada["preco G"]);
-const preco2 = parseFloat(pizza2["preco G"]);
+      const preco1 = parseFloat(pizzaSelecionada["preco G"]);
+      const preco2 = parseFloat(pizza2["preco G"]);
 
-let media = (preco1 + preco2) / 2;
+      let metade1 = preco1 / 2;
+      let metade2 = preco2 / 2;
 
-// se um dos dois sabores for promoção
-if (pizzaSelecionada.promocao || pizza2.promocao) {
-  media *= 0.8;
-}
+      // desconto apenas nas pizzas salgadas em promoção
+      if (
+        pizzaSelecionada.promocao &&
+        pizzaSelecionada.categoria === "pizzas-salgadas"
+      ) {
+        metade1 *= 0.8;
+      }
 
-precoFinal = Math.floor(media) + 0.99;
+      if (pizza2.promocao && pizza2.categoria === "pizzas-salgadas") {
+        metade2 *= 0.8;
+      }
+
+      precoFinal = metade1 + metade2;
 
       nomeFinal += ` 
 1/2 ${pizzaSelecionada.nome}
@@ -927,6 +970,12 @@ precoFinal = Math.floor(media) + 0.99;
 
       precoFinal += parseFloat(valor);
     });
+
+  // arredonda sempre para terminar em ,99
+  precoFinal = Math.ceil(precoFinal) - 0.01;
+
+  // evita problemas de casas decimais
+  precoFinal = Number(precoFinal.toFixed(2));
 
   if (adicionais.length) {
     nomeFinal += `\n+ ${adicionais.join(", ")}`;
@@ -1001,3 +1050,15 @@ window.confirmarEntrada = function () {
 
   fecharModalEntrada();
 };
+
+document.getElementById("precisaTroco").addEventListener("change", function () {
+  const campo = document.getElementById("valorTroco");
+
+  if (this.checked) {
+    campo.classList.remove("hidden");
+    campo.focus();
+  } else {
+    campo.classList.add("hidden");
+    campo.value = "";
+  }
+});
