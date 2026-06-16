@@ -655,12 +655,14 @@ window.abrirModalPizza = async function (produto) {
 
   document.getElementById("obsPizza").value = "";
 
-  // esconde os adicionais até concluir a seleção
-  document.getElementById("listaAdicionaisPizza")?.classList.add("hidden");
+  // reset visual
+  document.getElementById("perguntaAdicionais")?.classList.add("hidden");
+
+  document.getElementById("boxAdicionaisPizza")?.classList.add("hidden");
 
   saboresPizza = [produto];
 
-  carregarAdicionaisPizza(produto.categoria);
+  await carregarAdicionaisPizza();
 };
 
 window.fecharModalPizza = function () {
@@ -701,98 +703,129 @@ window.fecharModalPizza = function () {
   // limpa referência atual
   pizzaSelecionada = null;
 };
+function perguntarAdicionais() {
+  document.getElementById("perguntaAdicionais")?.classList.remove("hidden");
+
+  document.getElementById("boxAdicionaisPizza")?.classList.add("hidden");
+}
+
+// botão SIM
+// botão SIM
+document.getElementById("btnComAdicional")
+?.addEventListener("click", async () => {
+
+  // esconde a pergunta
+  document
+    .getElementById("perguntaAdicionais")
+    ?.classList.add("hidden");
+
+  // carrega adicionais novamente
+  await carregarAdicionaisPizza();
+
+  // mostra a box dos adicionais
+  document
+    .getElementById("boxAdicionaisPizza")
+    ?.classList.remove("hidden");
+});
+
+// botão NÃO
+document.getElementById("btnSemAdicional")?.addEventListener("click", () => {
+  document.getElementById("perguntaAdicionais")?.classList.add("hidden");
+
+  document.getElementById("boxAdicionaisPizza")?.classList.add("hidden");
+});
 
 document.addEventListener("change", async (e) => {
   // tamanho
-if (e.target.name === "tamanhoPizza") {
-  const tamanho = e.target.value;
+  if (e.target.name === "tamanhoPizza") {
+    const tamanho = e.target.value;
 
- if (tamanho === "G") {
-  document.getElementById("tipoPizzaBox").classList.remove("hidden");
+    if (tamanho === "G") {
+      document.getElementById("tipoPizzaBox").classList.remove("hidden");
 
-  // padrão = inteira
-  document
-    .getElementById("listaAdicionaisPizza")
-    ?.classList.remove("hidden");
-} else {
-    document.getElementById("tipoPizzaBox").classList.add("hidden");
-    document.getElementById("segundoSaborBox").classList.add("hidden");
+      document.getElementById("segundoSaborBox").classList.add("hidden");
 
-    // pizza P já pode mostrar adicionais
-    document
-      .getElementById("listaAdicionaisPizza")
-      ?.classList.remove("hidden");
+      document.getElementById("perguntaAdicionais")?.classList.add("hidden");
+
+      document.getElementById("boxAdicionaisPizza")?.classList.add("hidden");
+    } else {
+      document.getElementById("tipoPizzaBox").classList.add("hidden");
+      document.getElementById("segundoSaborBox").classList.add("hidden");
+
+      perguntarAdicionais();
+    }
   }
-}
 
   // tipo pizza
   if (e.target.name === "tipoPizza") {
-    const tipo = e.target.value;
+  const tipo = e.target.value;
 
-    
-
-    if (tipo === "meio") {
-
-      document
-  .getElementById("listaAdicionaisPizza")
-  ?.classList.add("hidden");
-
-      const lista = document.getElementById("listaSabores");
-
-      lista.innerHTML = "Carregando...";
-
-      document.getElementById("segundoSaborBox").classList.remove("hidden");
-
-      const q = query(
-        collection(db, "produtos"),
-        where("status", "==", "ativo"),
-      );
-
-      const snap = await getDocs(q);
-
-      lista.innerHTML = "";
-
-      snap.forEach((docSnap) => {
-        const pizza = docSnap.data();
-
-        // só categorias de pizza
-        if (!pizza.categoria?.startsWith("pizzas")) return;
-
-        // remove a própria pizza
-        if (pizza.nome === pizzaSelecionada.nome) return;
-
-        lista.innerHTML += `
-    <label class="flex items-center bg-[#222] p-3 rounded-xl cursor-pointer">
-
-      <input
-        type="radio"
-        name="segundoSabor"
-        value="${pizza.nome}"
-        class="mr-2">
-
-      ${pizza.nome}
-
-    </label>
-  `;
-      });
-   } else {
-
-  document.getElementById("segundoSaborBox").classList.add("hidden");
+  // reset
+  document
+    .getElementById("boxAdicionaisPizza")
+    ?.classList.add("hidden");
 
   document
-    .getElementById("listaAdicionaisPizza")
-    ?.classList.remove("hidden");
-}
+    .getElementById("perguntaAdicionais")
+    ?.classList.add("hidden");
+
+  // MEIO A MEIO
+  if (tipo === "meio") {
+
+    const lista = document.getElementById("listaSabores");
+
+    lista.innerHTML = "Carregando...";
+
+    document
+      .getElementById("segundoSaborBox")
+      .classList.remove("hidden");
+
+    const q = query(
+      collection(db, "produtos"),
+      where("status", "==", "ativo"),
+    );
+
+    const snap = await getDocs(q);
+
+    lista.innerHTML = "";
+
+    snap.forEach((docSnap) => {
+      const pizza = docSnap.data();
+
+      if (!pizza.categoria?.startsWith("pizzas")) return;
+      if (pizza.nome === pizzaSelecionada.nome) return;
+
+      lista.innerHTML += `
+        <label class="flex items-center bg-[#222] p-3 rounded-xl cursor-pointer">
+
+          <input
+            type="radio"
+            name="segundoSabor"
+            value="${pizza.nome}"
+            class="mr-2">
+
+          ${pizza.nome}
+
+        </label>
+      `;
+    });
+
   }
 
-   // segundo sabor escolhido
-if (e.target.name === "segundoSabor") {
+  // INTEIRA
+  else {
 
-  document
-    .getElementById("listaAdicionaisPizza")
-    ?.classList.remove("hidden");
+    document
+      .getElementById("segundoSaborBox")
+      .classList.add("hidden");
 
+    perguntarAdicionais();
+  }
 }
+
+  if (e.target.name === "segundoSabor") {
+    perguntarAdicionais();
+  }
 });
 
 async function carregarAdicionaisPizza() {
@@ -987,9 +1020,19 @@ window.confirmarPizza = async function () {
   const obs = document.getElementById("obsPizza").value.trim();
 
   adicionarAoCarrinho(nomeFinal, precoFinal, obs);
+  
 
   fecharModalPizza();
+
 };
+
+document
+  .getElementById("perguntaAdicionais")
+  ?.classList.add("hidden");
+
+document
+  .getElementById("boxAdicionaisPizza")
+  ?.classList.add("hidden");
 
 let entradaSelecionada = null;
 

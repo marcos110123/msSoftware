@@ -529,7 +529,7 @@ if ('serviceWorker' in navigator) {
 </script>
 
 <script>
-  const versaoSistema = "1.0.1"; // Atualize aqui também!
+  const versaoSistema = "1.0.2"; // Atualize aqui também!
 
   const script = document.createElement("script");
   script.type = "module";
@@ -1134,7 +1134,7 @@ Como deseja?
 <div class="space-y-2">
 
 <label class="flex items-center bg-[#222] p-3 rounded-xl cursor-pointer">
-<input type="radio" name="tipoPizza" value="inteira" checked class="mr-2">
+<input type="radio" name="tipoPizza" value="inteira" class="mr-2">
 Pizza inteira
 </label>
 
@@ -1161,15 +1161,59 @@ class="space-y-2 max-h-56 overflow-y-auto">
 </div>
 
 <!-- ADICIONAIS -->
-<div class="mb-5">
 
-<p class="font-semibold mb-2">
-Adicionais
-</p>
+<div id="perguntaAdicionais"
+class="hidden mb-5 bg-[#222] rounded-xl p-4 text-center">
 
-<div id="listaAdicionaisPizza"
-class="space-y-2 max-h-52 overflow-y-auto bg-[#222] p-3 rounded-xl">
+  <p class="font-semibold mb-3 text-lg">
+    Deseja adicionais?
+  </p>
+
+  <div class="flex gap-3">
+
+  <button id="btnSemAdicional"
+  type="button"
+  class="w-1/2
+  bg-[#2A2A2A]
+  border border-gray-600
+  hover:bg-[#363636]
+  py-3
+  rounded-xl
+  font-semibold
+  transition-all">
+  
+  Não
+</button>
+
+  <button id="btnComAdicional"
+  type="button"
+  class="w-1/2
+  bg-yellow-500
+  hover:bg-yellow-400
+  text-black
+  py-3
+  rounded-xl
+  font-bold
+  transition-all
+  duration-200
+  shadow-lg">
+  
+  🍕 Sim
+</button>
+
+  </div>
 </div>
+
+<!-- ADICIONAIS -->
+<div id="boxAdicionaisPizza" class="hidden mb-5">
+
+  <p class="font-semibold mb-2">
+    Adicionais
+  </p>
+
+  <div id="listaAdicionaisPizza"
+    class="space-y-2 max-h-52 overflow-y-auto bg-[#222] p-3 rounded-xl">
+  </div>
 
 </div>
 
