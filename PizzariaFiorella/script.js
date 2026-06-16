@@ -711,22 +711,20 @@ function perguntarAdicionais() {
 
 // botão SIM
 // botão SIM
-document.getElementById("btnComAdicional")
-?.addEventListener("click", async () => {
+document
+  .getElementById("btnComAdicional")
+  ?.addEventListener("click", async () => {
+    // esconde a pergunta
+    document.getElementById("perguntaAdicionais")?.classList.add("hidden");
 
-  // esconde a pergunta
-  document
-    .getElementById("perguntaAdicionais")
-    ?.classList.add("hidden");
+    // carrega adicionais novamente
+    await carregarAdicionaisPizza();
 
-  // carrega adicionais novamente
-  await carregarAdicionaisPizza();
+    // mostra a box dos adicionais
+    document.getElementById("boxAdicionaisPizza")?.classList.remove("hidden");
 
-  // mostra a box dos adicionais
-  document
-    .getElementById("boxAdicionaisPizza")
-    ?.classList.remove("hidden");
-});
+    scrollParaElemento("boxAdicionaisPizza");
+  });
 
 // botão NÃO
 document.getElementById("btnSemAdicional")?.addEventListener("click", () => {
@@ -735,6 +733,19 @@ document.getElementById("btnSemAdicional")?.addEventListener("click", () => {
   document.getElementById("boxAdicionaisPizza")?.classList.add("hidden");
 });
 
+function scrollParaElemento(id) {
+  setTimeout(() => {
+    const el = document.getElementById(id);
+
+    if (el) {
+      el.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
+  }, 250);
+}
+
 document.addEventListener("change", async (e) => {
   // tamanho
   if (e.target.name === "tamanhoPizza") {
@@ -742,6 +753,8 @@ document.addEventListener("change", async (e) => {
 
     if (tamanho === "G") {
       document.getElementById("tipoPizzaBox").classList.remove("hidden");
+
+      scrollParaElemento("tipoPizzaBox");
 
       document.getElementById("segundoSaborBox").classList.add("hidden");
 
@@ -758,44 +771,39 @@ document.addEventListener("change", async (e) => {
 
   // tipo pizza
   if (e.target.name === "tipoPizza") {
-  const tipo = e.target.value;
+    const tipo = e.target.value;
 
-  // reset
-  document
-    .getElementById("boxAdicionaisPizza")
-    ?.classList.add("hidden");
+    // reset
+    document.getElementById("boxAdicionaisPizza")?.classList.add("hidden");
 
-  document
-    .getElementById("perguntaAdicionais")
-    ?.classList.add("hidden");
+    document.getElementById("perguntaAdicionais")?.classList.add("hidden");
 
-  // MEIO A MEIO
-  if (tipo === "meio") {
+    // MEIO A MEIO
+    if (tipo === "meio") {
+      const lista = document.getElementById("listaSabores");
 
-    const lista = document.getElementById("listaSabores");
+      lista.innerHTML = "Carregando...";
 
-    lista.innerHTML = "Carregando...";
+      document.getElementById("segundoSaborBox").classList.remove("hidden");
 
-    document
-      .getElementById("segundoSaborBox")
-      .classList.remove("hidden");
+      scrollParaElemento("segundoSaborBox");
 
-    const q = query(
-      collection(db, "produtos"),
-      where("status", "==", "ativo"),
-    );
+      const q = query(
+        collection(db, "produtos"),
+        where("status", "==", "ativo"),
+      );
 
-    const snap = await getDocs(q);
+      const snap = await getDocs(q);
 
-    lista.innerHTML = "";
+      lista.innerHTML = "";
 
-    snap.forEach((docSnap) => {
-      const pizza = docSnap.data();
+      snap.forEach((docSnap) => {
+        const pizza = docSnap.data();
 
-      if (!pizza.categoria?.startsWith("pizzas")) return;
-      if (pizza.nome === pizzaSelecionada.nome) return;
+        if (!pizza.categoria?.startsWith("pizzas")) return;
+        if (pizza.nome === pizzaSelecionada.nome) return;
 
-      lista.innerHTML += `
+        lista.innerHTML += `
         <label class="flex items-center bg-[#222] p-3 rounded-xl cursor-pointer">
 
           <input
@@ -808,23 +816,27 @@ document.addEventListener("change", async (e) => {
 
         </label>
       `;
-    });
+      });
+    }
 
+    // INTEIRA
+    else {
+      document.getElementById("segundoSaborBox").classList.add("hidden");
+
+      perguntarAdicionais();
+
+      setTimeout(() => {
+        scrollParaElemento("perguntaAdicionais");
+      }, 200);
+    }
   }
-
-  // INTEIRA
-  else {
-
-    document
-      .getElementById("segundoSaborBox")
-      .classList.add("hidden");
-
-    perguntarAdicionais();
-  }
-}
 
   if (e.target.name === "segundoSabor") {
     perguntarAdicionais();
+
+    setTimeout(() => {
+      scrollParaElemento("perguntaAdicionais");
+    }, 200);
   }
 });
 
@@ -1020,19 +1032,13 @@ window.confirmarPizza = async function () {
   const obs = document.getElementById("obsPizza").value.trim();
 
   adicionarAoCarrinho(nomeFinal, precoFinal, obs);
-  
 
   fecharModalPizza();
-
 };
 
-document
-  .getElementById("perguntaAdicionais")
-  ?.classList.add("hidden");
+document.getElementById("perguntaAdicionais")?.classList.add("hidden");
 
-document
-  .getElementById("boxAdicionaisPizza")
-  ?.classList.add("hidden");
+document.getElementById("boxAdicionaisPizza")?.classList.add("hidden");
 
 let entradaSelecionada = null;
 
