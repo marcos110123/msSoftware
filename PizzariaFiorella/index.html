@@ -7,7 +7,7 @@
   <meta name="application-name" content="Pizzaria Fiorella - Cardápio Digital">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cardápio Digital - Pizzaria Fiorella</title>
+  <title>Cardápio Digital - Fiorella Pizzaria </title>
   <script src="https://cdn.tailwindcss.com"></script>
 
   <meta name="theme-color" content="#000000"> 
@@ -508,38 +508,86 @@ transition z-50 flex items-center gap-2 font-bold" text-white px-5 py-3 rounded-
 
 </footer>
 
-<script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js', { scope: './' }) // escopo relativo à pasta do HTML
-    .then(reg => {
-      if (reg.waiting) reg.waiting.postMessage("skipWaiting");
 
-      reg.addEventListener("updatefound", () => {
+<script>
+const versaoSistema = "1.0.3"; // altere quando subir atualização
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', async () => {
+    try {
+
+      // registra o SW com versão
+      const reg = await navigator.serviceWorker.register(
+        `./sw.js?v=${versaoSistema}`,
+        { scope: './' }
+      );
+
+      console.log('✅ SW registrado');
+
+      // força atualização ao abrir
+      reg.update();
+
+      // já existe atualização esperando?
+      if (reg.waiting) {
+        reg.waiting.postMessage('skipWaiting');
+      }
+
+      // detecta novo SW
+      reg.addEventListener('updatefound', () => {
         const newWorker = reg.installing;
-        newWorker?.addEventListener("statechange", () => {
-          if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
-            console.log("🔄 Nova versão detectada, atualizando...");
-            window.location.reload();
+
+        if (!newWorker) return;
+
+        newWorker.addEventListener('statechange', () => {
+          console.log('Estado SW:', newWorker.state);
+
+          if (
+            newWorker.state === 'installed' &&
+            navigator.serviceWorker.controller
+          ) {
+            console.log('🔄 Nova versão detectada');
+
+            // ativa imediatamente
+            newWorker.postMessage('skipWaiting');
           }
         });
       });
-    });
+
+      // quando novo SW assumir controle → reload
+      let refreshing = false;
+
+      navigator.serviceWorker.addEventListener(
+        'controllerchange',
+        () => {
+          if (refreshing) return;
+
+          refreshing = true;
+
+          console.log('♻️ Atualizando página...');
+          window.location.reload();
+        }
+      );
+
+    } catch (err) {
+      console.error('Erro SW:', err);
+    }
+  });
 }
 
-</script>
+// carrega script com cache bust
+const script = document.createElement("script");
+script.type = "module";
+script.src = `script.js?v=${versaoSistema}`;
+document.body.appendChild(script);
 
-<script>
-  const versaoSistema = "1.0.2"; // Atualize aqui também!
+// mostra versão na tela
+window.addEventListener("DOMContentLoaded", () => {
+  const versaoEl = document.getElementById("versaoSistemaTexto");
 
-  const script = document.createElement("script");
-  script.type = "module";
-  script.src = `script.js?v=${versaoSistema}`;
-  document.body.appendChild(script);
-
-  window.addEventListener("DOMContentLoaded", () => {
-    const versaoEl = document.getElementById("versaoSistemaTexto");
-    if (versaoEl) versaoEl.textContent = versaoSistema;
-  });
+  if (versaoEl) {
+    versaoEl.textContent = versaoSistema;
+  }
+});
 </script>
 
 
