@@ -481,7 +481,7 @@ document
 
       mensagem += `\n\n🛒 *Itens:*\n`;
       carrinho.forEach((item) => {
-        mensagem += `- ${item.nome} x${item.quantidade} - R$ ${item.subtotal.toFixed(2)}`;
+        mensagem += `- ${item.quantidade}x ${item.nome} - R$ ${item.subtotal.toFixed(2)}`;
         if (item.observacao) {
           mensagem += ` (Obs: ${item.observacao})`;
         }
