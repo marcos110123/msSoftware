@@ -760,22 +760,16 @@ document.addEventListener("change", async (e) => {
   if (e.target.name === "tamanhoPizza") {
     const tamanho = e.target.value;
 
-    if (tamanho === "G") {
-      document.getElementById("tipoPizzaBox").classList.remove("hidden");
+    document.getElementById("tipoPizzaBox").classList.remove("hidden");
 
-      scrollParaElemento("tipoPizzaBox");
+scrollParaElemento("tipoPizzaBox");
 
-      document.getElementById("segundoSaborBox").classList.add("hidden");
+document.getElementById("segundoSaborBox").classList.add("hidden");
 
-      document.getElementById("perguntaAdicionais")?.classList.add("hidden");
+document.getElementById("perguntaAdicionais")?.classList.add("hidden");
 
-      document.getElementById("boxAdicionaisPizza")?.classList.add("hidden");
-    } else {
-      document.getElementById("tipoPizzaBox").classList.add("hidden");
-      document.getElementById("segundoSaborBox").classList.add("hidden");
+document.getElementById("boxAdicionaisPizza")?.classList.add("hidden");
 
-      perguntarAdicionais();
-    }
   }
 
   // tipo pizza
@@ -934,82 +928,67 @@ window.confirmarPizza = async function () {
 
   let nomeFinal = `🍕 Pizza ${tamanhoSelecionado}`;
 
-  // -------------------------
-  // PIZZA GRANDE
-  // -------------------------
-  if (tamanhoSelecionado === "G") {
-    const tipo = document.querySelector(
-      'input[name="tipoPizza"]:checked',
-    )?.value;
+  const tipo = document.querySelector(
+  'input[name="tipoPizza"]:checked',
+)?.value;
 
-    // -------------------------
-    // MEIO A MEIO
-    // -------------------------
-    if (tipo === "meio") {
-      const sabor2Input = document.querySelector(
-        'input[name="segundoSabor"]:checked',
-      );
+// MEIO A MEIO
+if (tipo === "meio") {
+  const sabor2Input = document.querySelector(
+    'input[name="segundoSabor"]:checked',
+  );
 
-      if (!sabor2Input) {
-        mostrarAlerta("Escolha o 2º sabor.");
-        return;
-      }
+  if (!sabor2Input) {
+    mostrarAlerta("Escolha o 2º sabor.");
+    return;
+  }
 
-      // busca o segundo sabor
-      const q = query(
-        collection(db, "produtos"),
-        where("nome", "==", sabor2Input.value),
-      );
+  const q = query(
+    collection(db, "produtos"),
+    where("nome", "==", sabor2Input.value),
+  );
 
-      const snap = await getDocs(q);
+  const snap = await getDocs(q);
 
-      if (snap.empty) {
-        mostrarAlerta("Erro ao localizar sabor.");
-        return;
-      }
+  if (snap.empty) {
+    mostrarAlerta("Erro ao localizar sabor.");
+    return;
+  }
 
-      const pizza2 = snap.docs[0].data();
+  const pizza2 = snap.docs[0].data();
 
-      const preco1 = parseFloat(pizzaSelecionada["preco G"]);
-      const preco2 = parseFloat(pizza2["preco G"]);
+  const campoPreco =
+    tamanhoSelecionado === "P"
+      ? "preco P"
+      : "preco G";
 
-      let metade1 = preco1 / 2;
-      let metade2 = preco2 / 2;
+  let preco1 = parseFloat(pizzaSelecionada[campoPreco]);
+  let preco2 = parseFloat(pizza2[campoPreco]);
 
-      // desconto apenas nas pizzas salgadas em promoção
-      if (
-        pizzaSelecionada.promocao &&
-        pizzaSelecionada.categoria === "pizzas-salgadas"
-      ) {
-        metade1 *= 0.8;
-      }
+  if (
+    tamanhoSelecionado === "G" &&
+    pizzaSelecionada.promocao &&
+    pizzaSelecionada.categoria === "pizzas-salgadas"
+  ) {
+    preco1 *= 0.8;
+  }
 
-      if (pizza2.promocao && pizza2.categoria === "pizzas-salgadas") {
-        metade2 *= 0.8;
-      }
+  if (
+    tamanhoSelecionado === "G" &&
+    pizza2.promocao &&
+    pizza2.categoria === "pizzas-salgadas"
+  ) {
+    preco2 *= 0.8;
+  }
 
-      precoFinal = metade1 + metade2;
+  precoFinal = preco1 / 2 + preco2 / 2;
 
-      nomeFinal += ` 
+  nomeFinal += `
 1/2 ${pizzaSelecionada.nome}
 1/2 ${pizza2.nome}`;
-    }
-
-    // -------------------------
-    // INTEIRA
-    // -------------------------
-    else {
-      nomeFinal += ` - ${pizzaSelecionada.nome}`;
-    }
-  }
-
-  // -------------------------
-  // PIZZA PEQUENA
-  // -------------------------
-  else {
-    nomeFinal += ` - ${pizzaSelecionada.nome}`;
-  }
-
+} else {
+  nomeFinal += ` - ${pizzaSelecionada.nome}`;
+}
   // -------------------------
   // ADICIONAIS
   // -------------------------
