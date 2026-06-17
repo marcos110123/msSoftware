@@ -800,26 +800,35 @@ document.getElementById("boxAdicionaisPizza")?.classList.add("hidden");
 
       lista.innerHTML = "";
 
-      snap.forEach((docSnap) => {
-        const pizza = docSnap.data();
+    const pizzas = [];
 
-        if (!pizza.categoria?.startsWith("pizzas")) return;
-        if (pizza.nome === pizzaSelecionada.nome) return;
+snap.forEach((docSnap) => {
+  const pizza = docSnap.data();
 
-        lista.innerHTML += `
-        <label class="flex items-center bg-[#222] p-3 rounded-xl cursor-pointer">
+  if (!pizza.categoria?.startsWith("pizzas")) return;
+  if (pizza.nome === pizzaSelecionada.nome) return;
 
-          <input
-            type="radio"
-            name="segundoSabor"
-            value="${pizza.nome}"
-            class="mr-2">
+  pizzas.push(pizza);
+});
 
-          ${pizza.nome}
+pizzas.sort((a, b) => a.nome.localeCompare(b.nome));
 
-        </label>
-      `;
-      });
+lista.innerHTML = "";
+
+pizzas.forEach((pizza) => {
+  lista.innerHTML += `
+    <label class="flex items-center bg-[#222] p-3 rounded-xl cursor-pointer">
+      <input
+        type="radio"
+        name="segundoSabor"
+        value="${pizza.nome}"
+        class="mr-2">
+
+      ${pizza.nome}
+    </label>
+  `;
+});
+
     }
 
     // INTEIRA
