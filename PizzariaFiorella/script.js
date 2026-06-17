@@ -207,6 +207,15 @@ onclick='${
         }
       }
     });
+
+    const btnPromocao = document.getElementById("btn-promocao");
+const gridPromocoes = document.querySelector("#promocoes .produtos-grid");
+
+btnPromocao.classList.toggle(
+  "hidden",
+  gridPromocoes.children.length === 0
+);
+
   });
 }
 carregarProdutosDoFirestore();
@@ -274,7 +283,7 @@ function atualizarCarrinho() {
       div.className = "flex justify-between items-center py-2 border-b";
       div.innerHTML = `
   <div class="flex-1">
-    <span>${item.nome} x${item.quantidade}</span> - 
+    <span>${item.quantidade}x ${item.nome}</span> - 
     <span>R$ ${item.subtotal.toFixed(2)}</span>
     ${item.observacao ? `<br><small class="text-gray-400">Obs: ${item.observacao}</small>` : ""}
   </div>
@@ -1111,3 +1120,27 @@ document.getElementById("precisaTroco").addEventListener("change", function () {
     campo.value = "";
   }
 });
+
+// 🔥 Buscar tempo de entrega do Firestore
+// 🔥 Listener em tempo real para tempo de entrega
+function iniciarListenerTempoEntrega() {
+  const entregaRef = doc(db, "config", "entrega");
+
+  onSnapshot(entregaRef, (snap) => {
+    if (snap.exists()) {
+      window.tempoEntregaGlobal = snap.data().tempoEntrega || "";
+    } else {
+      window.tempoEntregaGlobal = "";
+    }
+
+    // Atualiza o texto no carrinho se já existir o elemento
+    const tempoEntregaEl = document.getElementById("tempoEntregaInfo");
+    if (tempoEntregaEl) {
+      tempoEntregaEl.textContent = window.tempoEntregaGlobal
+        ? `⏱ Tempo de entrega estimado: ${window.tempoEntregaGlobal}`
+        : "";
+    }
+  });
+}
+
+iniciarListenerTempoEntrega();

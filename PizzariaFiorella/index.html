@@ -154,7 +154,7 @@ via-[#120608]
 to-[#090909]
 min-h-screen">
 
-  <div id="aviso-fechado" class="bg-green-600 text-white text-center py-2 font-bold hidden">
+  <div id="aviso-fechado" class="bg-red-600 text-white text-center py-2 font-bold hidden">
   ❌ Estamos fechados para novos pedidos.
 </div>
 
@@ -172,6 +172,7 @@ text-white py-10 shadow-2xl">
   
 
 <button
+  id="btn-promocao"
   data-card="promoção"
   onclick="mostrarSecao('promocoes')"
   class="relative group overflow-hidden rounded-3xl
@@ -436,17 +437,25 @@ to-yellow-500">
     </div>
 
     <!-- total -->
-    <div class="mt-5 flex justify-between items-center">
+<div class="mt-5 bg-[#222] rounded-2xl p-4 border border-white/5">
 
-      <span class="text-gray-300 text-lg">
-        Total:
-      </span>
+  <div class="flex justify-between items-center">
+    <span class="text-gray-300 text-lg">
+      Total:
+    </span>
 
-      <p class="text-2xl font-bold text-yellow-400">
-        R$ <span id="total">0,00</span>
-      </p>
+    <p class="text-2xl font-bold text-yellow-400">
+      R$ <span id="total">0,00</span>
+    </p>
+  </div>
 
-    </div>
+  <div class="mt-3 pt-3 border-t border-white/10 text-center">
+    <p id="tempoEntregaInfo"
+      class="text-sm text-red-300 font-medium">
+    </p>
+  </div>
+
+</div>
 
     <!-- botão -->
     <form id="orderForm" class="mt-6">
@@ -510,7 +519,7 @@ transition z-50 flex items-center gap-2 font-bold" text-white px-5 py-3 rounded-
 
 
 <script>
-const versaoSistema = "1.0.3"; // altere quando subir atualização
+const versaoSistema = "1.0.1"; // altere quando subir atualização
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', async () => {
