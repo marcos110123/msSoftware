@@ -38,7 +38,7 @@ let tipoPedidoSelecionado = null;
 const taxaEntregaFixa = 0.0;
 
 function arredondar99(valor) {
-  return Number((Math.ceil(valor) - 0.01).toFixed(2));
+  return Number((Math.ceil(valor) - 0.10).toFixed(2));
 }
 
 // ----------------------
@@ -653,7 +653,7 @@ window.abrirModalPizza = async function (produto) {
     precoG *= 0.8;
 
     // arredonda para terminar em ,99
-    precoG = Math.ceil(precoG) - 0.01;
+    precoG = Math.ceil(precoG) - 0.10;
     precoG = Number(precoG.toFixed(2));
   }
 
@@ -1014,7 +1014,7 @@ if (tipo === "meio") {
     });
 
   // arredonda sempre para terminar em ,99
-  precoFinal = Math.ceil(precoFinal) - 0.01;
+  precoFinal = Math.ceil(precoFinal) - 0.10;
 
   // evita problemas de casas decimais
   precoFinal = Number(precoFinal.toFixed(2));
