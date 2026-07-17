@@ -208,12 +208,22 @@ onclick='${
       }
     });
 
-    const btnPromocao = document.getElementById("btn-promocao");
+    
+
+ const btnPromocao = document.getElementById("btn-promocao");
 const gridPromocoes = document.querySelector("#promocoes .produtos-grid");
 
 btnPromocao.classList.toggle(
   "hidden",
   gridPromocoes.children.length === 0
+);
+
+const btnCombos = document.getElementById("btn-combos");
+const gridCombos = document.querySelector("#combos .produtos-grid");
+
+btnCombos.classList.toggle(
+  "hidden",
+  gridCombos.children.length === 0
 );
 
   });
