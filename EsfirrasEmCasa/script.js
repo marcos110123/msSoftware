@@ -10,7 +10,7 @@ import {
   query,
   orderBy,
   where,
-getDocs 
+  getDocs,
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
 // ----------------------
@@ -22,7 +22,7 @@ const firebaseConfig = {
   projectId: "esfihas-em-casa",
   storageBucket: "esfihas-em-casa.firebasestorage.app",
   messagingSenderId: "1095184776226",
-  appId: "1:1095184776226:web:c5d9f67a479a5646859e7b"
+  appId: "1:1095184776226:web:c5d9f67a479a5646859e7b",
 };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -35,7 +35,7 @@ let total = 0;
 let secaoAtiva = null;
 let tipoPedidoSelecionado = null;
 
-const taxaEntregaFixa = 2.00;
+const taxaEntregaFixa = 2.0;
 
 // ----------------------
 // Carregar produtos
@@ -45,8 +45,9 @@ function carregarProdutosDoFirestore() {
   const q = query(ref, orderBy("nome", "asc")); // ordena pelo campo "nome"
 
   onSnapshot(q, (snapshot) => {
-    document.querySelectorAll(".produtos-grid").forEach(grid => grid.innerHTML = "");
-
+    document
+      .querySelectorAll(".produtos-grid")
+      .forEach((grid) => (grid.innerHTML = ""));
 
     snapshot.forEach((docSnap) => {
       const produto = docSnap.data();
@@ -58,12 +59,11 @@ function carregarProdutosDoFirestore() {
       const container = secao.querySelector(".produtos-grid");
       if (!container) return;
 
-   const card = document.createElement("div");
+      const card = document.createElement("div");
 
-card.className =
-  "menu-item bg-gray-800 rounded-lg shadow-lg p-4";
+      card.className = "menu-item bg-gray-800 rounded-lg shadow-lg p-4";
 
-card.innerHTML = `
+      card.innerHTML = `
   <img src="${produto.imagem || ""}" 
        alt="${produto.nome}" 
        class="w-full h-48 object-cover rounded-md shadow-lg" 
@@ -84,8 +84,7 @@ card.innerHTML = `
 
   <button 
     onclick="${
-      produto.categoria &&
-      produto.categoria.startsWith('esfihas')
+      produto.categoria && produto.categoria.startsWith("esfihas")
         ? `abrirModalObservacao(
             '${produto.nome}',
             ${produto.preco},
@@ -105,19 +104,19 @@ card.innerHTML = `
   </button>
 `;
 
-
       container.appendChild(card);
       // Se for marcado como mais vendido, também mostra na seção "mais-vendidas"
-if (produto.maisVendido) {
-  const maisVendidosSecao = document.getElementById("mais-vendidas");
-  if (maisVendidosSecao) {
-    const maisVendidosContainer = maisVendidosSecao.querySelector(".produtos-grid");
-    if (maisVendidosContainer) {
-      const clone = card.cloneNode(true); // clona o card
-      maisVendidosContainer.appendChild(clone);
-    }
-  }
-}
+      if (produto.maisVendido) {
+        const maisVendidosSecao = document.getElementById("mais-vendidas");
+        if (maisVendidosSecao) {
+          const maisVendidosContainer =
+            maisVendidosSecao.querySelector(".produtos-grid");
+          if (maisVendidosContainer) {
+            const clone = card.cloneNode(true); // clona o card
+            maisVendidosContainer.appendChild(clone);
+          }
+        }
+      }
     });
   });
 }
@@ -144,25 +143,38 @@ function mostrarSecao(id) {
 
 // ----------------------
 // Carrinho
-// ----------------------
-function adicionarAoCarrinho(nome, preco, observacao = "") {
+function adicionarAoCarrinho(
+  nome,
+  preco,
+  observacao = "",
+  quantidade = 1
+) {
   const itemExistente = carrinho.find(
     (item) => item.nome === nome && item.observacao === observacao
   );
 
   if (itemExistente) {
-    itemExistente.quantidade += 1;
-    itemExistente.subtotal += preco;
+    itemExistente.quantidade += quantidade;
+    itemExistente.subtotal += preco * quantidade;
   } else {
-    carrinho.push({ nome, preco, quantidade: 1, subtotal: preco, observacao });
+    carrinho.push({
+      nome,
+      preco,
+      quantidade,
+      subtotal: preco * quantidade,
+      observacao
+    });
   }
 
-  total += preco;
+  total += preco * quantidade;
   atualizarCarrinho();
-  exibirNotificacao(nome);
+
+  exibirNotificacao(
+    quantidade > 1
+      ? `${quantidade}x ${nome}`
+      : nome
+  );
 }
-
-
 
 function removerDoCarrinho(index) {
   const item = carrinho[index];
@@ -180,7 +192,8 @@ function atualizarCarrinho() {
   carrinhoItens.innerHTML = "";
 
   if (carrinho.length === 0) {
-    carrinhoItens.innerHTML = '<p class="text-gray-300">Nenhum item no carrinho.</p>';
+    carrinhoItens.innerHTML =
+      '<p class="text-gray-300">Nenhum item no carrinho.</p>';
   } else {
     carrinho.forEach((item, index) => {
       const div = document.createElement("div");
@@ -204,11 +217,14 @@ function atualizarCarrinho() {
   }
 
   total = carrinho.reduce((sum, item) => sum + item.subtotal, 0);
-const taxaEntrega = tipoPedidoSelecionado === "entrega" ? taxaEntregaFixa : 0;
+  const taxaEntrega = tipoPedidoSelecionado === "entrega" ? taxaEntregaFixa : 0;
 
-document.getElementById("total").textContent = total.toFixed(2);
-document.getElementById("totalComEntregaPreview").textContent =
-  (total + taxaEntrega).toFixed(2).replace(".", ",");
+  document.getElementById("total").textContent = total.toFixed(2);
+  document.getElementById("totalComEntregaPreview").textContent = (
+    total + taxaEntrega
+  )
+    .toFixed(2)
+    .replace(".", ",");
 
   localStorage.setItem("carrinho", JSON.stringify(carrinho));
 }
@@ -223,27 +239,29 @@ function fecharCarrinho() {
 // ----------------------
 // Fluxo de Pedido
 // ----------------------
-document.getElementById("orderForm").addEventListener("submit", async function (event) {
-  event.preventDefault();
+document
+  .getElementById("orderForm")
+  .addEventListener("submit", async function (event) {
+    event.preventDefault();
 
-  const estadoRef = doc(db, "config", "estadoPedidos");
-  const snap = await getDoc(estadoRef);
-  const recebendo = snap.exists() ? snap.data().recebendo : true;
+    const estadoRef = doc(db, "config", "estadoPedidos");
+    const snap = await getDoc(estadoRef);
+    const recebendo = snap.exists() ? snap.data().recebendo : true;
 
-  if (!recebendo) {
-    mostrarAlerta("⚠️ O sistema está temporariamente fechado para pedidos.");
-    return;
-  }
+    if (!recebendo) {
+      mostrarAlerta("⚠️ O sistema está temporariamente fechado para pedidos.");
+      return;
+    }
 
-  if (carrinho.length === 0) {
-    mostrarAlerta("Seu carrinho está vazio!");
-    return;
-  }
+    if (carrinho.length === 0) {
+      mostrarAlerta("Seu carrinho está vazio!");
+      return;
+    }
 
-  document.getElementById("modalTipoPedido").classList.remove("hidden");
-});
+    document.getElementById("modalTipoPedido").classList.remove("hidden");
+  });
 
-window.selecionarTipoPedido = function(tipo) {
+window.selecionarTipoPedido = function (tipo) {
   tipoPedidoSelecionado = tipo;
 
   if (tipo === "retirada") {
@@ -277,11 +295,10 @@ window.selecionarTipoPedido = function(tipo) {
     blocoEntrega?.classList.remove("hidden");
   }
 
-   atualizarCarrinho();
+  atualizarCarrinho();
 
   document.getElementById("modalDadosEntrega")?.classList.remove("hidden");
 };
-
 
 window.fecharModalEntrega = function () {
   document.getElementById("modalDadosEntrega").classList.add("hidden");
@@ -296,7 +313,11 @@ window.confirmarDadosEntrega = function () {
   const endereco = document.getElementById("enderecoCliente").value.trim();
   const formaPagamento = document.getElementById("formaPagamento").value;
 
- if (!nome || !tel || (tipoPedidoSelecionado === "entrega" && (!endereco || !formaPagamento))) {
+  if (
+    !nome ||
+    !tel ||
+    (tipoPedidoSelecionado === "entrega" && (!endereco || !formaPagamento))
+  ) {
     mostrarAlerta("Preencha todos os dados obrigatórios.");
     return;
   }
@@ -305,24 +326,25 @@ window.confirmarDadosEntrega = function () {
   document.getElementById("confNomeCliente").textContent = nome;
   document.getElementById("confTelefoneCliente").textContent = tel;
   document.getElementById("confEnderecoCliente").textContent = endereco;
-  document.getElementById("linhaEndereco").style.display = tipoPedidoSelecionado === "entrega" ? "block" : "none";
+  document.getElementById("linhaEndereco").style.display =
+    tipoPedidoSelecionado === "entrega" ? "block" : "none";
 
   const listaItens = document.getElementById("listaItensConfirmacao");
   listaItens.innerHTML = "";
- carrinho.forEach(item => {
-  const li = document.createElement("li");
-  li.textContent = `${item.nome} x${item.quantidade} - R$ ${item.subtotal.toFixed(2)}`;
-  if (item.observacao) {
-    li.innerHTML += `<br><small>Obs: ${item.observacao}</small>`;
-  }
-  listaItens.appendChild(li);
-});
+  carrinho.forEach((item) => {
+    const li = document.createElement("li");
+    li.textContent = `${item.nome} x${item.quantidade} - R$ ${item.subtotal.toFixed(2)}`;
+    if (item.observacao) {
+      li.innerHTML += `<br><small>Obs: ${item.observacao}</small>`;
+    }
+    listaItens.appendChild(li);
+  });
 
+  const taxa = tipoPedidoSelecionado === "entrega" ? taxaEntregaFixa : 0;
+  const valorFinal = total + taxa;
 
- const taxa = tipoPedidoSelecionado === "entrega" ? taxaEntregaFixa : 0;
-const valorFinal = total + taxa;
-
-  document.getElementById("valorTotalConfirmacao").textContent = `Total: R$ ${valorFinal.toFixed(2)}`;
+  document.getElementById("valorTotalConfirmacao").textContent =
+    `Total: R$ ${valorFinal.toFixed(2)}`;
 
   document.getElementById("modalDadosEntrega").classList.add("hidden");
   document.getElementById("modalConfirmacao").classList.remove("hidden");
@@ -330,87 +352,92 @@ const valorFinal = total + taxa;
 
 // ----------------------
 // Envio Pedido (Firestore + WhatsApp)
-document.getElementById("btnConfirmarPedido").addEventListener("click", async () => {
-  const nome = document.getElementById("confNomeCliente").textContent;
-  const tel = document.getElementById("confTelefoneCliente").textContent;
-  const endereco = document.getElementById("confEnderecoCliente").textContent;
-  const formaPagamento = document.getElementById("formaPagamento").value;
+document
+  .getElementById("btnConfirmarPedido")
+  .addEventListener("click", async () => {
+    const nome = document.getElementById("confNomeCliente").textContent;
+    const tel = document.getElementById("confTelefoneCliente").textContent;
+    const endereco = document.getElementById("confEnderecoCliente").textContent;
+    const formaPagamento = document.getElementById("formaPagamento").value;
 
-  const precisaTroco = document.getElementById("precisaTroco").checked;
-  const valorTroco = precisaTroco ? parseFloat(document.getElementById("valorTroco").value || 0) : null;
+    const precisaTroco = document.getElementById("precisaTroco").checked;
+    const valorTroco = precisaTroco
+      ? parseFloat(document.getElementById("valorTroco").value || 0)
+      : null;
 
-  const taxa = tipoPedidoSelecionado === "entrega" ? taxaEntregaFixa : 0;
-  const totalProdutos = carrinho.reduce((sum, item) => sum + item.subtotal, 0);
-  const valorFinal = totalProdutos + taxa;
+    const taxa = tipoPedidoSelecionado === "entrega" ? taxaEntregaFixa : 0;
+    const totalProdutos = carrinho.reduce(
+      (sum, item) => sum + item.subtotal,
+      0,
+    );
+    const valorFinal = totalProdutos + taxa;
 
-  try {
-    await addDoc(collection(db, "orders"), {
-      items: carrinho,
-      totalProdutos: totalProdutos.toFixed(2),
-      taxaEntrega: taxa,
-      totalFinal: valorFinal.toFixed(2),
-      precisaTroco: precisaTroco,
-      valorTroco: valorTroco,
-      status: "pendente",
-      createdAt: serverTimestamp(),
-      formaPagamento,
-      nomeCliente: nome,
-      telefoneCliente: tel,
-      enderecoCliente: tipoPedidoSelecionado === "entrega" ? endereco : "",
-      tipo: tipoPedidoSelecionado
-    });
+    try {
+      await addDoc(collection(db, "orders"), {
+        items: carrinho,
+        totalProdutos: totalProdutos.toFixed(2),
+        taxaEntrega: taxa,
+        totalFinal: valorFinal.toFixed(2),
+        precisaTroco: precisaTroco,
+        valorTroco: valorTroco,
+        status: "pendente",
+        createdAt: serverTimestamp(),
+        formaPagamento,
+        nomeCliente: nome,
+        telefoneCliente: tel,
+        enderecoCliente: tipoPedidoSelecionado === "entrega" ? endereco : "",
+        tipo: tipoPedidoSelecionado,
+      });
 
- // --- WhatsApp ---
-let mensagem = `📦 *Novo Pedido* (${tipoPedidoSelecionado.toUpperCase()})\n\n👤 Cliente: ${nome}\n📞 Tel: ${tel}`;
-if (tipoPedidoSelecionado === "entrega") {
-  mensagem += `\n🏠 Endereço: ${endereco}`;
-  mensagem += `\n🚚 Taxa de entrega: R$ ${taxa.toFixed(2)}`;
-}
+      // --- WhatsApp ---
+      let mensagem = `📦 *Novo Pedido* (${tipoPedidoSelecionado.toUpperCase()})\n\n👤 Cliente: ${nome}\n📞 Tel: ${tel}`;
+      if (tipoPedidoSelecionado === "entrega") {
+        mensagem += `\n🏠 Endereço: ${endereco}`;
+        mensagem += `\n🚚 Taxa de entrega: R$ ${taxa.toFixed(2)}`;
+      }
 
-mensagem += `\n\n🛒 *Itens:*\n`;
-carrinho.forEach(item => {
-  mensagem += `- ${item.nome} x${item.quantidade} - R$ ${item.subtotal.toFixed(2)}`;
-  if (item.observacao) {
-    mensagem += ` (Obs: ${item.observacao})`;
-  }
-  mensagem += `\n`;
-});
+      mensagem += `\n\n🛒 *Itens:*\n`;
+      carrinho.forEach((item) => {
+        mensagem += `- ${item.nome} x${item.quantidade} - R$ ${item.subtotal.toFixed(2)}`;
+        if (item.observacao) {
+          mensagem += ` (Obs: ${item.observacao})`;
+        }
+        mensagem += `\n`;
+      });
 
-mensagem += `\n💳 Pagamento: ${formaPagamento}\n💰 Total: R$ ${valorFinal.toFixed(2)}`;
+      mensagem += `\n💳 Pagamento: ${formaPagamento}\n💰 Total: R$ ${valorFinal.toFixed(2)}`;
 
-if (precisaTroco && valorTroco) {
-  const troco = (valorTroco - valorFinal).toFixed(2);
-  mensagem += `\n💵 Troco para: R$ ${valorTroco.toFixed(2)} (Troco: R$ ${troco})`;
-}
+      if (precisaTroco && valorTroco) {
+        const troco = (valorTroco - valorFinal).toFixed(2);
+        mensagem += `\n💵 Troco para: R$ ${valorTroco.toFixed(2)} (Troco: R$ ${troco})`;
+      }
 
-// 👇 Agradecimento no final
-mensagem += `\n\n🙏 Obrigado pela preferência!\n🍴 *Esfirras em Casa*`;
+      // 👇 Agradecimento no final
+      mensagem += `\n\n🙏 Obrigado pela preferência!\n🍴 *Esfirras em Casa*`;
 
+      const telefoneLoja = "5517992362238"; // 👈 coloque o número da loja
+      const url = `https://wa.me/${telefoneLoja}?text=${encodeURIComponent(mensagem)}`;
+      window.open(url, "_blank");
 
-    const telefoneLoja = "5517992362238"; // 👈 coloque o número da loja
-    const url = `https://wa.me/${telefoneLoja}?text=${encodeURIComponent(mensagem)}`;
-    window.open(url, "_blank");
+      // Resetar carrinho
+      carrinho = [];
+      total = 0;
+      atualizarCarrinho();
 
-    // Resetar carrinho
-    carrinho = [];
-    total = 0;
-    atualizarCarrinho();
+      // Fechar modal do carrinho também
+      fecharCarrinho();
 
-        // Fechar modal do carrinho também
-    fecharCarrinho();
+      // Limpar todos os campos do modal
+      document.getElementById("formaPagamento").value = "";
+      document.getElementById("precisaTroco").checked = false;
+      document.getElementById("valorTroco").value = "";
 
-    // Limpar todos os campos do modal
-document.getElementById("formaPagamento").value = "";
-document.getElementById("precisaTroco").checked = false;
-document.getElementById("valorTroco").value = "";
-
-
-    document.getElementById("modalConfirmacao").classList.add("hidden");
-    document.getElementById("modalSucessoPedido").classList.remove("hidden");
-  } catch (e) {
-    mostrarAlerta("Erro ao enviar pedido. Tente novamente.");
-  }
-});
+      document.getElementById("modalConfirmacao").classList.add("hidden");
+      document.getElementById("modalSucessoPedido").classList.remove("hidden");
+    } catch (e) {
+      mostrarAlerta("Erro ao enviar pedido. Tente novamente.");
+    }
+  });
 
 window.fecharModalSucesso = function () {
   document.getElementById("modalSucessoPedido").classList.add("hidden");
@@ -421,7 +448,8 @@ window.fecharModalSucesso = function () {
 // ----------------------
 function exibirNotificacao(nome) {
   const notificacao = document.createElement("div");
-  notificacao.className = "fixed bottom-4 right-4 bg-green-600 text-white px-4 py-2 rounded shadow-lg z-50";
+  notificacao.className =
+    "fixed bottom-4 right-4 bg-green-600 text-white px-4 py-2 rounded shadow-lg z-50";
   notificacao.textContent = `${nome} adicionado ao carrinho!`;
   document.body.appendChild(notificacao);
   setTimeout(() => notificacao.remove(), 2500);
@@ -470,14 +498,15 @@ window.fecharModalAlerta = function () {
   document.getElementById("modalAlerta").classList.add("hidden");
 };
 
+document
+  .getElementById("btnCancelarConfirmacao")
+  .addEventListener("click", () => {
+    // Fecha o modal de confirmação
+    document.getElementById("modalConfirmacao").classList.add("hidden");
 
-document.getElementById("btnCancelarConfirmacao").addEventListener("click", () => {
-  // Fecha o modal de confirmação
-  document.getElementById("modalConfirmacao").classList.add("hidden");
-
-  // Reabre o modal de dados para edição
-  document.getElementById("modalDadosEntrega").classList.remove("hidden");
-});
+    // Reabre o modal de dados para edição
+    document.getElementById("modalDadosEntrega").classList.remove("hidden");
+  });
 
 // ----------------------
 // Expor globalmente
@@ -491,11 +520,19 @@ window.confirmarDadosEntrega = confirmarDadosEntrega;
 window.confirmarEntrega = confirmarDadosEntrega;
 let produtoSelecionado = null;
 let precoSelecionado = 0;
+let quantidadeSelecionada = 1;
 
-window.abrirModalObservacao = async function(nome, preco, categoria) {
-
+window.abrirModalObservacao = async function (nome, preco, categoria) {
   produtoSelecionado = nome;
   precoSelecionado = preco;
+
+  quantidadeSelecionada = 1;
+
+  document.getElementById("quantidadeEsfirra").textContent =
+    quantidadeSelecionada;
+  document.getElementById("totalEsfirraModal").textContent = Number(preco)
+    .toFixed(2)
+    .replace(".", ",");
 
   document.getElementById("modalProdutoNome").textContent = nome;
   document.getElementById("observacaoInput").value = "";
@@ -505,7 +542,7 @@ window.abrirModalObservacao = async function(nome, preco, categoria) {
 
   const q = query(
     collection(db, "opcoesLanche"),
-    where("status", "==", "ativo")
+    where("status", "==", "ativo"),
   );
 
   const snapshot = await getDocs(q);
@@ -516,7 +553,6 @@ window.abrirModalObservacao = async function(nome, preco, categoria) {
   const grupos = {};
 
   snapshot.forEach((docSnap) => {
-
     const item = docSnap.data();
 
     if (!grupos[item.grupo]) {
@@ -524,7 +560,6 @@ window.abrirModalObservacao = async function(nome, preco, categoria) {
     }
 
     grupos[item.grupo].push(item);
-
   });
 
   // definir grupos conforme categoria
@@ -532,30 +567,23 @@ window.abrirModalObservacao = async function(nome, preco, categoria) {
 
   if (categoria === "esfihas-doces") {
     ordemGrupos = ["extrasDoces"];
-  } 
-  else if (categoria === "esfihas-salgadas") {
+  } else if (categoria === "esfihas-salgadas") {
     ordemGrupos = ["extras"];
   }
 
   // criar grupos na tela
   ordemGrupos.forEach((grupo) => {
-
     if (!grupos[grupo]) return;
 
     const titulo = document.createElement("p");
 
-    titulo.textContent =
-      grupo === "extrasDoces"
-        ? "EXTRAS DOCES"
-        : "EXTRAS";
+    titulo.textContent = grupo === "extrasDoces" ? "EXTRAS DOCES" : "EXTRAS";
 
-    titulo.className =
-      "font-bold text-sm mt-3 mb-1 text-gray-700";
+    titulo.className = "font-bold text-sm mt-3 mb-1 text-gray-700";
 
     container.appendChild(titulo);
 
     grupos[grupo].forEach((item) => {
-
       const label = document.createElement("label");
 
       label.className =
@@ -570,6 +598,8 @@ window.abrirModalObservacao = async function(nome, preco, categoria) {
       checkbox.value = `${item.nome}|${item.valor}`;
       checkbox.className = "accent-red-500";
 
+      checkbox.addEventListener("change", atualizarTotalEsfirraModal);
+
       const texto = document.createElement("span");
       texto.textContent = item.nome;
 
@@ -577,8 +607,7 @@ window.abrirModalObservacao = async function(nome, preco, categoria) {
       esquerda.appendChild(texto);
 
       const preco = document.createElement("span");
-      preco.textContent =
-        `+ R$ ${parseFloat(item.valor).toFixed(2)}`;
+      preco.textContent = `+ R$ ${parseFloat(item.valor).toFixed(2)}`;
 
       preco.className = "text-gray-600 text-xs";
 
@@ -586,41 +615,31 @@ window.abrirModalObservacao = async function(nome, preco, categoria) {
       label.appendChild(preco);
 
       container.appendChild(label);
-
     });
-
   });
 
-  document
-    .getElementById("modalObservacao")
-    .classList.remove("hidden");
-
+  document.getElementById("modalObservacao").classList.remove("hidden");
 };
 
-window.fecharModalObservacao = function() {
-  document
-    .getElementById("modalObservacao")
-    .classList.add("hidden");
+window.fecharModalObservacao = function () {
+  document.getElementById("modalObservacao").classList.add("hidden");
 };
 
-window.confirmarObservacao = function() {
-
+window.confirmarObservacao = function () {
   const obs = document.getElementById("observacaoInput").value.trim();
 
   const selecionados = document.querySelectorAll(
-    'input[name="adicional"]:checked'
+    'input[name="adicional"]:checked',
   );
 
   let precoFinal = precoSelecionado;
   const adicionais = [];
 
   selecionados.forEach((item) => {
-
     const [nome, valor] = item.value.split("|");
 
     adicionais.push(nome);
     precoFinal += parseFloat(valor);
-
   });
 
   let nomeFinal = produtoSelecionado;
@@ -629,9 +648,44 @@ window.confirmarObservacao = function() {
     nomeFinal += ` + (${adicionais.join(", ")})`;
   }
 
-  adicionarAoCarrinho(nomeFinal, precoFinal, obs);
+ adicionarAoCarrinho(
+  nomeFinal,
+  precoFinal,
+  obs,
+  quantidadeSelecionada
+);
 
   fecharModalObservacao();
-
 };
 
+window.alterarQuantidade = function (valor) {
+  quantidadeSelecionada += valor;
+
+  if (quantidadeSelecionada < 1) {
+    quantidadeSelecionada = 1;
+  }
+
+  document.getElementById("quantidadeEsfirra").textContent =
+    quantidadeSelecionada;
+
+  atualizarTotalEsfirraModal();
+};
+
+function atualizarTotalEsfirraModal() {
+  let precoUnitario = precoSelecionado;
+
+  const selecionados = document.querySelectorAll(
+    'input[name="adicional"]:checked',
+  );
+
+  selecionados.forEach((item) => {
+    const [, valor] = item.value.split("|");
+    precoUnitario += parseFloat(valor);
+  });
+
+  const totalModal = precoUnitario * quantidadeSelecionada;
+
+  document.getElementById("totalEsfirraModal").textContent = totalModal
+    .toFixed(2)
+    .replace(".", ",");
+}

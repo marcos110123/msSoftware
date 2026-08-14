@@ -17,6 +17,16 @@
 
   <meta name="apple-mobile-web-app-status-bar" content="#b91c1c">
   <style>
+    /* Scrollbar discreta/invisível no modal */
+.modal-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.modal-scroll::-webkit-scrollbar {
+  display: none;
+}
+
     #modalAlerta {
   z-index: 9999 !important;
 }
@@ -384,7 +394,7 @@ if ('serviceWorker' in navigator) {
 </script>
 
 <script>
-  const versaoSistema = "1.0.11"; // Atualize aqui também!
+  const versaoSistema = "1.0.12"; // Atualize aqui também!
 
   const script = document.createElement("script");
   script.type = "module";
@@ -541,56 +551,239 @@ if ('serviceWorker' in navigator) {
   </div>
 </div>
 
-<!-- Modal Adicionais e Observação -->
-<!-- Modal Adicionais e Observação -->
+
+<!-- Modal Personalizar Esfirra -->
+<!-- Modal Personalizar Esfirra -->
 <div id="modalObservacao"
-  class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden z-50">
+  class="fixed inset-0 bg-black/75 backdrop-blur-sm
+         flex items-center justify-center
+         hidden z-50 p-3 sm:p-4">
 
-  <div class="bg-white rounded-xl p-4 w-11/12 max-w-md max-h-[90vh] flex flex-col shadow-xl text-gray-900">
+  <div
+    class="bg-white w-full sm:max-w-md
+           rounded-3xl
+           max-h-[88vh]
+           flex flex-col
+           shadow-2xl overflow-hidden">
 
-    <h2 class="text-lg font-bold mb-2 text-center">
-      🧾 Personalize sua Esfirra
-    </h2>
+    <!-- TOPO -->
+    <div class="relative px-5 pt-4 pb-3">
 
-    <p id="modalProdutoNome"
-      class="mb-2 text-center font-semibold text-base"></p>
+      <button
+        type="button"
+        onclick="fecharModalObservacao()"
+        class="absolute top-3 right-4
+               w-8 h-8 rounded-full
+               bg-gray-100 hover:bg-red-50
+               text-gray-500 hover:text-red-600
+               flex items-center justify-center
+               text-lg font-bold transition">
+        &times;
+      </button>
 
-    <!-- LISTA DE ADICIONAIS -->
-    <div class="mb-2">
-      <p class="text-xs font-semibold mb-1 text-gray-700">
-        Escolha adicionais:
-      </p>
+      <div class="pr-10">
 
-      <div id="listaAdicionais"
-        class="max-h-64 overflow-y-auto border border-gray-200 rounded-md p-2 space-y-1 bg-gray-50">
+        <div class="flex items-center gap-1.5">
+          <span class="text-red-600 text-xs">🍴</span>
+
+          <span class="text-[11px] font-bold uppercase tracking-wider text-red-600">
+            Personalize
+          </span>
+        </div>
+
+        <h2 class="text-xl font-extrabold text-gray-900 leading-tight">
+          Sua esfirra
+        </h2>
+
+        <p
+          id="modalProdutoNome"
+          class="text-sm font-semibold text-gray-500 mt-0.5">
+        </p>
+
       </div>
     </div>
 
-    <!-- OBSERVAÇÃO -->
-    <div class="mb-2">
-      <textarea id="observacaoInput"
-        class="w-full p-2 text-sm border border-gray-300 rounded resize-none focus:ring focus:ring-red-200"
-        placeholder="Observação (opcional)"
-        rows="2"></textarea>
+
+    <!-- CONTEÚDO -->
+    <div class="modal-scroll overflow-y-auto px-5 pb-4">
+
+      <!-- ADICIONAIS -->
+      <div>
+
+        <div class="flex items-center justify-between mb-2">
+
+          <h3 class="text-sm font-extrabold text-gray-900">
+            Adicionais
+          </h3>
+
+          <span class="text-[11px] text-gray-400">
+            opcionais
+          </span>
+
+        </div>
+
+        <div
+          id="listaAdicionais"
+          class="space-y-1">
+        </div>
+
+      </div>
+
+
+      <!-- QUANTIDADE -->
+      <div
+        class="mt-4 py-3
+               flex items-center justify-between
+               border-y border-gray-100">
+
+        <div>
+          <h3 class="text-sm font-extrabold text-gray-900">
+            Quantidade
+          </h3>
+
+          <p class="text-[11px] text-gray-400 mt-0.5">
+            Escolha a quantidade
+          </p>
+        </div>
+
+        <div class="flex items-center gap-2.5">
+
+          <button
+            type="button"
+            onclick="alterarQuantidade(-1)"
+            class="w-9 h-9 rounded-full
+                   border-2 border-gray-200
+                   text-gray-700
+                   hover:border-red-500
+                   hover:text-red-600
+                   text-xl font-bold
+                   transition active:scale-90">
+            −
+          </button>
+
+          <span
+            id="quantidadeEsfirra"
+            class="w-6 text-center
+                   text-lg font-extrabold
+                   text-gray-900">
+            1
+          </span>
+
+          <button
+            type="button"
+            onclick="alterarQuantidade(1)"
+            class="w-9 h-9 rounded-full
+                   bg-red-600 hover:bg-red-700
+                   text-white text-xl
+                   font-bold shadow-sm
+                   transition active:scale-90">
+            +
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- OBSERVAÇÃO -->
+      <div class="mt-4">
+
+        <div class="flex items-center justify-between mb-1.5">
+
+          <h3 class="text-sm font-extrabold text-gray-900">
+            Observação
+          </h3>
+
+          <span class="text-[11px] text-gray-400">
+            opcional
+          </span>
+
+        </div>
+
+        <textarea
+          id="observacaoInput"
+          rows="2"
+          placeholder="Ex.: sem cebola, bem assada..."
+          class="w-full
+                 bg-gray-50
+                 border border-gray-200
+                 rounded-xl
+                 px-3 py-2
+                 text-sm
+                 text-gray-800
+                 placeholder:text-gray-400
+                 resize-none
+                 outline-none
+                 focus:bg-white
+                 focus:border-red-500
+                 focus:ring-2
+                 focus:ring-red-100
+                 transition">
+        </textarea>
+
+      </div>
+
     </div>
 
-    <!-- BOTÕES -->
-    <div class="flex gap-2 mt-1">
 
-      <button onclick="fecharModalObservacao()"
-        class="w-1/2 bg-gray-500 hover:bg-gray-600 text-white py-2 rounded-md text-sm font-semibold">
-        Cancelar
-      </button>
+    <!-- RODAPÉ -->
+    <div
+      class="bg-white
+             border-t border-gray-100
+             px-5 pt-3 pb-4
+             shadow-[0_-6px_18px_rgba(0,0,0,0.04)]">
 
-      <button onclick="confirmarObservacao()"
-        class="w-1/2 bg-red-600 hover:bg-red-700 text-white py-2 rounded-md text-sm font-semibold">
-        Confirmar
-      </button>
+      <div class="flex items-center justify-between mb-2.5">
+
+        <span class="text-sm font-semibold text-gray-500">
+          Total
+        </span>
+
+        <span class="text-xl font-extrabold text-red-600">
+          R$
+          <span id="totalEsfirraModal">
+            0,00
+          </span>
+        </span>
+
+      </div>
+
+      <div class="flex gap-2.5">
+
+        <button
+          type="button"
+          onclick="fecharModalObservacao()"
+          class="w-[28%]
+                 py-3
+                 rounded-xl
+                 bg-gray-100 hover:bg-gray-200
+                 text-gray-700
+                 text-sm font-bold
+                 transition active:scale-[0.98]">
+          Voltar
+        </button>
+
+        <button
+          type="button"
+          onclick="confirmarObservacao()"
+          class="flex-1
+                 py-3
+                 rounded-xl
+                 bg-gradient-to-r
+                 from-red-600 to-red-500
+                 hover:from-red-700 hover:to-red-600
+                 text-white
+                 text-sm font-extrabold
+                 shadow-md shadow-red-600/15
+                 transition active:scale-[0.98]">
+          🛒 Adicionar ao carrinho
+        </button>
+
+      </div>
 
     </div>
 
   </div>
 </div>
-
 </body>
 </html>
