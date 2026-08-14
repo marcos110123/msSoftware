@@ -394,7 +394,7 @@ if ('serviceWorker' in navigator) {
 </script>
 
 <script>
-  const versaoSistema = "1.0.12"; // Atualize aqui também!
+  const versaoSistema = "1.0.13"; // Atualize aqui também!
 
   const script = document.createElement("script");
   script.type = "module";
@@ -553,11 +553,12 @@ if ('serviceWorker' in navigator) {
 
 
 <!-- Modal Personalizar Esfirra -->
-<!-- Modal Personalizar Esfirra -->
 <div id="modalObservacao"
-  class="fixed inset-0 bg-black/75 backdrop-blur-sm
-         flex items-center justify-center
-         hidden z-50 p-3 sm:p-4">
+  class="fixed inset-0
+         bg-black/75
+         flex items-end sm:items-center justify-center
+         hidden z-50 p-0 sm:p-4
+         pointer-events-auto touch-manipulation">
 
   <div
     class="bg-white w-full sm:max-w-md

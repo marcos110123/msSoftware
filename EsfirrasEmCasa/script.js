@@ -541,11 +541,15 @@ window.abrirModalObservacao = async function (nome, preco, categoria) {
   container.innerHTML = "Carregando adicionais...";
 
   const q = query(
-    collection(db, "opcoesLanche"),
-    where("status", "==", "ativo"),
-  );
+  collection(db, "opcoesLanche"),
+  where("status", "==", "ativo")
+);
 
-  const snapshot = await getDocs(q);
+document.getElementById("modalObservacao").classList.remove("hidden");
+
+console.log("MODAL ABRIU:", nome);
+
+const snapshot = await getDocs(q);
 
   container.innerHTML = "";
 
