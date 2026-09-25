@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Cardápio Digital - Gatini Flor & Sabor</title>
+  <meta name="theme-color" content="#445f25">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" type="image/svg+xml" href="./img/logo.svg">
+  <link rel="apple-touch-icon" href="./img/logo.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f4f8ee', 100: '#e6f0d6', 200: '#cde1ad', 300: '#adcb7c', 400: '#8cb356',
+              500: '#6f9a3a', 600: '#56792c', 700: '#445f25', 800: '#384d22', 900: '#2f4120'
+            },
+            coral: { 50: '#fdf0ed', 100: '#fbdcd5', 500: '#e8553d', 600: '#d0432c' },
+            creme: '#fbf8f1'
+          },
+          fontFamily: {
+            sans: ['Nunito', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+            display: ['Fraunces', 'Georgia', 'serif']
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    #modalAlerta { z-index: 9999 !important; }
+    body { -webkit-tap-highlight-color: transparent; }
+    .hero-bg {
+      background:
+        radial-gradient(circle at 12% 20%, rgba(173, 203, 124, .35) 0 18%, transparent 19%),
+        radial-gradient(circle at 92% 85%, rgba(252, 211, 77, .14) 0 14%, transparent 15%),
+        linear-gradient(135deg, #445f25 0%, #56792c 55%, #384d22 100%);
+    }
+    .pb-safe { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
+  </style>
+</head>
+
+<body class="bg-creme font-sans text-gray-800 min-h-screen flex flex-col">
+
+  <!-- HEADER -->
+  <header class="sticky top-0 z-40 bg-creme/90 backdrop-blur border-b border-brand-100">
+    <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
+      <a href="#" class="flex items-center gap-3 min-w-0">
+        <img src="img/logo.svg" alt="Logo Gatini Flor & Sabor" class="w-11 h-11 shrink-0">
+        <span class="leading-tight min-w-0">
+          <span class="block font-display font-extrabold text-xl text-brand-800 truncate">Gatini</span>
+          <span class="block text-[11px] uppercase tracking-[.2em] text-coral-600 font-bold truncate">Flor &amp; Sabor</span>
+        </span>
+      </a>
+      <button onclick="abrirCarrinho()" id="btnAbrirCarrinho"
+        class="relative flex items-center gap-2 bg-brand-700 text-white pl-4 pr-5 py-2.5 rounded-full shadow-md hover:bg-brand-800 transition">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M6 7h12l-1.2 11.1a2 2 0 0 1-2 1.9H9.2a2 2 0 0 1-2-1.9L6 7Z"/><path d="M9 7a3 3 0 0 1 6 0"/>
+        </svg>
+        <span class="font-bold text-sm">Carrinho</span>
+        <span id="badgeCarrinho" class="absolute -top-1.5 -right-1.5 min-w-[22px] h-[22px] px-1 grid place-items-center bg-coral-500 text-white font-extrabold rounded-full text-xs ring-2 ring-creme hidden">0</span>
+      </button>
+    </div>
+  </header>
+
+  <div id="aviso-fechado" class="bg-coral-500 text-white text-center py-2 px-4 font-bold hidden">
+    🕒 Estamos fechados para novos pedidos no momento.
+  </div>
+
+  <!-- HERO -->
+  <section class="px-4 pt-5">
+    <div class="hero-bg relative overflow-hidden max-w-6xl mx-auto rounded-3xl text-white px-5 py-7 md:px-12 md:py-12 shadow-xl">
+      <div class="relative flex flex-col md:flex-row items-center gap-6 md:gap-10 text-center md:text-left">
+        <img src="img/logo.svg" alt="" class="w-24 h-24 md:w-44 md:h-44 drop-shadow-2xl shrink-0">
+        <div>
+          <p class="text-brand-200 font-bold uppercase tracking-[.25em] text-xs">Cardápio digital</p>
+          <h1 class="font-display font-extrabold text-[2.1rem] md:text-6xl mt-1 leading-none">
+            Gatini <span class="text-coral-100">Flor &amp; Sabor</span>
+          </h1>
+          <p class="mt-3 text-brand-100 md:text-lg max-w-xl">
+            Lanches naturais, saladas, sucos e Manga Mix — feitos na hora, com carinho.
+          </p>
+          <div class="mt-5 flex flex-wrap justify-center md:justify-start gap-2 text-xs md:text-sm font-semibold">
+            <span class="bg-white/15 backdrop-blur px-3 py-1.5 rounded-full">🌿 Natural</span>
+            <span class="bg-white/15 backdrop-blur px-3 py-1.5 rounded-full">🛵 Entrega</span>
+            <span class="bg-white/15 backdrop-blur px-3 py-1.5 rounded-full">🏃 Retirada</span>
+            <span class="bg-white/15 backdrop-blur px-3 py-1.5 rounded-full">💬 Pedido pelo WhatsApp</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CATEGORIAS (montadas pelo script.js) -->
+  <nav class="max-w-6xl w-full mx-auto px-4 pt-8 pb-4">
+    <h2 class="font-display font-extrabold text-2xl text-brand-800 mb-4">O que você deseja hoje?</h2>
+    <div id="navCategorias" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3"></div>
+  </nav>
+
+  <!-- SEÇÕES DE PRODUTOS (montadas pelo script.js) -->
+  <main id="secoes" class="flex-1"></main>
+
+  <footer class="bg-brand-800 text-brand-100 mt-12 pt-8 pb-28">
+    <div class="max-w-6xl mx-auto px-4 flex flex-col items-center text-center gap-3">
+      <img src="img/logo.svg" alt="" class="w-14 h-14">
+      <p class="font-display font-extrabold text-xl text-white">Gatini Flor &amp; Sabor</p>
+      <button id="install-button"
+        class="hidden bg-white text-brand-800 px-5 py-2.5 rounded-full font-bold shadow-lg hover:bg-brand-50">
+        📲 Instalar App
+      </button>
+      <p class="text-sm">© 2026 Gatini Flor &amp; Sabor · Desenvolvido por
+        <span class="text-white font-semibold">MSSoftware</span>
+      </p>
+      <p class="text-xs opacity-70">Versão: <span id="versaoSistemaTexto"></span></p>
+    </div>
+  </footer>
+
+  <!-- Barra do carrinho (aparece quando há itens) -->
+  <div id="barraCarrinho" class="fixed inset-x-0 bottom-0 z-30 px-4 pb-safe pt-3 pointer-events-none hidden">
+    <button onclick="abrirCarrinho()"
+      class="pointer-events-auto max-w-xl mx-auto w-full flex items-center justify-between gap-3 bg-coral-500 hover:bg-coral-600 text-white rounded-2xl px-5 py-3.5 shadow-2xl transition">
+      <span class="flex items-center gap-2 font-bold">
+        <span id="barraQtd" class="bg-white/25 rounded-lg px-2 py-0.5 text-sm">0</span>
+        Ver carrinho
+      </span>
+      <span id="barraTotal" class="font-extrabold">R$ 0,00</span>
+    </button>
+  </div>
+
+  <!-- ========== MODAIS ========== -->
+
+  <!-- Carrinho -->
+  <div id="modalCarrinho" class="fixed inset-0 bg-black/60 flex items-end sm:items-center justify-center hidden z-50">
+    <section class="bg-white rounded-t-3xl sm:rounded-3xl w-full sm:max-w-xl sm:w-11/12 p-6 shadow-xl relative max-h-[92vh] overflow-y-auto">
+      <button onclick="fecharCarrinho()" class="absolute top-3 right-4 text-gray-400 hover:text-gray-700 text-3xl leading-none">&times;</button>
+      <h2 class="font-display font-extrabold text-2xl text-center mb-4 text-brand-800">Seu pedido</h2>
+      <div id="carrinho-itens" class="bg-brand-50 rounded-2xl px-4 py-1 max-h-72 overflow-y-auto"></div>
+      <p class="flex justify-between items-baseline text-xl font-extrabold mt-4 text-brand-800">
+        <span>Total</span><span id="total">R$ 0,00</span>
+      </p>
+      <form id="orderForm" class="mt-5">
+        <button type="submit" class="bg-brand-700 text-white px-6 py-3.5 rounded-2xl hover:bg-brand-800 w-full font-bold shadow-md transition">
+          Avançar
+        </button>
+      </form>
+    </section>
+  </div>
+
+  <!-- Tipo de pedido -->
+  <div id="modalTipoPedido" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 hidden">
+    <div class="relative bg-white rounded-3xl p-6 w-11/12 max-w-md shadow-xl">
+      <button onclick="fecharModalTipoPedido()" class="absolute top-3 right-4 text-gray-400 hover:text-coral-600 text-3xl leading-none">&times;</button>
+      <h2 class="font-display font-extrabold text-2xl mb-5 text-center text-brand-800">Como deseja receber?</h2>
+      <div class="grid grid-cols-2 gap-3">
+        <button onclick="selecionarTipoPedido('retirada')" class="flex flex-col items-center gap-2 border-2 border-brand-200 hover:border-brand-500 hover:bg-brand-50 text-brand-800 font-bold py-5 rounded-2xl transition">
+          <span class="text-4xl">🏃</span> Retirada no balcão
+        </button>
+        <button onclick="selecionarTipoPedido('entrega')" class="flex flex-col items-center gap-2 border-2 border-coral-100 hover:border-coral-500 hover:bg-coral-50 text-coral-600 font-bold py-5 rounded-2xl transition">
+          <span class="text-4xl">🛵</span> Entrega em domicílio
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dados do cliente -->
+  <div id="modalDadosEntrega" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-3xl p-6 w-11/12 max-w-md max-h-[92vh] overflow-y-auto shadow-xl">
+      <h2 class="font-display font-extrabold text-2xl mb-4 text-center text-brand-800">Seus dados</h2>
+      <div class="space-y-4">
+        <div>
+          <label for="nomeCliente" class="block text-sm font-bold text-gray-700 mb-1">Nome</label>
+          <input type="text" id="nomeCliente" autocomplete="name" placeholder="Seu nome"
+                 class="w-full px-3 py-2.5 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-300">
+        </div>
+        <div>
+          <label for="telCliente" class="block text-sm font-bold text-gray-700 mb-1">Telefone (WhatsApp)</label>
+          <input type="tel" id="telCliente" autocomplete="tel" placeholder="(17) 99999-9999"
+                 class="w-full px-3 py-2.5 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-300">
+        </div>
+        <div id="campoEndereco">
+          <label for="enderecoCliente" class="block text-sm font-bold text-gray-700 mb-1">Endereço completo</label>
+          <textarea id="enderecoCliente" rows="2" placeholder="Rua, número, bairro e ponto de referência"
+                    class="w-full px-3 py-2.5 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-300 resize-none"></textarea>
+        </div>
+        <div>
+          <label for="formaPagamento" class="block text-sm font-bold text-gray-700 mb-1">Forma de pagamento</label>
+          <select id="formaPagamento" class="w-full px-3 py-2.5 rounded-xl border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-brand-300">
+            <option value="">Selecione</option>
+            <option value="Dinheiro">Dinheiro</option>
+            <option value="Cartão de Crédito">Cartão de Crédito</option>
+            <option value="Cartão de Débito">Cartão de Débito</option>
+            <option value="PIX">PIX</option>
+          </select>
+        </div>
+        <div id="blocoTroco" class="space-y-2 hidden">
+          <label class="inline-flex items-center text-sm text-gray-700">
+            <input type="checkbox" id="precisaTroco" class="mr-2 accent-brand-700 w-4 h-4"> Precisa de troco?
+          </label>
+          <input type="number" step="0.01" id="valorTroco" placeholder="Troco para quanto?"
+                 class="w-full px-3 py-2.5 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-300 hidden">
+        </div>
+        <div class="bg-brand-50 rounded-2xl p-4 text-sm space-y-1">
+          <p class="flex justify-between"><span>Produtos</span><span id="resumoProdutos">R$ 0,00</span></p>
+          <p id="linhaTaxaPreview" class="flex justify-between"><span>Taxa de entrega</span><span id="resumoTaxa">R$ 0,00</span></p>
+          <p class="flex justify-between font-extrabold text-brand-800 text-base pt-1 border-t border-brand-100"><span>Total</span><span id="totalComEntregaPreview">R$ 0,00</span></p>
+        </div>
+        <div class="flex gap-3 pt-2">
+          <button onclick="fecharModalEntrega()" class="w-1/3 bg-gray-100 hover:bg-gray-200 py-3 rounded-2xl font-bold">Voltar</button>
+          <button onclick="confirmarEntrega()" class="flex-1 bg-brand-700 hover:bg-brand-800 text-white py-3 rounded-2xl font-bold">Continuar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirmação -->
+  <div id="modalConfirmacao" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-3xl p-6 max-w-md w-11/12 max-h-[92vh] overflow-y-auto shadow-2xl">
+      <h2 class="font-display font-extrabold text-2xl mb-4 text-center text-brand-800">Confirmar pedido</h2>
+      <div class="text-sm mb-4 space-y-1 bg-brand-50 rounded-2xl p-4">
+        <p><strong>Nome:</strong> <span id="confNomeCliente"></span></p>
+        <p><strong>Telefone:</strong> <span id="confTelefoneCliente"></span></p>
+        <p id="linhaEndereco"><strong>Endereço:</strong> <span id="confEnderecoCliente"></span></p>
+        <p><strong>Pagamento:</strong> <span id="confPagamento"></span></p>
+      </div>
+      <ul id="listaItensConfirmacao" class="text-sm text-gray-700 mb-4 space-y-2 max-h-56 overflow-y-auto border border-brand-100 rounded-2xl p-4"></ul>
+      <p id="valorTotalConfirmacao" class="text-lg font-extrabold text-brand-800 mb-4 text-center"></p>
+      <div class="flex gap-3">
+        <button id="btnCancelarConfirmacao" class="w-1/3 bg-gray-100 hover:bg-gray-200 py-3 rounded-2xl font-bold">Voltar</button>
+        <button id="btnConfirmarPedido" class="flex-1 bg-brand-700 hover:bg-brand-800 text-white py-3 rounded-2xl font-bold disabled:opacity-60">
+          Enviar pedido 💬
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sucesso -->
+  <div id="modalSucessoPedido" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-3xl p-6 w-11/12 max-w-sm text-center shadow-xl">
+      <img src="img/logo.svg" alt="" class="w-20 h-20 mx-auto mb-3">
+      <h2 class="font-display font-extrabold text-2xl mb-2 text-brand-800">Pedido enviado!</h2>
+      <p class="mb-5 text-gray-600">Finalize o envio da mensagem no WhatsApp. Obrigado! 💚</p>
+      <button onclick="fecharModalSucesso()" class="bg-brand-700 hover:bg-brand-800 text-white px-6 py-3 rounded-2xl font-bold w-full">Fechar</button>
+    </div>
+  </div>
+
+  <!-- Alerta -->
+  <div id="modalAlerta" class="fixed inset-0 bg-black/60 flex items-center justify-center hidden">
+    <div class="bg-white rounded-3xl p-6 max-w-sm w-11/12 text-center shadow-xl">
+      <div class="text-4xl mb-2">⚠️</div>
+      <h2 class="font-display font-extrabold text-xl mb-2 text-brand-800">Atenção</h2>
+      <p id="mensagemAlerta" class="mb-6 text-gray-600"></p>
+      <button onclick="fecharModalAlerta()" class="bg-coral-500 hover:bg-coral-600 text-white px-6 py-3 rounded-2xl font-bold w-full">Ok</button>
+    </div>
+  </div>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    }
+
+    const versaoSistema = "2.1.1"; // mude a cada publicação para forçar atualização do script
+    const s = document.createElement("script");
+    s.type = "module";
+    s.src = `script.js?v=${versaoSistema}`;
+    document.body.appendChild(s);
+    document.getElementById("versaoSistemaTexto").textContent = versaoSistema;
+  </script>
+</body>
+</html>

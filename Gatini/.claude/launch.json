@@ -1,0 +1,23 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "gatini",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["C:\\Users\\Win11\\AppData\\Local\\Temp\\claude\\C--Users-Win11-Desktop-Pessoal-MsSoftware-Gatini\\65ece26a-152e-417c-9ce8-4310c2ff7a29\\scratchpad\\serve.js", "C:\\Users\\Win11\\Desktop\\Pessoal\\MsSoftware\\Gatini", "5510"],
+      "port": 5510
+    },
+    {
+      "name": "gatini-adm",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["C:\\Users\\Win11\\AppData\\Local\\Temp\\claude\\C--Users-Win11-Desktop-Pessoal-MsSoftware-Gatini\\65ece26a-152e-417c-9ce8-4310c2ff7a29\\scratchpad\\serve.js", "C:\\Users\\Win11\\Desktop\\Pessoal\\Gatini adm", "5520"],
+      "port": 5520
+    },
+    {
+      "name": "gatini-adm-teste",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["C:\\Users\\Win11\\AppData\\Local\\Temp\\claude\\C--Users-Win11-Desktop-Pessoal-MsSoftware-Gatini\\65ece26a-152e-417c-9ce8-4310c2ff7a29\\scratchpad\\serve.js", "C:\\Users\\Win11\\AppData\\Local\\Temp\\claude\\C--Users-Win11-Desktop-Pessoal-MsSoftware-Gatini\\65ece26a-152e-417c-9ce8-4310c2ff7a29\\scratchpad\\teste-adm", "5530"],
+      "port": 5530
+    }
+  ]
+}

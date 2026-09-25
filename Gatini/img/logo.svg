@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="Gatini Flor &amp; Sabor">
+  <!-- Fundo -->
+  <circle cx="100" cy="100" r="96" fill="#fbf8f1"/>
+  <circle cx="100" cy="100" r="96" fill="none" stroke="#445f25" stroke-width="6"/>
+  <circle cx="100" cy="100" r="86" fill="none" stroke="#cde1ad" stroke-width="2" stroke-dasharray="2 6" stroke-linecap="round"/>
+
+  <!-- Folhas atrás da orelha direita -->
+  <path d="M132 50 C140 30 160 24 172 28 C168 44 152 56 132 50 Z" fill="#8cb356"/>
+  <path d="M134 49 C146 42 156 36 168 30" fill="none" stroke="#56792c" stroke-width="2" stroke-linecap="round"/>
+  <path d="M138 60 C154 56 168 62 174 72 C160 78 146 72 138 60 Z" fill="#6f9a3a"/>
+
+  <!-- Cabeça do gato -->
+  <path d="M50 122 C50 94 58 78 66 71 L60 36 L92 58 C97 57 103 57 108 58 L140 36 L134 71
+           C142 78 150 94 150 122 C150 150 128 168 100 168 C72 168 50 150 50 122 Z"
+        fill="#445f25"/>
+  <!-- Interior das orelhas -->
+  <path d="M67 48 L70 68 L84 59 Z" fill="#6f9a3a"/>
+  <path d="M133 48 L130 68 L116 59 Z" fill="#6f9a3a"/>
+
+  <!-- Olhos fechados (felizes) -->
+  <path d="M72 112 Q81 102 90 112" fill="none" stroke="#fbf8f1" stroke-width="5" stroke-linecap="round"/>
+  <path d="M110 112 Q119 102 128 112" fill="none" stroke="#fbf8f1" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- Bochechas -->
+  <circle cx="72" cy="128" r="7" fill="#f7a08f" opacity=".9"/>
+  <circle cx="128" cy="128" r="7" fill="#f7a08f" opacity=".9"/>
+
+  <!-- Nariz e boca -->
+  <path d="M94 124 L106 124 L100 131 Z" fill="#e8553d" stroke="#e8553d" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M100 131 Q100 139 92 139 M100 131 Q100 139 108 139" fill="none" stroke="#fbf8f1" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- Bigodes -->
+  <g stroke="#445f25" stroke-width="3" stroke-linecap="round">
+    <path d="M49 128 L30 123"/><path d="M50 136 L31 140"/>
+    <path d="M151 128 L170 123"/><path d="M150 136 L169 140"/>
+  </g>
+
+  <!-- Flor na orelha esquerda -->
+  <g transform="translate(58 44)">
+    <g fill="#e8553d">
+      <ellipse cx="0" cy="-12" rx="7" ry="10"/>
+      <ellipse cx="0" cy="-12" rx="7" ry="10" transform="rotate(72)"/>
+      <ellipse cx="0" cy="-12" rx="7" ry="10" transform="rotate(144)"/>
+      <ellipse cx="0" cy="-12" rx="7" ry="10" transform="rotate(216)"/>
+      <ellipse cx="0" cy="-12" rx="7" ry="10" transform="rotate(288)"/>
+    </g>
+    <circle r="7" fill="#fcd34d"/>
+    <circle r="3" fill="#f59e0b"/>
+  </g>
+</svg>

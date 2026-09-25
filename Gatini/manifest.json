@@ -1,0 +1,14 @@
+{
+  "name": "Gatini Flor & Sabor",
+  "short_name": "Gatini",
+  "description": "Cardápio digital da Gatini Flor & Sabor",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fbf8f1",
+  "theme_color": "#445f25",
+  "icons": [
+    { "src": "img/logo-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "img/logo-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
