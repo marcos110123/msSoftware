@@ -4,20 +4,82 @@
     {
       "name": "gatini",
       "runtimeExecutable": "node",
-      "runtimeArgs": ["C:\\Users\\Win11\\AppData\\Local\\Temp\\claude\\C--Users-Win11-Desktop-Pessoal-MsSoftware-Gatini\\65ece26a-152e-417c-9ce8-4310c2ff7a29\\scratchpad\\serve.js", "C:\\Users\\Win11\\Desktop\\Pessoal\\MsSoftware\\Gatini", "5510"],
+      "runtimeArgs": [
+        "C:\\Users\\Win11\\AppData\\Local\\Temp\\claude\\C--Users-Win11-Desktop-Pessoal-MsSoftware-Gatini\\65ece26a-152e-417c-9ce8-4310c2ff7a29\\scratchpad\\serve.js",
+        "C:\\Users\\Win11\\Desktop\\Pessoal\\MsSoftware\\Gatini",
+        "5510"
+      ],
       "port": 5510
     },
     {
       "name": "gatini-adm",
       "runtimeExecutable": "node",
-      "runtimeArgs": ["C:\\Users\\Win11\\AppData\\Local\\Temp\\claude\\C--Users-Win11-Desktop-Pessoal-MsSoftware-Gatini\\65ece26a-152e-417c-9ce8-4310c2ff7a29\\scratchpad\\serve.js", "C:\\Users\\Win11\\Desktop\\Pessoal\\Gatini adm", "5520"],
+      "runtimeArgs": [
+        "C:\\Users\\Win11\\AppData\\Local\\Temp\\claude\\C--Users-Win11-Desktop-Pessoal-MsSoftware-Gatini\\65ece26a-152e-417c-9ce8-4310c2ff7a29\\scratchpad\\serve.js",
+        "C:\\Users\\Win11\\Desktop\\Pessoal\\Gatini adm",
+        "5520"
+      ],
       "port": 5520
     },
     {
       "name": "gatini-adm-teste",
       "runtimeExecutable": "node",
-      "runtimeArgs": ["C:\\Users\\Win11\\AppData\\Local\\Temp\\claude\\C--Users-Win11-Desktop-Pessoal-MsSoftware-Gatini\\65ece26a-152e-417c-9ce8-4310c2ff7a29\\scratchpad\\serve.js", "C:\\Users\\Win11\\AppData\\Local\\Temp\\claude\\C--Users-Win11-Desktop-Pessoal-MsSoftware-Gatini\\65ece26a-152e-417c-9ce8-4310c2ff7a29\\scratchpad\\teste-adm", "5530"],
+      "runtimeArgs": [
+        "C:\\Users\\Win11\\AppData\\Local\\Temp\\claude\\C--Users-Win11-Desktop-Pessoal-MsSoftware-Gatini\\65ece26a-152e-417c-9ce8-4310c2ff7a29\\scratchpad\\serve.js",
+        "C:\\Users\\Win11\\AppData\\Local\\Temp\\claude\\C--Users-Win11-Desktop-Pessoal-MsSoftware-Gatini\\65ece26a-152e-417c-9ce8-4310c2ff7a29\\scratchpad\\teste-adm",
+        "5530"
+      ],
       "port": 5530
+    },
+    {
+      "name": "labrasa-teste",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:\\Users\\Win11\\AppData\\Local\\Temp\\claude\\C--Users-Win11-Desktop-Pessoal-MsSoftware-Gatini\\65ece26a-152e-417c-9ce8-4310c2ff7a29\\scratchpad\\serve.js",
+        "C:\\Users\\Win11\\AppData\\Local\\Temp\\claude\\C--Users-Win11-Desktop-Pessoal-MsSoftware-Gatini\\65ece26a-152e-417c-9ce8-4310c2ff7a29\\scratchpad\\teste-labrasa",
+        "5540"
+      ],
+      "port": 5540
+    },
+    {
+      "name": "labrasa-v2-teste",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:\\Users\\Win11\\AppData\\Local\\Temp\\claude\\C--Users-Win11-Desktop-Pessoal-MsSoftware-Gatini\\65ece26a-152e-417c-9ce8-4310c2ff7a29\\scratchpad\\serve.js",
+        "C:\\Users\\Win11\\AppData\\Local\\Temp\\claude\\C--Users-Win11-Desktop-Pessoal-MsSoftware-Gatini\\65ece26a-152e-417c-9ce8-4310c2ff7a29\\scratchpad\\teste-v2",
+        "5550"
+      ],
+      "port": 5550
+    },
+    {
+      "name": "cardapio-teste",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:\\Users\\Win11\\AppData\\Local\\Temp\\claude\\C--Users-Win11-Desktop-Pessoal-MsSoftware-Gatini\\65ece26a-152e-417c-9ce8-4310c2ff7a29\\scratchpad\\serve.js",
+        "C:\\Users\\Win11\\AppData\\Local\\Temp\\claude\\C--Users-Win11-Desktop-Pessoal-MsSoftware-Gatini\\65ece26a-152e-417c-9ce8-4310c2ff7a29\\scratchpad\\teste-cardapio",
+        "5560"
+      ],
+      "port": 5560
+    },
+    {
+      "name": "esfirras-v2-teste",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:\\Users\\Win11\\AppData\\Local\\Temp\\claude\\C--Users-Win11-Desktop-Pessoal-MsSoftware-Gatini\\65ece26a-152e-417c-9ce8-4310c2ff7a29\\scratchpad\\serve.js",
+        "C:\\Users\\Win11\\AppData\\Local\\Temp\\claude\\C--Users-Win11-Desktop-Pessoal-MsSoftware-Gatini\\65ece26a-152e-417c-9ce8-4310c2ff7a29\\scratchpad\\teste-esf",
+        "5570"
+      ],
+      "port": 5570
+    },
+    {
+      "name": "fiorella-v2-teste",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:\\Users\\Win11\\AppData\\Local\\Temp\\claude\\C--Users-Win11-Desktop-Pessoal-MsSoftware-Gatini\\65ece26a-152e-417c-9ce8-4310c2ff7a29\\scratchpad\\serve.js",
+        "C:\\Users\\Win11\\AppData\\Local\\Temp\\claude\\C--Users-Win11-Desktop-Pessoal-MsSoftware-Gatini\\65ece26a-152e-417c-9ce8-4310c2ff7a29\\scratchpad\\teste-fio",
+        "5580"
+      ],
+      "port": 5580
     }
   ]
 }
