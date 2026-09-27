@@ -13,7 +13,7 @@
   <meta name="theme-color" content="#000000"> 
   <link rel="manifest" href="./manifest.json">
 
-<link rel="apple-touch-icon" href="./img/logo2.jpeg">
+<link rel="apple-touch-icon" href="./img/logo2-leve.jpg">
 
   <meta name="apple-mobile-web-app-status-bar" content="#b91c1c">
   <style>
@@ -80,6 +80,29 @@ body{
   border-radius:20px;
 }
   </style>
+<style>
+  /* Botão redondo do carrinho: o aviso "adicionado" sobe para não ficar por cima */
+  .aviso-adicionado { bottom: 96px !important; }
+  @keyframes pulinho { 0%{transform:scale(1)} 40%{transform:scale(1.12)} 100%{transform:scale(1)} }
+  .pulou { animation: pulinho .35s ease; }
+
+  /* Janelas brancas com o topo vinho da marca */
+  .modal-card > h2 {
+    margin: -24px -24px 18px; padding: 16px 44px; border-radius: inherit;
+    border-bottom-left-radius: 0; border-bottom-right-radius: 0;
+    background: linear-gradient(90deg, #7f1d1d, #991b1b); color: #fff !important;
+  }
+  .modal-card > .fechar-modal { color: #fecaca; z-index: 1; }
+  .modal-obs-topo { background: linear-gradient(90deg, #7f1d1d, #991b1b); }
+  .modal-obs-topo h2 { color: #fff !important; }
+  .modal-obs-topo #modalProdutoNome { color: #fecaca !important; }
+  .modal-obs-topo .text-red-600 { color: #fde68a !important; }
+  .modal-obs-topo .fechar-modal { background: rgba(255,255,255,.15); color: #fff; }
+
+  /* Campo de quantidade sem as setinhas do navegador */
+  #quantidadeEsfirra::-webkit-outer-spin-button, #quantidadeEsfirra::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  #quantidadeEsfirra { -moz-appearance: textfield; }
+</style>
 </head>
 
 <!-- HEADER / HERO MINI -->
@@ -104,7 +127,7 @@ bg-[radial-gradient(ellipse_at_center,_#991b1b_0%,_#450a0a_45%,_#1f0505_100%)]">
 
   <!-- Logo -->
   <div class="relative z-10 flex justify-center">
-    <img src="img/logo2.jpeg"
+    <img src="img/logo2-leve.jpg"
       alt="Logo Esfirras em Casa"
       class="w-[80%] max-w-[380px]
       rounded-3xl
@@ -161,7 +184,7 @@ shadow-[0_0_30px_rgba(239,68,68,0.15)]
 hover:scale-[1.03]
 transition duration-300"
     >
-      <img src="img/esfirrasalgadanova.png" alt="Esfihas Salgadas" class="w-full h-52 object-cover
+      <img src="img/esfirrasalgadanova-leve.jpg" alt="Esfihas Salgadas" class="w-full h-52 object-cover
 group-hover:scale-110 transition duration-500">
       <div class="absolute bottom-0 bg-black/70 text-white w-full text-center py-2 text-sm">
         Esfirras Salgadas
@@ -178,7 +201,7 @@ shadow-[0_0_30px_rgba(239,68,68,0.15)]
 hover:scale-[1.03]
 transition duration-300"
     >
-      <img src="img/esfirradocenova.png" alt="Esfihas Doces"  class="w-full h-52 object-cover
+      <img src="img/esfirradocenova-leve.jpg" alt="Esfihas Doces"  class="w-full h-52 object-cover
 group-hover:scale-110 transition duration-500">
       <div class="absolute bottom-0 bg-black/70 text-white w-full text-center py-2 text-sm">
         Esfirras Doces
@@ -195,10 +218,10 @@ shadow-[0_0_30px_rgba(239,68,68,0.15)]
 hover:scale-[1.03]
 transition duration-300"
     >
-      <img src="img/latasnova.png" alt="Bebidas"  class="w-full h-52 object-cover
+      <img src="img/latasnova-leve.jpg" alt="Bebidas"  class="w-full h-52 object-cover
 group-hover:scale-110 transition duration-500">
       <div class="absolute bottom-0 bg-black/70 text-white w-full text-center py-2 text-sm">
-        BEBIDAS
+        Bebidas
       </div>
     </button>
 
@@ -213,10 +236,10 @@ shadow-[0_0_30px_rgba(239,68,68,0.15)]
 hover:scale-[1.03]
 transition duration-300"
     >
-      <img src="img/longs2.png" alt="cervejas" class="w-full h-52 object-cover
+      <img src="img/longs2-leve.jpg" alt="cervejas" class="w-full h-52 object-cover
 group-hover:scale-110 transition duration-500">
       <div class="absolute bottom-0 bg-black/70 text-white w-full text-center py-2 text-sm">
-        CERVEJAS
+        Cervejas
       </div>
     </button>
 
@@ -325,6 +348,7 @@ to-red-400">
     </div>
 
     <p class="text-xl font-bold mt-4 text-red-400">Total: R$ <span id="total">0,00</span></p>
+    <p id="tempoEntregaInfo" class="text-sm text-red-100 mt-1 hidden"></p>
 
 
     <form id="orderForm" class="mt-6">
@@ -336,15 +360,11 @@ to-red-400">
 </div>
 
 <!-- Botão Flutuante Ver Carrinho -->
-<button onclick="abrirCarrinho()" id="btnAbrirCarrinho"
-  class="fixed top-4 right-4
-bg-red-500 text-[#7f1d1d]
-px-5 py-3 rounded-full
-shadow-[0_0_20px_rgba(239,68,68,0.5)]
-hover:scale-105
-transition z-50 flex items-center gap-2 font-bold" text-white px-5 py-3 rounded-full shadow-xl hover:bg-red-700 z-50 flex items-center gap-2">
-  🛒 <span class="font-medium">Carrinho</span>
-  <span id="badgeCarrinho" class="ml-1 bg-red-700 text-white font-bold px-2 py-0.5 rounded-full text-sm hidden">0</span>
+<button id="btnAbrirCarrinho" onclick="abrirCarrinho()" aria-label="Abrir carrinho"
+  class="flex fixed bottom-5 right-5 z-50 w-16 h-16 rounded-full bg-red-600 hover:bg-red-700
+  text-white text-2xl items-center justify-center shadow-[0_0_25px_rgba(239,68,68,0.6)] border-2 border-red-300/40 transition">
+  🛒
+  <span id="badgeCarrinho" class="hidden absolute -top-1 -right-1 bg-white text-red-700 font-extrabold text-xs min-w-[24px] h-6 px-1.5 rounded-full flex items-center justify-center border-2 border-red-600">0</span>
 </button>
 
 
@@ -394,7 +414,7 @@ if ('serviceWorker' in navigator) {
 </script>
 
 <script>
-  const versaoSistema = "1.0.1"; // Atualize aqui também!
+  const versaoSistema = "1.0.3"; // Atualize aqui também!
 
   const script = document.createElement("script");
   script.type = "module";
@@ -409,7 +429,7 @@ if ('serviceWorker' in navigator) {
 
 <!-- Modal de Confirmação do Pedido -->
 <div id="modalConfirmacao" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden">
-  <div class="bg-white rounded-lg p-6 max-w-md w-11/12 max-h-screen overflow-y-auto text-center shadow-2xl">
+  <div class="modal-card bg-white rounded-lg p-6 max-w-md w-11/12 max-h-screen overflow-y-auto text-center shadow-2xl">
     <h2 class="text-xl font-bold mb-4 text-gray-800">Confirmar Pedido</h2>
     <p id="textoConfirmacao" class="text-gray-700 mb-2">Você confirma o envio do pedido?</p>
 
@@ -452,7 +472,7 @@ if ('serviceWorker' in navigator) {
 <!-- Modal de Alerta -->
 <div id="modalAlerta" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[9999] hidden">
 
-  <div class="bg-white rounded-lg p-6 max-w-sm w-11/12 text-center shadow-xl text-gray-800 max-h-screen overflow-y-auto">
+  <div class="modal-card bg-white rounded-lg p-6 max-w-sm w-11/12 text-center shadow-xl text-gray-800 max-h-screen overflow-y-auto">
     <h2 class="text-xl font-bold mb-4">⚠️ Atenção</h2>
     <p id="mensagemAlerta" class="mb-6">Mensagem do alerta.</p>
     <button onclick="fecharModalAlerta()" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Fechar</button>
@@ -462,11 +482,11 @@ if ('serviceWorker' in navigator) {
 
 <!-- Modal de Tipo de Pedido -->
 <div id="modalTipoPedido" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
-  <div class="relative bg-white rounded-xl p-6 w-11/12 max-w-md max-h-screen overflow-y-auto shadow-xl text-gray-900">
+  <div class="modal-card relative bg-white rounded-xl p-6 w-11/12 max-w-md max-h-screen overflow-y-auto shadow-xl text-gray-900">
 
  <!-- Botão de Fechar -->
 <button onclick="fecharModalTipoPedido()" 
-  class="absolute top-3 right-3 text-gray-500 hover:text-red-600 text-2xl font-bold transition">
+  class="fechar-modal absolute top-3 right-3 text-gray-500 hover:text-red-600 text-2xl font-bold transition">
   &times;
 </button>
 
@@ -486,8 +506,8 @@ if ('serviceWorker' in navigator) {
 
 <!-- Modal de Dados para Entrega -->
 <div id="modalDadosEntrega" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
-  <div class="relative bg-white rounded-xl p-6 w-11/12 max-w-md max-h-screen overflow-y-auto shadow-xl text-gray-900">
-    <h2 class="text-2xl font-bold mb-4 text-center">📄Dados para entrega do pedido</h2>
+  <div class="modal-card relative bg-white rounded-xl p-6 w-11/12 max-w-md max-h-screen overflow-y-auto shadow-xl text-gray-900">
+    <h2 class="text-2xl font-bold mb-4 text-center">📄 Dados para entrega do pedido</h2>
 
     <div class="space-y-4">
       <!-- Nome -->
@@ -559,19 +579,19 @@ if ('serviceWorker' in navigator) {
          hidden z-50 p-3 sm:p-4">
 
   <div
-    class="bg-white w-full sm:max-w-md
+    class="modal-card bg-white w-full sm:max-w-md
            rounded-3xl
            max-h-[88vh]
            flex flex-col
            shadow-2xl overflow-hidden">
 
     <!-- TOPO -->
-    <div class="relative px-5 pt-4 pb-3">
+    <div class="modal-obs-topo relative px-5 pt-4 pb-3 mb-3">
 
       <button
         type="button"
         onclick="fecharModalObservacao()"
-        class="absolute top-3 right-4
+        class="fechar-modal absolute top-3 right-4
                w-8 h-8 rounded-full
                bg-gray-100 hover:bg-red-50
                text-gray-500 hover:text-red-600
@@ -660,13 +680,18 @@ if ('serviceWorker' in navigator) {
             −
           </button>
 
-          <span
+          <input
             id="quantidadeEsfirra"
-            class="w-6 text-center
+            type="number" inputmode="numeric" min="1" max="999" value="1"
+            aria-label="Quantidade"
+            oninput="definirQuantidade(this.value, false)"
+            onblur="definirQuantidade(this.value, true)"
+            onfocus="this.select()"
+            class="w-12 h-9 text-center
                    text-lg font-extrabold
-                   text-gray-900">
-            1
-          </span>
+                   text-gray-900 bg-gray-50
+                   border border-gray-200 rounded-lg
+                   outline-none focus:border-red-500 focus:ring-2 focus:ring-red-100">
 
           <button
             type="button"
@@ -681,6 +706,16 @@ if ('serviceWorker' in navigator) {
 
         </div>
 
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-2 pb-1">
+        <span class="text-[11px] text-gray-400 mr-auto">Atalhos:</span>
+        <button type="button" onclick="alterarQuantidade(5)"
+          class="qtd-atalho px-3 py-1.5 rounded-full border border-red-200 bg-red-50 text-red-700 text-xs font-extrabold active:scale-95 transition">+5</button>
+        <button type="button" onclick="alterarQuantidade(10)"
+          class="qtd-atalho px-3 py-1.5 rounded-full border border-red-200 bg-red-50 text-red-700 text-xs font-extrabold active:scale-95 transition">+10</button>
+        <button type="button" onclick="definirQuantidade(1, true)"
+          class="qtd-atalho px-3 py-1.5 rounded-full border border-gray-200 bg-gray-50 text-gray-500 text-xs font-bold active:scale-95 transition">Limpar</button>
       </div>
 
 
@@ -727,7 +762,7 @@ if ('serviceWorker' in navigator) {
 
     <!-- RODAPÉ -->
     <div
-      class="bg-white
+      class="modal-obs-rodape bg-white
              border-t border-gray-100
              px-5 pt-3 pb-4
              shadow-[0_-6px_18px_rgba(0,0,0,0.04)]">

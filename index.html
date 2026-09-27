@@ -1,327 +1,454 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-tema="misto">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MsSoftware - Desenvolvimento Web e Mobile</title>
+  <title>MsSoftware — Sites, Sistemas e Aplicativos sob medida</title>
+  <meta name="description" content="MsSoftware: sites, sistemas web, aplicativos e cardápios digitais sob medida para a sua empresa. Peça um orçamento pelo WhatsApp.">
+  <meta name="keywords" content="desenvolvimento web, sistemas, aplicativos, sites, cardápio digital, mssoftware">
+  <meta name="author" content="MsSoftware">
+  <meta name="theme-color" content="#0b1120">
+  <link rel="canonical" href="https://mssoftware.com.br/">
+  <link rel="icon" href="assets/favicon-64.png" type="image/png">
+  <link rel="apple-touch-icon" href="assets/apple-touch-180.png">
+  <meta property="og:title" content="MsSoftware — Soluções Digitais">
+  <meta property="og:description" content="Sites, sistemas e aplicativos sob medida para a sua empresa.">
+  <meta property="og:image" content="https://mssoftware.com.br/assets/logo-ms.jpg">
+  <meta property="og:url" content="https://mssoftware.com.br/">
+  <meta property="og:type" content="website">
+
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="icon" href="logo2.png" type="image/png" />
-  <meta name="description" content="MsSoftware - Sites, Sistemas e Aplicativos sob medida para sua empresa. Soluções digitais com foco em resultado.">
-<meta name="keywords" content="desenvolvimento web, sistemas, aplicativos, sites, mssoftware, tecnologia, agência digital">
-<meta name="author" content="MsSoftware">
-<meta property="og:title" content="MsSoftware - Soluções Digitais" />
-<meta property="og:description" content="Sites, Sistemas e Aplicativos sob medida para sua empresa." />
-<meta property="og:image" content="https://mssoftware.com.br/logo2.png" />
-<meta property="og:url" content="https://mssoftware.com.br" />
-<meta property="og:type" content="website" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <style>
-    body { font-family: 'Poppins', sans-serif; }
-    .fade-in { opacity: 0; transform: translateY(20px); transition: opacity 0.8s, transform 0.8s; }
-    .fade-in.visible { opacity: 1; transform: translateY(0); }
+    /* ===== Cores (3 estilos) ===== */
+    :root, html[data-tema="misto"] {
+      --fundo: #f5f7fb; --fundo-alt: #ffffff; --cartao: #ffffff; --borda: #e3e8f2;
+      --texto: #0f172a; --texto-suave: #55627a;
+      --topo: #0b1120; --topo-2: #12204a; --topo-texto: #ffffff; --topo-suave: #b8c4dd;
+      --primaria: #2563eb; --primaria-2: #1d4ed8; --destaque: #60a5fa;
+      --faixa: #0b1120; --faixa-texto: #ffffff;
+      --sombra: 0 10px 30px rgba(15, 23, 42, .08);
+    }
+    html[data-tema="escuro"] {
+      --fundo: #0b1120; --fundo-alt: #0f172a; --cartao: #111c34; --borda: #1f2c4a;
+      --texto: #e8eefc; --texto-suave: #9aa8c7;
+      --topo: #070c18; --topo-2: #12204a; --topo-texto: #ffffff; --topo-suave: #b8c4dd;
+      --primaria: #3b82f6; --primaria-2: #2563eb; --destaque: #60a5fa;
+      --faixa: #070c18; --faixa-texto: #ffffff;
+      --sombra: 0 10px 30px rgba(0, 0, 0, .35);
+    }
+    html[data-tema="claro"] {
+      --fundo: #ffffff; --fundo-alt: #f3f6fc; --cartao: #ffffff; --borda: #e3e8f2;
+      --texto: #0f172a; --texto-suave: #55627a;
+      --topo: #eef3ff; --topo-2: #dbe7ff; --topo-texto: #0f172a; --topo-suave: #4b5a78;
+      --primaria: #2563eb; --primaria-2: #1d4ed8; --destaque: #2563eb;
+      --faixa: #2563eb; --faixa-texto: #ffffff;
+      --sombra: 0 10px 30px rgba(37, 99, 235, .10);
+    }
 
-   @keyframes scroll {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-100%); } /* Vai até o fim do conteúdo duplicado */
-}
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Poppins', system-ui, sans-serif; background: var(--fundo); color: var(--texto); }
+    .secao-alt { background: var(--fundo-alt); }
+    .suave { color: var(--texto-suave); }
+    .cartao { background: var(--cartao); border: 1px solid var(--borda); border-radius: 18px; box-shadow: var(--sombra); }
+    .cartao-hover { transition: transform .25s, box-shadow .25s, border-color .25s; }
+    .cartao-hover:hover { transform: translateY(-4px); border-color: var(--primaria); }
+    .icone { width: 52px; height: 52px; border-radius: 14px; display: grid; place-items: center; font-size: 26px;
+      background: color-mix(in srgb, var(--primaria) 12%, transparent); }
+    .etiqueta { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--primaria); }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600;
+      border-radius: 999px; padding: 14px 28px; transition: transform .2s, background .2s, box-shadow .2s; }
+    .btn:active { transform: scale(.97); }
+    .btn-primario { background: var(--primaria); color: #fff; box-shadow: 0 8px 24px color-mix(in srgb, var(--primaria) 35%, transparent); }
+    .btn-primario:hover { background: var(--primaria-2); }
+    .btn-contorno { border: 1.5px solid color-mix(in srgb, var(--topo-texto) 35%, transparent); color: var(--topo-texto); }
+    .btn-contorno:hover { background: color-mix(in srgb, var(--topo-texto) 10%, transparent); }
 
-.animate-scroll {
-  display: flex;
-  width: 200%; /* conteúdo duplicado */
-  animation: scroll 20s linear infinite;
-}
+    /* Topo */
+    .hero { background: radial-gradient(1200px 600px at 80% -10%, var(--topo-2), transparent 60%), var(--topo); color: var(--topo-texto); }
+    .hero .suave-topo { color: var(--topo-suave); }
+    .grade-fundo { background-image: linear-gradient(color-mix(in srgb, var(--topo-texto) 6%, transparent) 1px, transparent 1px),
+      linear-gradient(90deg, color-mix(in srgb, var(--topo-texto) 6%, transparent) 1px, transparent 1px);
+      background-size: 44px 44px; mask-image: radial-gradient(ellipse at center, #000 30%, transparent 75%); }
+    #cabecalho { color: var(--topo-texto); transition: background .3s, box-shadow .3s; }
+    #cabecalho.rolou { background: color-mix(in srgb, var(--topo) 92%, transparent); backdrop-filter: blur(10px); box-shadow: 0 4px 20px rgba(0,0,0,.15); }
+    #cabecalho a.link { color: var(--topo-suave); }
+    #cabecalho a.link:hover { color: var(--topo-texto); }
+    #menuCelular { background: var(--topo); }
+    .chip { font-size: 13px; padding: 6px 14px; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--topo-texto) 18%, transparent); color: var(--topo-suave); }
 
-  
+    /* Projetos */
+    .projeto-logo { height: 150px; border-radius: 14px; overflow: hidden; background: #fff; }
+    .projeto-logo img { display: block; width: 100%; height: 100%; object-fit: contain; padding: 8px; }
+    .projeto-logo img.foto { object-fit: cover; padding: 0; }
+    .link-projeto { color: var(--primaria); font-weight: 600; }
+
+    /* Passos */
+    .num { width: 40px; height: 40px; border-radius: 999px; background: var(--primaria); color: #fff; display: grid; place-items: center; font-weight: 700; }
+
+    /* Carrossel de clientes */
+    .faixa-logos { mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent); }
+    .trilho { display: flex; width: max-content; animation: rolar 35s linear infinite; }
+    .faixa-logos:hover .trilho { animation-play-state: paused; }
+    .trilho img { height: 84px; width: 84px; object-fit: cover; border-radius: 18px; margin: 0 18px; background: #fff;
+      border: 1px solid var(--borda); box-shadow: var(--sombra); }
+    @keyframes rolar { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+    /* Perguntas */
+    details summary { list-style: none; cursor: pointer; }
+    details summary::-webkit-details-marker { display: none; }
+    details[open] .seta { transform: rotate(45deg); }
+    .seta { transition: transform .2s; color: var(--primaria); font-size: 22px; line-height: 1; }
+
+    /* Faixa final e rodapé */
+    .faixa { background: var(--faixa); color: var(--faixa-texto); }
+    footer { background: var(--topo); color: var(--topo-suave); }
+    html[data-tema="claro"] footer { background: #0b1120; color: #b8c4dd; }
+
+    /* WhatsApp flutuante */
+    .whats { position: fixed; right: 18px; bottom: 18px; z-index: 60; width: 58px; height: 58px; border-radius: 999px;
+      background: #25d366; display: grid; place-items: center; box-shadow: 0 8px 24px rgba(37,211,102,.45); transition: transform .2s; }
+    .whats:hover { transform: scale(1.07); }
+
+    /* Animação ao rolar */
+    .surgir { opacity: 0; transform: translateY(18px); transition: opacity .7s, transform .7s; }
+    .surgir.visivel { opacity: 1; transform: none; }
+    @media (prefers-reduced-motion: reduce) {
+      .surgir { opacity: 1; transform: none; transition: none; }
+      .trilho { animation: none; }
+      html { scroll-behavior: auto; }
+    }
   </style>
 </head>
-<body class="bg-gray-50 text-gray-800">
+<body>
 
-  <!-- Header Melhorado -->
-<header id="mainHeader" class="fixed w-full bg-transparent transition-all duration-500 z-50">
-  <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-    <div class="flex items-center space-x-3">
-      <img src="logo2.png" alt="MsSoftware Logo" class="h-12 w-12 rounded-full shadow object-cover" />
-      <div>
-        <h1 class="text-2xl font-extrabold tracking-tight text-white">
-          <span class="text-blue-500">Ms</span>Software
-        </h1>
-        <p class="text-sm text-gray-300">Inovação Digital para sua Empresa</p>
-      </div>
-    </div>
-
-    <nav class="space-x-6 font-medium hidden md:flex">
-      <a href="#sobre" class="text-gray-100 hover:text-blue-400 transition">Sobre</a>
-      <a href="#servicos" class="text-gray-100 hover:text-blue-400 transition">Serviços</a>
-      <a href="#clientes" class="text-gray-100 hover:text-blue-400 transition">Clientes</a>
-       <a href="https://wa.me/5517996045305?text=Olá!%20Gostaria%20de%20saber%20mais%20sobre%20os%20serviços%20da%20MsSoftware." 
-     target="_blank" class="text-gray-200 hover:text-blue-400 transition">Contato</a>
-    </nav>
-
-    <a href="https://wa.me/5517996045305?text=Olá!%20Gostaria%20de%20saber%20mais%20sobre%20os%20serviços%20da%20MsSoftware." 
-       target="_blank"
-       class="hidden sm:inline-block bg-blue-600 text-white px-5 py-2 rounded-lg shadow hover:bg-blue-700 transition">
-      📧 Orçamento 
+<!-- Cabeçalho -->
+<header id="cabecalho" class="fixed inset-x-0 top-0 z-50">
+  <div class="max-w-6xl mx-auto px-5 py-3 flex items-center justify-between gap-4">
+    <a href="#inicio" class="flex items-center gap-3">
+      <img src="assets/logo-ms.jpg" alt="Logo MsSoftware" class="h-11 w-11 rounded-full object-cover" width="44" height="44">
+      <span class="text-xl font-extrabold tracking-tight"><span style="color:var(--destaque)">Ms</span>Software</span>
     </a>
+    <nav class="hidden md:flex items-center gap-7 text-sm font-medium">
+      <a class="link" href="#servicos">Serviços</a>
+      <a class="link" href="#projetos">Projetos</a>
+      <a class="link" href="#como-trabalhamos">Como trabalhamos</a>
+      <a class="link" href="#clientes">Clientes</a>
+      <a class="link" href="#perguntas">Dúvidas</a>
+    </nav>
+    <div class="flex items-center gap-2">
+      <a href="https://wa.me/5517996045305?text=Ol%C3%A1!%20Gostaria%20de%20um%20or%C3%A7amento%20com%20a%20MsSoftware."
+         target="_blank" rel="noopener" class="btn btn-primario hidden sm:inline-flex !py-2.5 !px-5 text-sm">Pedir orçamento</a>
+      <button id="btnMenu" class="md:hidden w-11 h-11 grid place-items-center rounded-xl text-2xl" aria-label="Abrir menu" aria-expanded="false">☰</button>
+    </div>
   </div>
+  <nav id="menuCelular" class="md:hidden hidden px-5 pb-5">
+    <div class="flex flex-col gap-1 text-base font-medium">
+      <a class="link py-2" href="#servicos">Serviços</a>
+      <a class="link py-2" href="#projetos">Projetos</a>
+      <a class="link py-2" href="#como-trabalhamos">Como trabalhamos</a>
+      <a class="link py-2" href="#clientes">Clientes</a>
+      <a class="link py-2" href="#perguntas">Dúvidas</a>
+      <a href="https://wa.me/5517996045305?text=Ol%C3%A1!%20Gostaria%20de%20um%20or%C3%A7amento%20com%20a%20MsSoftware."
+         target="_blank" rel="noopener" class="btn btn-primario mt-2">Pedir orçamento</a>
+    </div>
+  </nav>
 </header>
 
-
-<section class="relative bg-gradient-to-r from-gray-900 via-blue-800 to-gray-800 text-white min-h-screen flex items-center overflow-hidden">
-  <!-- Fundo com blur -->
-  <div class="absolute inset-0 bg-black/30 backdrop-blur-sm z-0 w-full h-full"></div>
-
-  <!-- Conteúdo central -->
-  <div class="relative z-10 w-full max-w-6xl mx-auto text-center px-4 sm:px-6">
-    <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight drop-shadow-md mb-6">
-      Transformamos Ideias em <span class="text-blue-400">Soluções Digitais</span>
+<!-- Topo -->
+<section id="inicio" class="hero relative overflow-hidden pt-32 pb-24 sm:pt-40 sm:pb-32">
+  <div class="grade-fundo absolute inset-0 pointer-events-none"></div>
+  <div class="relative max-w-6xl mx-auto px-5 text-center">
+    <span class="chip inline-block mb-6">Sites · Sistemas · Aplicativos · Cardápios digitais</span>
+    <h1 class="font-extrabold tracking-tight leading-tight" style="font-size:clamp(1.9rem, 8.4vw, 3.75rem)">
+      Transformamos ideias em<br class="hidden sm:block">
+      <span style="color:var(--destaque)">soluções digitais</span>
     </h1>
-    <p class="text-base sm:text-lg md:text-xl max-w-2xl mx-auto mb-10 text-gray-200 leading-relaxed">
-      Desenvolvimento Web e Mobile sob medida para o seu negócio crescer.
+    <p class="suave-topo text-lg sm:text-xl max-w-2xl mx-auto mt-6">
+      Desenvolvimento web e mobile sob medida, rápido e sem enrolação — para o seu negócio vender mais e trabalhar melhor.
     </p>
+    <div class="flex flex-wrap justify-center gap-3 mt-10">
+      <a href="https://wa.me/5517996045305?text=Ol%C3%A1!%20Gostaria%20de%20um%20or%C3%A7amento%20com%20a%20MsSoftware."
+         target="_blank" rel="noopener" class="btn btn-primario text-lg">💬 Pedir orçamento</a>
+      <a href="#projetos" class="btn btn-contorno text-lg">Ver projetos no ar</a>
+    </div>
+  </div>
+</section>
 
-    <div class="flex flex-wrap justify-center gap-4">
-      <a href="https://wa.me/5517996045305?text=Olá!%20Gostaria%20de%20saber%20mais%20sobre%20os%20serviços%20da%20MsSoftware." 
-         target="_blank"
-         class="bg-blue-600 hover:bg-blue-700 px-8 py-4 rounded-full shadow-lg font-semibold text-white text-lg transition transform hover:scale-105 flex items-center gap-2">
-        🚀 Solicitar Orçamento
+<!-- Diferenciais -->
+<section class="py-20 px-5">
+  <div class="max-w-6xl mx-auto grid md:grid-cols-3 gap-6">
+    <div class="cartao p-7 surgir">
+      <div class="icone mb-4">💡</div>
+      <h3 class="text-lg font-bold mb-2">Feito sob medida</h3>
+      <p class="suave">Cada projeto nasce da necessidade do seu negócio, com foco na experiência de quem vai usar.</p>
+    </div>
+    <div class="cartao p-7 surgir">
+      <div class="icone mb-4">⚡</div>
+      <h3 class="text-lg font-bold mb-2">Rápido e moderno</h3>
+      <p class="suave">Páginas leves, que abrem bem no celular e funcionam em qualquer aparelho.</p>
+    </div>
+    <div class="cartao p-7 surgir">
+      <div class="icone mb-4">🤝</div>
+      <h3 class="text-lg font-bold mb-2">Parceria de verdade</h3>
+      <p class="suave">Acompanhamos do início ao fim e seguimos juntos depois da entrega, com suporte e melhorias.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Serviços -->
+<section id="servicos" class="secao-alt py-20 px-5">
+  <div class="max-w-6xl mx-auto">
+    <div class="text-center max-w-2xl mx-auto mb-12 surgir">
+      <span class="etiqueta">Serviços</span>
+      <h2 class="text-3xl sm:text-4xl font-extrabold mt-2">O que fazemos</h2>
+      <p class="suave mt-3">Da página de apresentação ao sistema completo da sua empresa.</p>
+    </div>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div class="cartao cartao-hover p-7 surgir">
+        <div class="icone mb-4">🌐</div>
+        <h3 class="text-lg font-bold mb-2">Sites institucionais</h3>
+        <p class="suave">Sites profissionais que passam confiança e levam o cliente direto para o seu WhatsApp.</p>
+      </div>
+      <div class="cartao cartao-hover p-7 surgir">
+        <div class="icone mb-4">🧩</div>
+        <h3 class="text-lg font-bold mb-2">Sistemas web</h3>
+        <p class="suave">Painéis administrativos, controle de pedidos, relatórios e o que a sua rotina precisar.</p>
+      </div>
+      <div class="cartao cartao-hover p-7 surgir">
+        <div class="icone mb-4">📱</div>
+        <h3 class="text-lg font-bold mb-2">Aplicativos</h3>
+        <p class="suave">Apps Android e WebApps que se instalam no celular, com a cara da sua marca.</p>
+      </div>
+      <div class="cartao cartao-hover p-7 surgir">
+        <div class="icone mb-4">🍽️</div>
+        <h3 class="text-lg font-bold mb-2">Cardápios digitais</h3>
+        <p class="suave">Cardápio online com pedidos pelo WhatsApp e painel para a loja acompanhar tudo.</p>
+      </div>
+      <div class="cartao cartao-hover p-7 surgir">
+        <div class="icone mb-4">🔧</div>
+        <h3 class="text-lg font-bold mb-2">Manutenção e suporte</h3>
+        <p class="suave">Atualizações, correções e melhorias contínuas nos seus sistemas.</p>
+      </div>
+      <div class="cartao cartao-hover p-7 surgir">
+        <div class="icone mb-4">🚀</div>
+        <h3 class="text-lg font-bold mb-2">SEO e performance</h3>
+        <p class="suave">Site mais rápido e mais bem posicionado no Google.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Projetos -->
+<section id="projetos" class="py-20 px-5">
+  <div class="max-w-6xl mx-auto">
+    <div class="text-center max-w-2xl mx-auto mb-12 surgir">
+      <span class="etiqueta">Projetos no ar</span>
+      <h2 class="text-3xl sm:text-4xl font-extrabold mt-2">Veja funcionando</h2>
+      <p class="suave mt-3">Cardápios digitais que desenvolvemos e que estão recebendo pedidos agora.</p>
+    </div>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <a href="https://labrasa.site" target="_blank" rel="noopener" class="cartao cartao-hover p-4 block surgir">
+        <div class="projeto-logo"><img src="assets/cli-labrasa.jpg" alt="La Brasa Steakhouse" loading="lazy" class="foto"></div>
+        <h3 class="font-bold mt-4">La Brasa Steakhouse</h3>
+        <p class="suave text-sm">Cardápio delivery, tablets nas mesas e painel de pedidos</p>
+        <p class="link-projeto text-sm mt-3">Ver cardápio →</p>
       </a>
-      <a href="#servicos"
-         class="bg-gray-700 hover:bg-gray-600 px-8 py-4 rounded-full shadow-lg font-semibold text-white text-lg transition transform hover:scale-105 flex items-center gap-2">
-        📌 Ver Serviços
+      <a href="EsfirrasEmCasa/" target="_blank" rel="noopener" class="cartao cartao-hover p-4 block surgir">
+        <div class="projeto-logo"><img src="assets/cli-esfirras.jpg" alt="Esfirras em Casa" loading="lazy"></div>
+        <h3 class="font-bold mt-4">Esfirras em Casa</h3>
+        <p class="suave text-sm">Cardápio delivery com pedidos no WhatsApp e painel de pedidos</p>
+        <p class="link-projeto text-sm mt-3">Ver cardápio →</p>
+      </a>
+      <a href="PizzariaFiorella/" target="_blank" rel="noopener" class="cartao cartao-hover p-4 block surgir">
+        <div class="projeto-logo"><img src="assets/cli-fiorella.jpg" alt="Pizzaria Fiorella" loading="lazy"></div>
+        <h3 class="font-bold mt-4">Pizzaria Fiorella</h3>
+        <p class="suave text-sm">Cardápio delivery, montagem de pizza e painel com nota fiscal</p>
+        <p class="link-projeto text-sm mt-3">Ver cardápio →</p>
+      </a>
+      <a href="Gatini/" target="_blank" rel="noopener" class="cartao cartao-hover p-4 block surgir">
+        <div class="projeto-logo"><img src="assets/cli-gatini.png" alt="Gatini" loading="lazy"></div>
+        <h3 class="font-bold mt-4">Gatini</h3>
+        <p class="suave text-sm">Cardápio digital com pedidos online</p>
+        <p class="link-projeto text-sm mt-3">Ver cardápio →</p>
       </a>
     </div>
   </div>
 </section>
 
-<!-- Sobre -->
-<section id="sobre" class="py-20 px-6 bg-white fade-in">
-  <div class="max-w-6xl mx-auto text-center mb-12">
-    <h2 class="text-4xl font-bold text-gray-800">💻 Sobre a MsSoftware</h2>
-    <p class="text-lg text-gray-600 mt-4">
-   Sites, Apps e Sistemas rápidos, modernos e sob medida. Criamos o que seu negócio precisa, sem enrolação.</p>
-  </div>
-
-  <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto text-left">
-    <div class="bg-gray-50 p-6 rounded-xl shadow hover:shadow-lg transition">
-      <div class="text-4xl text-blue-600 mb-4">💡</div>
-      <h3 class="text-xl font-bold text-gray-800 mb-2">Inovação sob medida</h3>
-      <p class="text-gray-600">
-        Projetos personalizados com foco total na experiência do usuário e nos objetivos do seu negócio.
-      </p>
+<!-- Como trabalhamos -->
+<section id="como-trabalhamos" class="secao-alt py-20 px-5">
+  <div class="max-w-6xl mx-auto">
+    <div class="text-center max-w-2xl mx-auto mb-12 surgir">
+      <span class="etiqueta">Como trabalhamos</span>
+      <h2 class="text-3xl sm:text-4xl font-extrabold mt-2">Simples, do começo ao fim</h2>
     </div>
-
-    <div class="bg-gray-50 p-6 rounded-xl shadow hover:shadow-lg transition">
-      <div class="text-4xl text-blue-600 mb-4">🔧</div>
-      <h3 class="text-xl font-bold text-gray-800 mb-2">Tecnologia de ponta</h3>
-      <p class="text-gray-600">
-        Usamos as melhores práticas de desenvolvimento web e mobile, com ferramentas modernas e eficientes.
-      </p>
-    </div>
-
-    <div class="bg-gray-50 p-6 rounded-xl shadow hover:shadow-lg transition">
-      <div class="text-4xl text-blue-600 mb-4">🤝</div>
-      <h3 class="text-xl font-bold text-gray-800 mb-2">Parceria verdadeira</h3>
-      <p class="text-gray-600">
-        Estamos ao seu lado do início ao fim, oferecendo suporte contínuo e evolução constante para seus projetos.
-      </p>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="cartao p-7 surgir">
+        <div class="num mb-4">1</div>
+        <h3 class="font-bold mb-1">Conversa</h3>
+        <p class="suave text-sm">Você conta a ideia e o que precisa resolver. Pode ser pelo WhatsApp.</p>
+      </div>
+      <div class="cartao p-7 surgir">
+        <div class="num mb-4">2</div>
+        <h3 class="font-bold mb-1">Proposta</h3>
+        <p class="suave text-sm">Enviamos o orçamento com o que será feito e o prazo combinado.</p>
+      </div>
+      <div class="cartao p-7 surgir">
+        <div class="num mb-4">3</div>
+        <h3 class="font-bold mb-1">Desenvolvimento</h3>
+        <p class="suave text-sm">Você acompanha versões de teste e aprova antes de ir ao ar.</p>
+      </div>
+      <div class="cartao p-7 surgir">
+        <div class="num mb-4">4</div>
+        <h3 class="font-bold mb-1">Entrega e suporte</h3>
+        <p class="suave text-sm">Colocamos no ar e seguimos com suporte e melhorias.</p>
+      </div>
     </div>
   </div>
 </section>
 
-
-
-
-  <!-- Serviços -->
-  <section id="servicos" class="py-20 px-6 bg-gray-100 fade-in">
-    <div class="max-w-6xl mx-auto text-center">
-      <h2 class="text-3xl font-bold mb-12 text-gray-800">Nossos Serviços</h2>
-      <div class="grid md:grid-cols-3 gap-8">
-        <div class="bg-white p-8 rounded-xl shadow hover:shadow-lg hover:-translate-y-1 transition">
-          <div class="text-blue-600 text-5xl mb-4">💻</div>
-          <h3 class="text-xl font-semibold text-gray-800 mb-3">Sites Institucionais</h3>
-          <p class="text-gray-600">Sites profissionais que transmitem confiança e credibilidade.</p>
-        </div>
-        <div class="bg-white p-8 rounded-xl shadow hover:shadow-lg hover:-translate-y-1 transition">
-          <div class="text-blue-600 text-5xl mb-4">📱</div>
-          <h3 class="text-xl font-semibold text-gray-800 mb-3">Aplicativos</h3>
-          <p class="text-gray-600">Desenvolvimento de apps Android e WebApps personalizados.</p>
-        </div>
-        <div class="bg-white p-8 rounded-xl shadow hover:shadow-lg hover:-translate-y-1 transition">
-          <div class="text-blue-600 text-5xl mb-4">🔧</div>
-          <h3 class="text-xl font-semibold text-gray-800 mb-3">Manutenção</h3>
-          <p class="text-gray-600">Suporte, atualizações e melhorias contínuas em seus sistemas.</p>
-        </div>
-        <div class="bg-white p-8 rounded-xl shadow hover:shadow-lg hover:-translate-y-1 transition">
-          <div class="text-blue-600 text-5xl mb-4">🚀</div>
-          <h3 class="text-xl font-semibold text-gray-800 mb-3">SEO & Performance</h3>
-          <p class="text-gray-600">Melhore seu ranking no Google e acelere seu site.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
- 
-
- <section id="clientes" class="py-24 bg-gradient-to-r from-white via-gray-50 to-white overflow-hidden fade-in relative">
-
-  <div class="max-w-6xl mx-auto text-center mb-12 px-4">
-    <h2 class="text-4xl font-bold text-gray-800">Nossos Clientes</h2>
-    <p class="text-gray-600 mt-2 text-lg">Empresas que confiam na MsSoftware</p>
+<!-- Clientes -->
+<section id="clientes" class="py-20 overflow-hidden">
+  <div class="text-center max-w-2xl mx-auto mb-10 px-5 surgir">
+    <span class="etiqueta">Clientes</span>
+    <h2 class="text-3xl sm:text-4xl font-extrabold mt-2">Empresas que confiam na MsSoftware</h2>
   </div>
-
-  <!-- Gradientes laterais -->
-  <div class="absolute left-0 top-0 w-24 h-full bg-gradient-to-r from-white to-transparent z-10 pointer-events-none"></div>
-  <div class="absolute right-0 top-0 w-24 h-full bg-gradient-to-l from-white to-transparent z-10 pointer-events-none"></div>
-
-  <!-- Carrossel contínuo -->
-<!-- Carrossel contínuo -->
-<div class="overflow-hidden w-full">
-  <div class="flex animate-scroll whitespace-nowrap">
-    <div class="flex items-center space-x-10 sm:space-x-20 px-4 sm:px-8">
-      <!-- Imagens dos clientes -->
-      
-      <img src="favicon.png" class="transition duration-300 object-contain h-20 sm:h-28" />
-      <img src="esfirras.png" class="transition duration-300 object-contain h-20 sm:h-28" />
-      <img src="fundo7.png" class="transition duration-300 object-contain h-20 sm:h-28" />
-      <img src="icon.png" class="transition duration-300 object-contain h-20 sm:h-28" />
-      <img src="Logo2025.jpeg" class="transition duration-300 object-contain h-20 sm:h-28" />
-      <img src="igreja.jpeg" class="transition duration-300 object-contain h-20 sm:h-28" />
-      <img src="acai.png" class="transition duration-300 object-contain h-20 sm:h-28" />
-      
-
-      <!-- Bloco duplicado -->
-      
-      <img src="favicon.png" class="transition duration-300 object-contain h-20 sm:h-28" />
-      <img src="esfirras.png" class="transition duration-300 object-contain h-20 sm:h-28" />
-      <img src="fundo7.png" class="transition duration-300 object-contain h-20 sm:h-28" />
-      <img src="icon.png" class="transition duration-300 object-contain h-20 sm:h-28" />
-      <img src="Logo2025.jpeg" class="transition duration-300 object-contain h-20 sm:h-28" />
-      <img src="igreja.jpeg" class="transition duration-300 object-contain h-20 sm:h-28" />
-      <img src="acai.png" class="transition duration-300 object-contain h-20 sm:h-28" />
-      
-      <!-- Bloco duplicado -->
-
-          <img src="favicon.png" class="transition duration-300 object-contain h-20 sm:h-28" />
-          <img src="esfirras.png" class="transition duration-300 object-contain h-20 sm:h-28" />
-      <img src="fundo7.png" class="transition duration-300 object-contain h-20 sm:h-28" />
-      <img src="icon.png" class="transition duration-300 object-contain h-20 sm:h-28" />
-      <img src="Logo2025.jpeg" class="transition duration-300 object-contain h-20 sm:h-28" />
-      <img src="igreja.jpeg" class="transition duration-300 object-contain h-20 sm:h-28" />
-      <img src="acai.png" class="transition duration-300 object-contain h-20 sm:h-28" />
-      
-
-      <!-- Bloco duplicado -->
-      
-      <img src="favicon.png" class="transition duration-300 object-contain h-20 sm:h-28" />
-      <img src="esfirras.png" class="transition duration-300 object-contain h-20 sm:h-28" />
-      <img src="fundo7.png" class="transition duration-300 object-contain h-20 sm:h-28" />
-      <img src="icon.png" class="transition duration-300 object-contain h-20 sm:h-28" />
-      <img src="Logo2025.jpeg" class="transition duration-300 object-contain h-20 sm:h-28" />
-      <img src="igreja.jpeg" class="transition duration-300 object-contain h-20 sm:h-28" />
-      <img src="acai.png" class="transition duration-300 object-contain h-20 sm:h-28" />
-      
-          <img src="favicon.png" class="transition duration-300 object-contain h-20 sm:h-28" />
-          <img src="esfirras.png" class="transition duration-300 object-contain h-20 sm:h-28" />
-      <img src="fundo7.png" class="transition duration-300 object-contain h-20 sm:h-28" />
-      <img src="icon.png" class="transition duration-300 object-contain h-20 sm:h-28" />
-      <img src="Logo2025.jpeg" class="transition duration-300 object-contain h-20 sm:h-28" />
-      <img src="igreja.jpeg" class="transition duration-300 object-contain h-20 sm:h-28" />
-      <img src="acai.png" class="transition duration-300 object-contain h-20 sm:h-28" />
-      
-
-      <!-- Bloco duplicado -->
-      
-      <img src="favicon.png" class="transition duration-300 object-contain h-20 sm:h-28" />
-      <img src="esfirras.png" class="transition duration-300 object-contain h-20 sm:h-28" />
-      <img src="fundo7.png" class="transition duration-300 object-contain h-20 sm:h-28" />
-      <img src="icon.png" class="transition duration-300 object-contain h-20 sm:h-28" />
-      <img src="Logo2025.jpeg" class="transition duration-300 object-contain h-20 sm:h-28" />
-      <img src="igreja.jpeg" class="transition duration-300 object-contain h-20 sm:h-28" />
-      <img src="acai.png" class="transition duration-300 object-contain h-20 sm:h-28" />
- 
+  <div class="faixa-logos py-4">
+    <div class="trilho" id="trilho">
+      <img src="assets/cli-labrasa-logo.jpg" alt="La Brasa Steakhouse" loading="lazy">
+      <img src="assets/cli-esfirras.jpg" alt="Esfirras em Casa" loading="lazy">
+      <img src="assets/cli-fiorella.jpg" alt="Pizzaria Fiorella" loading="lazy">
+      <img src="assets/cli-gatini.png" alt="Gatini" loading="lazy" style="object-fit:contain;padding:6px">
+      <img src="assets/cli-acai.jpg" alt="Rei do Açaí" loading="lazy">
+      <img src="assets/cli-resulthair.jpg" alt="Result Hair" loading="lazy" style="object-fit:contain">
+      <img src="assets/cli-pousada.jpg" alt="Pousada 3 de Abril" loading="lazy">
+      <img src="assets/cli-joyce.jpg" alt="Joyce Maurieli Ateliê das Unhas" loading="lazy">
+      <img src="assets/cli-binus.jpg" alt="Flutuante Binu's" loading="lazy">
     </div>
   </div>
-</div>
-
 </section>
 
-
-<!-- CTA Final -->
-<section class="bg-gradient-to-r from-blue-700 to-gray-800 text-white py-16 text-center fade-in">
-  <h2 class="text-3xl font-bold mb-6">Pronto para impulsionar seu negócio?</h2>
-  <p class="mb-6 text-gray-200">Entre em contato agora e dê o próximo passo no mundo digital.</p>
-  <a href="https://wa.me/5517996045305?text=Olá!%20Gostaria%20de%20saber%20mais%20sobre%20os%20serviços%20da%20MsSoftware." 
-     target="_blank"
-     class="bg-white text-blue-700 font-semibold px-8 py-3 rounded-lg shadow hover:bg-gray-100 transition">
-    📩 Falar com a MsSoftware
-  </a>
+<!-- Perguntas -->
+<section id="perguntas" class="secao-alt py-20 px-5">
+  <div class="max-w-3xl mx-auto">
+    <div class="text-center mb-10 surgir">
+      <span class="etiqueta">Dúvidas</span>
+      <h2 class="text-3xl sm:text-4xl font-extrabold mt-2">Perguntas frequentes</h2>
+    </div>
+    <div class="space-y-3">
+      <details class="cartao p-5 surgir">
+        <summary class="flex items-center justify-between gap-4 font-semibold">Quanto custa um projeto?<span class="seta">+</span></summary>
+        <p class="suave mt-3">Cada projeto é orçado conforme o que o seu negócio precisa. Chame no WhatsApp e receba um orçamento sem compromisso.</p>
+      </details>
+      <details class="cartao p-5 surgir">
+        <summary class="flex items-center justify-between gap-4 font-semibold">Quanto tempo leva para ficar pronto?<span class="seta">+</span></summary>
+        <p class="suave mt-3">Depende do tamanho do projeto. O prazo é combinado já no orçamento, e você acompanha cada etapa.</p>
+      </details>
+      <details class="cartao p-5 surgir">
+        <summary class="flex items-center justify-between gap-4 font-semibold">Funciona no celular?<span class="seta">+</span></summary>
+        <p class="suave mt-3">Sim. Tudo é feito para funcionar bem no celular, no tablet e no computador.</p>
+      </details>
+      <details class="cartao p-5 surgir">
+        <summary class="flex items-center justify-between gap-4 font-semibold">Consigo alterar informações sozinho?<span class="seta">+</span></summary>
+        <p class="suave mt-3">Nos sistemas com painel administrativo, você mesmo altera produtos, preços, fotos e configurações.</p>
+      </details>
+      <details class="cartao p-5 surgir">
+        <summary class="flex items-center justify-between gap-4 font-semibold">E depois que o projeto é entregue?<span class="seta">+</span></summary>
+        <p class="suave mt-3">Seguimos juntos: oferecemos suporte, correções e melhorias contínuas.</p>
+      </details>
+    </div>
+  </div>
 </section>
 
+<!-- Chamada final -->
+<section class="faixa py-16 px-5 text-center">
+  <h2 class="text-3xl font-extrabold">Pronto para tirar a sua ideia do papel?</h2>
+  <p class="mt-3 opacity-80">Conte o que você precisa e receba um orçamento sem compromisso.</p>
+  <a href="https://wa.me/5517996045305?text=Ol%C3%A1!%20Gostaria%20de%20um%20or%C3%A7amento%20com%20a%20MsSoftware."
+     target="_blank" rel="noopener" class="btn mt-8 bg-white text-blue-700 hover:bg-blue-50 text-lg">💬 Falar no WhatsApp</a>
+</section>
 
-
-  <!-- Rodapé -->
-  <footer class="bg-gray-900 text-gray-300 py-12 fade-in">
-    <div class="max-w-6xl mx-auto px-6 grid md:grid-cols-3 gap-8">
-      <div>
-        <h3 class="text-xl font-bold text-white mb-4">MsSoftware</h3>
-        <p class="text-gray-400 text-sm">Especialistas em desenvolvimento web e mobile para alavancar seu negócio.</p>
+<!-- Rodapé -->
+<footer class="py-12 px-5">
+  <div class="max-w-6xl mx-auto grid md:grid-cols-3 gap-8 text-sm">
+    <div>
+      <div class="flex items-center gap-3 mb-3">
+        <img src="assets/logo-ms.jpg" alt="" class="h-10 w-10 rounded-full object-cover" width="40" height="40">
+        <span class="text-lg font-extrabold text-white"><span class="text-blue-400">Ms</span>Software</span>
       </div>
-      <div>
-        <h4 class="font-semibold text-white mb-4">Links Rápidos</h4>
-        <ul class="space-y-2 text-sm">
-          <li><a href="#sobre" class="hover:text-white">Sobre</a></li>
-          <li><a href="#servicos" class="hover:text-white">Serviços</a></li>
-          <li><a href="#clientes" class="hover:text-white">Clientes</a></li>
-          <li><a href="#contato" class="hover:text-white">Contato</a></li>
-        </ul>
-      </div>
-      <div>
-        <h4 class="font-semibold text-white mb-4">Contato</h4>
-        <p class="text-sm">📧 msouzasoftware@gmail.com</p>
-        <p class="text-sm">📞 (17) 99604-3167</p>
-       
-      </div>
+      <p>Sites, sistemas e aplicativos sob medida para a sua empresa.</p>
     </div>
-    <div class="text-center text-gray-500 text-sm mt-8">
-      &copy; 2025 MsSoftware - Todos os direitos reservados.
+    <div>
+      <h4 class="font-semibold text-white mb-3">Navegação</h4>
+      <ul class="space-y-2">
+        <li><a href="#servicos" class="hover:text-white">Serviços</a></li>
+        <li><a href="#projetos" class="hover:text-white">Projetos</a></li>
+        <li><a href="#clientes" class="hover:text-white">Clientes</a></li>
+        <li><a href="#perguntas" class="hover:text-white">Dúvidas</a></li>
+      </ul>
     </div>
-  </footer>
+    <div>
+      <h4 class="font-semibold text-white mb-3">Contato</h4>
+      <p class="mb-2"><a href="https://wa.me/5517996045305" target="_blank" rel="noopener" class="hover:text-white">💬 WhatsApp (17) 99604-5305</a></p>
+      <p><a href="mailto:msouzasoftware@gmail.com" class="hover:text-white">📧 msouzasoftware@gmail.com</a></p>
+    </div>
+  </div>
+  <p class="text-center mt-10 opacity-70">© <span id="ano">2026</span> MsSoftware — Todos os direitos reservados.</p>
+</footer>
 
-  <!-- Script para animações de scroll -->
-  <script>
-    const elements = document.querySelectorAll('.fade-in');
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-        }
-      });
-    }, { threshold: 0.2 });
-    elements.forEach(el => observer.observe(el));
+<!-- WhatsApp flutuante -->
+<a class="whats" href="https://wa.me/5517996045305?text=Ol%C3%A1!%20Gostaria%20de%20um%20or%C3%A7amento%20com%20a%20MsSoftware."
+   target="_blank" rel="noopener" aria-label="Falar no WhatsApp">
+  <svg width="30" height="30" viewBox="0 0 32 32" fill="#fff" aria-hidden="true"><path d="M16 3C8.8 3 3 8.7 3 15.8c0 2.5.7 4.9 2 7L3 29l6.4-2c2 1.1 4.3 1.7 6.6 1.7 7.2 0 13-5.7 13-12.8S23.2 3 16 3zm0 23.4c-2.1 0-4.1-.6-5.9-1.7l-.4-.3-3.8 1.2 1.2-3.7-.3-.4c-1.2-1.8-1.9-3.9-1.9-6 0-5.9 4.9-10.7 11-10.7s11 4.8 11 10.7-4.9 10.9-10.9 10.9zm6-8c-.3-.2-2-1-2.3-1.1-.3-.1-.5-.2-.8.2-.2.3-.9 1.1-1.1 1.3-.2.2-.4.3-.7.1-.3-.2-1.4-.5-2.7-1.7-1-.9-1.7-2-1.9-2.3-.2-.3 0-.5.2-.7l.5-.6c.2-.2.2-.4.3-.6.1-.2 0-.5 0-.6l-1.1-2.6c-.3-.7-.6-.6-.8-.6h-.7c-.2 0-.6.1-.9.4-.3.3-1.2 1.1-1.2 2.8s1.2 3.2 1.4 3.5c.2.2 2.4 3.6 5.8 5.1.8.3 1.4.5 1.9.7.8.3 1.5.2 2.1.1.6-.1 2-.8 2.2-1.6.3-.8.3-1.4.2-1.6-.1-.1-.3-.2-.6-.4z"/></svg>
+</a>
 
-    // Header muda de cor ao rolar
-    const header = document.getElementById('mainHeader');
-    window.addEventListener('scroll', () => {
-      if (window.scrollY > 50) {
-        header.classList.add('bg-gray-900/90', 'backdrop-blur-sm');
-        header.classList.remove('bg-transparent');
-      } else {
-        header.classList.add('bg-transparent');
-        header.classList.remove('bg-gray-900/90', 'backdrop-blur-sm');
-      }
+<script>
+  // ano no rodapé
+  document.getElementById("ano").textContent = new Date().getFullYear();
+
+  // cabeçalho sólido ao rolar
+  const cabecalho = document.getElementById("cabecalho");
+  const aoRolar = () => cabecalho.classList.toggle("rolou", window.scrollY > 30);
+  window.addEventListener("scroll", aoRolar, { passive: true });
+  aoRolar();
+
+  // menu do celular
+  const btnMenu = document.getElementById("btnMenu");
+  const menuCelular = document.getElementById("menuCelular");
+  btnMenu.addEventListener("click", () => {
+    const abrir = menuCelular.classList.contains("hidden");
+    menuCelular.classList.toggle("hidden", !abrir);
+    btnMenu.setAttribute("aria-expanded", String(abrir));
+    btnMenu.textContent = abrir ? "✕" : "☰";
+    if (abrir) cabecalho.classList.add("rolou"); else aoRolar();
+  });
+  menuCelular.querySelectorAll("a").forEach((a) => a.addEventListener("click", () => {
+    menuCelular.classList.add("hidden");
+    btnMenu.textContent = "☰";
+    btnMenu.setAttribute("aria-expanded", "false");
+    aoRolar();
+  }));
+
+  // carrossel sem emendas: duplica as logos uma vez
+  const trilho = document.getElementById("trilho");
+  [...trilho.children].forEach((img) => {
+    const copia = img.cloneNode(true);
+    copia.alt = "";
+    copia.setAttribute("aria-hidden", "true");
+    trilho.appendChild(copia);
+  });
+
+  // blocos surgem ao rolar
+  const observador = new IntersectionObserver((itens) => {
+    itens.forEach((i) => {
+      if (i.isIntersecting) { i.target.classList.add("visivel"); observador.unobserve(i.target); }
     });
-
-    // WhatsApp form
-    document.getElementById('formContato').addEventListener('submit', function (e) {
-      e.preventDefault();
-      const nome = document.getElementById('nome').value;
-      const email = document.getElementById('email').value;
-      const mensagem = document.getElementById('mensagem').value;
-      const texto = `Olá! Meu nome é ${nome}%0AEmail: ${email}%0AMensagem: ${mensagem}`;
-      window.open(`https://wa.me/5517996045305?text=${texto}`, '_blank');
-    });
-  </script>
-
+  }, { threshold: 0.12 });
+  document.querySelectorAll(".surgir").forEach((el) => observador.observe(el));
+</script>
 </body>
 </html>

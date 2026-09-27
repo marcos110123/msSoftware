@@ -35,7 +35,8 @@ let total = 0;
 let secaoAtiva = null;
 let tipoPedidoSelecionado = null;
 
-const taxaEntregaFixa = 2.0;
+// taxa de entrega: vem do painel (config/entrega); 2,00 até carregar
+let taxaEntregaFixa = 2.0;
 
 // ----------------------
 // Carregar produtos
@@ -227,6 +228,15 @@ function atualizarCarrinho() {
     .replace(".", ",");
 
   localStorage.setItem("carrinho", JSON.stringify(carrinho));
+
+
+  // pulinho no botão do carrinho a cada mudança
+  const btnCarrinho = document.getElementById("btnAbrirCarrinho");
+  if (btnCarrinho) {
+    btnCarrinho.classList.remove("pulou");
+    void btnCarrinho.offsetWidth;
+    btnCarrinho.classList.add("pulou");
+  }
 }
 
 function abrirCarrinho() {
@@ -343,6 +353,19 @@ window.confirmarDadosEntrega = function () {
   const taxa = tipoPedidoSelecionado === "entrega" ? taxaEntregaFixa : 0;
   const valorFinal = total + taxa;
 
+  // troco: precisa ser maior que o total do pedido
+  if (tipoPedidoSelecionado === "entrega" && document.getElementById("precisaTroco").checked) {
+    const valorTroco = parseFloat(
+      String(document.getElementById("valorTroco").value).replace(",", ".")
+    );
+    if (!valorTroco || valorTroco <= valorFinal) {
+      mostrarAlerta(
+        `Informe para quanto precisa de troco. O valor deve ser maior que o total do pedido (R$ ${valorFinal.toFixed(2).replace(".", ",")}).`
+      );
+      return;
+    }
+  }
+
   document.getElementById("valorTotalConfirmacao").textContent =
     `Total: R$ ${valorFinal.toFixed(2)}`;
 
@@ -352,9 +375,30 @@ window.confirmarDadosEntrega = function () {
 
 // ----------------------
 // Envio Pedido (Firestore + WhatsApp)
+let enviandoPedido = false;
 document
   .getElementById("btnConfirmarPedido")
   .addEventListener("click", async () => {
+    // evita pedido duplicado com dois toques no botão
+    if (enviandoPedido) return;
+    enviandoPedido = true;
+    const btnConfirmar = document.getElementById("btnConfirmarPedido");
+    const textoBotao = btnConfirmar.textContent;
+    btnConfirmar.disabled = true;
+    btnConfirmar.classList.add("opacity-60", "cursor-not-allowed");
+    btnConfirmar.textContent = "Enviando...";
+
+    // abre a aba do WhatsApp já no toque (o iPhone bloqueia se abrir depois de salvar)
+    let janelaWhats = null;
+    try {
+      janelaWhats = window.open("", "_blank");
+      if (janelaWhats) {
+        janelaWhats.document.write(
+          '<p style="font-family:sans-serif;text-align:center;margin-top:40vh">Abrindo o WhatsApp…</p>'
+        );
+      }
+    } catch (e) {}
+
     const nome = document.getElementById("confNomeCliente").textContent;
     const tel = document.getElementById("confTelefoneCliente").textContent;
     const endereco = document.getElementById("confEnderecoCliente").textContent;
@@ -417,7 +461,12 @@ document
 
       const telefoneLoja = "5517992362238"; // 👈 coloque o número da loja
       const url = `https://wa.me/${telefoneLoja}?text=${encodeURIComponent(mensagem)}`;
-      window.open(url, "_blank");
+      if (janelaWhats && !janelaWhats.closed) {
+        janelaWhats.location.href = url;
+      } else {
+        const aberta = window.open(url, "_blank");
+        if (!aberta) window.location.href = url;
+      }
 
       // Resetar carrinho
       carrinho = [];
@@ -435,7 +484,13 @@ document
       document.getElementById("modalConfirmacao").classList.add("hidden");
       document.getElementById("modalSucessoPedido").classList.remove("hidden");
     } catch (e) {
+      try { if (janelaWhats && !janelaWhats.closed) janelaWhats.close(); } catch (_) {}
       mostrarAlerta("Erro ao enviar pedido. Tente novamente.");
+    } finally {
+      enviandoPedido = false;
+      btnConfirmar.disabled = false;
+      btnConfirmar.classList.remove("opacity-60", "cursor-not-allowed");
+      btnConfirmar.textContent = textoBotao;
     }
   });
 
@@ -449,7 +504,7 @@ window.fecharModalSucesso = function () {
 function exibirNotificacao(nome) {
   const notificacao = document.createElement("div");
   notificacao.className =
-    "fixed bottom-4 right-4 bg-green-600 text-white px-4 py-2 rounded shadow-lg z-50";
+    "aviso-adicionado fixed bottom-4 right-4 bg-green-600 text-white px-4 py-2 rounded shadow-lg z-50";
   notificacao.textContent = `${nome} adicionado ao carrinho!`;
   document.body.appendChild(notificacao);
   setTimeout(() => notificacao.remove(), 2500);
@@ -486,6 +541,51 @@ onSnapshot(estadoRef, (snap) => {
   if (!aviso) return;
   aviso.classList.toggle("hidden", recebendo);
 });
+
+// ----------------------
+// Tempo de entrega (definido no painel)
+// ----------------------
+onSnapshot(doc(db, "config", "entrega"), (snap) => {
+  const tempo = snap.exists() ? String(snap.data().tempoEntrega || "").trim() : "";
+  const info = document.getElementById("tempoEntregaInfo");
+  const taxa = snap.exists() ? Number(snap.data().taxaEntrega) : NaN;
+  if (Number.isFinite(taxa) && taxa >= 0 && taxa !== taxaEntregaFixa) {
+    taxaEntregaFixa = taxa;
+    atualizarCarrinho();
+  }
+  if (!info) return;
+  info.textContent = tempo ? `🛵 Tempo de entrega: ${tempo}` : "";
+  info.classList.toggle("hidden", !tempo);
+});
+
+// ----------------------
+// Adicionais (lidos uma vez e atualizados sozinhos)
+// ----------------------
+let adicionaisCache = null;
+onSnapshot(
+  query(collection(db, "opcoesLanche"), where("status", "==", "ativo")),
+  (snapshot) => {
+    adicionaisCache = snapshot.docs.map((d) => d.data());
+  }
+);
+
+// ----------------------
+// Recupera o carrinho salvo (ex.: página recarregada)
+// ----------------------
+try {
+  const salvo = JSON.parse(localStorage.getItem("carrinho") || "[]");
+  if (Array.isArray(salvo)) {
+    carrinho = salvo.filter(
+      (i) =>
+        i && typeof i.nome === "string" &&
+        Number.isFinite(i.preco) && Number.isFinite(i.subtotal) &&
+        Number.isInteger(i.quantidade) && i.quantidade > 0
+    ).map((i) => ({ ...i, observacao: i.observacao || "" }));
+  }
+} catch (e) {
+  carrinho = [];
+}
+atualizarCarrinho();
 
 // ----------------------
 // Alertas
@@ -528,8 +628,7 @@ window.abrirModalObservacao = async function (nome, preco, categoria) {
 
   quantidadeSelecionada = 1;
 
-  document.getElementById("quantidadeEsfirra").textContent =
-    quantidadeSelecionada;
+  document.getElementById("quantidadeEsfirra").value = quantidadeSelecionada;
   document.getElementById("totalEsfirraModal").textContent = Number(preco)
     .toFixed(2)
     .replace(".", ",");
@@ -540,25 +639,23 @@ window.abrirModalObservacao = async function (nome, preco, categoria) {
   const container = document.getElementById("listaAdicionais");
   container.innerHTML = "Carregando adicionais...";
 
-  const q = query(
-  collection(db, "opcoesLanche"),
-  where("status", "==", "ativo")
-);
-
 document.getElementById("modalObservacao").classList.remove("hidden");
 
-console.log("MODAL ABRIU:", nome);
-
-const snapshot = await getDocs(q);
+  // usa os adicionais já carregados; só busca no banco se ainda não chegaram
+  let itens = adicionaisCache;
+  if (!itens) {
+    const snapshot = await getDocs(
+      query(collection(db, "opcoesLanche"), where("status", "==", "ativo"))
+    );
+    itens = snapshot.docs.map((d) => d.data());
+  }
 
   container.innerHTML = "";
 
   // organizar por grupo
   const grupos = {};
 
-  snapshot.forEach((docSnap) => {
-    const item = docSnap.data();
-
+  itens.forEach((item) => {
     if (!grupos[item.grupo]) {
       grupos[item.grupo] = [];
     }
@@ -669,9 +766,22 @@ window.alterarQuantidade = function (valor) {
     quantidadeSelecionada = 1;
   }
 
-  document.getElementById("quantidadeEsfirra").textContent =
-    quantidadeSelecionada;
+  document.getElementById("quantidadeEsfirra").value = quantidadeSelecionada;
 
+  atualizarTotalEsfirraModal();
+};
+
+// quantidade digitada no campo (final=true ao sair do campo: corrige vazio/0)
+window.definirQuantidade = function (valor, final) {
+  const campo = document.getElementById("quantidadeEsfirra");
+  let n = parseInt(valor, 10);
+  if (!Number.isFinite(n) || n < 1) {
+    if (!final) return;
+    n = 1;
+  }
+  if (n > 999) n = 999;
+  quantidadeSelecionada = n;
+  if (final || String(campo.value) !== String(n)) campo.value = n;
   atualizarTotalEsfirraModal();
 };
 
