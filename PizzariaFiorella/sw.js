@@ -1,19 +1,22 @@
-const CACHE_VERSION = '1.0.3'; 
+const CACHE_VERSION = '1.0.4';
 const CACHE_NAME = `fiorella-cache-v${CACHE_VERSION}`;
 
+// caminhos relativos à pasta do sw.js (funciona em /EsfirrasEmCasa/ e em testes locais)
 const urlsToCache = [
-  '/PizzariaFiorella/',
-  '/PizzariaFiorella/index.html',
-  `/PizzariaFiorella/script.js?v=${CACHE_VERSION}`,
-  '/PizzariaFiorella/img/logo-192.png',
-  '/PizzariaFiorella/img/logo-512.png'
+  './',
+  './index.html',
+  `./script.js?v=${CACHE_VERSION}`,
+  './img/logo-192.png',
+  './img/logo-512.png'
 ];
 
 
 // Instala
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(urlsToCache))
+    caches.open(CACHE_NAME)
+      .then((cache) => cache.addAll(urlsToCache))
+      .catch(() => {}) // sem internet na instalação não impede o SW de funcionar
   );
   self.skipWaiting();
 });
@@ -30,10 +33,27 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
-// Busca do cache ou rede
+// Rede primeiro (sempre a versão mais nova); sem internet, usa o cache.
+// Firebase, Tailwind e outros sites externos não passam pelo cache.
 self.addEventListener("fetch", (event) => {
+  const req = event.request;
+  if (req.method !== "GET") return;
+  if (new URL(req.url).origin !== self.location.origin) return;
+
   event.respondWith(
-    caches.match(event.request).then((res) => res || fetch(event.request))
+    fetch(req)
+      .then((res) => {
+        if (res && res.ok) {
+          const copia = res.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(req, copia));
+        }
+        return res;
+      })
+      .catch(() =>
+        caches.match(req).then((res) =>
+          res || (req.mode === "navigate" ? caches.match("./index.html") : undefined)
+        ).then((res) => res || Response.error())
+      )
   );
 });
 
