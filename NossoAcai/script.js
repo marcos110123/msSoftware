@@ -6,6 +6,7 @@ import {
   getDoc,
   doc,
   onSnapshot,
+  setDoc,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
@@ -485,6 +486,151 @@ $("formaPagamento").addEventListener("change", () => {
 });
 $("precisaTroco").addEventListener("change", () => $("valorTroco").classList.toggle("oculto", !$("precisaTroco").checked));
 
+// ----------------------
+// Acompanhamento do pedido ao vivo
+// O cardápio cria "acompanhamento/{código aleatório}" (sem telefone/endereço) e guarda o código neste celular.
+// O painel atualiza a etapa quando o operador clica "Recebido", "Saiu p/ entrega"/"Pronto", "Concluir" ou "Cancelar".
+// ----------------------
+let tempoEntregaTxt = "";
+let acomp = lerJSON("acompanhamento", null);   // { token, criado }
+let acompDados = null;
+let pararAcomp = null;
+const DOZE_HORAS = 12 * 60 * 60 * 1000;
+
+const hora = (t) => (t?.toDate ? t.toDate() : null);
+const hhmm = (d) => d ? d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) : "";
+const somaMin = (d, m) => new Date(d.getTime() + m * 60000);
+
+function previsaoEntrega(d) {
+  const nums = String(d.tempoEntrega || "").match(/\d+/g);
+  const base = hora(d.horarios?.enviado) || hora(d.criadoEm);
+  if (!nums || !base) return "";
+  const a = Number(nums[0]), b = Number(nums[1] || nums[0]);
+  return a === b ? hhmm(somaMin(base, a)) : `${hhmm(somaMin(base, a))} – ${hhmm(somaMin(base, b))}`;
+}
+
+const ILU_MOTO = `<svg width="170" height="120" viewBox="0 0 170 120" aria-hidden="true">
+  <path d="M8 104h154" stroke="#d9c6d3" stroke-width="3" stroke-linecap="round" stroke-dasharray="2 10"/>
+  <circle cx="42" cy="88" r="17" fill="#2b0d28"/><circle cx="42" cy="88" r="7" fill="#f6efe6"/>
+  <circle cx="128" cy="88" r="17" fill="#2b0d28"/><circle cx="128" cy="88" r="7" fill="#f6efe6"/>
+  <path d="M40 86l20-30h40l14 30z" fill="#a8409a"/><path d="M100 56l10-20h12" fill="none" stroke="#2b0d28" stroke-width="6" stroke-linecap="round"/>
+  <rect x="54" y="30" width="38" height="30" rx="6" fill="#3a1236"/><path d="M62 40h22" stroke="#f6efe6" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="104" cy="22" r="10" fill="#f2d49b"/><path d="M96 20a10 10 0 0 1 18-4" fill="#2b0d28"/>
+  <path d="M150 60h14M146 72h18M152 48h10" stroke="#a8409a" stroke-width="3" stroke-linecap="round" opacity=".45"/></svg>`;
+
+function etapasDe(d) {
+  const entrega = d.tipo === "entrega";
+  return [
+    { id: "enviado",    nome: "Pedido enviado",                               desc: "Aguardando a loja confirmar" },
+    { id: "preparando", nome: "Preparando",                                   desc: "Montando o seu açaí" },
+    { id: entrega ? "saiu" : "pronto", nome: entrega ? "Saiu para entrega" : "Pronto para retirar",
+      desc: entrega ? "A caminho do seu endereço" : "Pode vir buscar no balcão" }
+  ];
+}
+
+function textosDe(d) {
+  const entrega = d.tipo === "entrega";
+  return {
+    enviado:    ["Pedido <i>enviado</i>", "Assim que a loja confirmar, esta tela muda sozinha. Se ainda não enviou a mensagem no WhatsApp, finalize por lá."],
+    preparando: ["Seu açaí está sendo <i>preparado</i>", "A loja já recebeu e está montando tudo do jeitinho que você pediu."],
+    saiu:       ["Saiu para <i>entrega!</i>", "O entregador já está a caminho. Deixe o celular por perto."],
+    pronto:     ["Pronto para <i>retirar!</i>", "Seu pedido está esperando por você no balcão."],
+    concluido:  [entrega ? "Pedido <i>entregue</i>" : "Pedido <i>retirado</i>", "Obrigado pela preferência! Bom apetite. 💜"],
+    cancelado:  ["Pedido <i>cancelado</i>", "Se tiver alguma dúvida, fale com a loja pelo WhatsApp."]
+  }[d.status] || ["Acompanhe seu <i>pedido</i>", ""];
+}
+
+function renderAcomp() {
+  const d = acompDados;
+  if (!d) return;
+  const [titulo, sub] = textosDe(d);
+  const etapas = etapasDe(d);
+  const ordem = { enviado: 0, preparando: 1, saiu: 2, pronto: 2, concluido: 3 };
+  const atual = ordem[d.status] ?? 0;
+  const cancelado = d.status === "cancelado";
+  const entrega = d.tipo === "entrega";
+  const prev = entrega && ["enviado", "preparando"].includes(d.status) ? previsaoEntrega(d) : "";
+  const chip = cancelado || d.status === "concluido" ? ""
+    : prev ? `🛵 Previsão de entrega: <b>${prev}</b>`
+    : d.status === "saiu" ? "🛵 A caminho · chega em breve"
+    : d.status === "pronto" ? "🛍️ Pode vir buscar" : "";
+  const palco = d.status === "saiu" ? ILU_MOTO : iluCategoria({ ilu: "tigela" }, 160);
+  const troco = d.valorTroco ? ` · troco para ${brl(d.valorTroco)}` : "";
+
+  $("telaAcomp").innerHTML = `
+    <div class="montagem acomp ${cancelado ? "cancelado" : ""} ${d.status === "concluido" ? "fim" : ""}">
+      <div class="acomp-topo"><img src="img/logo-192.png" alt=""><span>Nosso Açaí</span>
+        <button class="fechar" data-sair-acomp aria-label="Fechar">✕</button></div>
+      <div class="acomp-palco"><span class="onda b"></span><span class="onda"></span>${palco}</div>
+      <p class="acomp-num">${d.num ? `Pedido #${d.num}` : "Seu pedido"}${hora(d.criadoEm) ? ` · ${hhmm(hora(d.criadoEm))}` : ""}</p>
+      <h2 class="acomp-titulo">${titulo}</h2>
+      <p class="acomp-sub">${esc(sub)}</p>
+      ${chip ? `<div class="acomp-chip"><span>${chip}</span></div>` : ""}
+      ${cancelado ? "" : `<div class="passos">${etapas.map((e, i) => {
+        const cls = i < atual || (i === atual && d.status === "concluido") ? "ok" : i === atual ? "agora" : "fut";
+        const h = hhmm(hora(d.horarios?.[e.id]));
+        return `<div class="p ${cls}"><span class="bola">${cls === "ok" ? "✓" : ""}</span>
+          <p class="t">${cls === "agora" ? `<b>${e.nome}</b>` : e.nome}${cls === "agora" ? `<small>${e.desc}</small>` : ""}</p>
+          <span class="h">${h}</span></div>`;
+      }).join("")}</div>`}
+      <div class="acomp-resumo"><span>${esc(d.resumo || "")}<small>${esc(d.pagamento || "")}${troco}</small></span><b>${brl(d.total)}</b></div>
+      <div class="acomp-acoes">
+        <a class="btn-sec" href="https://wa.me/${LOJA.whatsapp}?text=${encodeURIComponent(`Olá! Sobre o meu pedido${d.num ? ` #${d.num}` : ""}…`)}" target="_blank" rel="noopener">💬 Falar com a loja</a>
+        <button class="btn-pri centro" data-sair-acomp>Voltar ao cardápio</button>
+      </div>
+    </div>`;
+  renderBarraAcomp();
+}
+
+function acompAtivo() {
+  if (!acomp?.token) return false;
+  if (Date.now() - (acomp.criado || 0) > DOZE_HORAS) return false;
+  return true;
+}
+
+function renderBarraAcomp() {
+  const d = acompDados;
+  const mostrarBarra = acompAtivo() && d && !["concluido", "cancelado"].includes(d.status) && $("telaAcomp").classList.contains("oculto");
+  $("barraAcomp").classList.toggle("oculto", !mostrarBarra);
+  if (!mostrarBarra) return;
+  const txt = { enviado: ["📨", "Pedido enviado", "Aguardando a loja confirmar"],
+                preparando: ["🍇", "Seu açaí está sendo preparado", d.tipo === "entrega" && previsaoEntrega(d) ? `Previsão: ${previsaoEntrega(d)}` : "Toque para acompanhar"],
+                saiu: ["🛵", "Seu pedido saiu para entrega", "Chega em breve"],
+                pronto: ["🛍️", "Pronto para retirar", "Pode vir buscar no balcão"] }[d.status] || ["📦", "Acompanhe seu pedido", ""];
+  $("barraAcomp").innerHTML = `<span class="ic">${txt[0]}</span>
+    <span class="tx"><span class="ao-vivo"></span>${d.num ? `#${d.num} · ` : ""}${txt[1]}<small>${txt[2]}</small></span><span class="ver">Ver</span>`;
+}
+
+function escutarAcomp() {
+  pararAcomp?.();
+  pararAcomp = null;
+  if (!acompAtivo()) { acompDados = null; renderBarraAcomp(); return; }
+  pararAcomp = onSnapshot(doc(db, "acompanhamento", acomp.token), (snap) => {
+    if (!snap.exists()) return;
+    acompDados = snap.data();
+    if (!$("telaAcomp").classList.contains("oculto")) renderAcomp(); else renderBarraAcomp();
+  }, (e) => console.warn("Acompanhamento indisponível:", e));
+}
+
+function abrirAcomp() {
+  if (!acompAtivo()) return;
+  if (acompDados) renderAcomp();
+  else $("telaAcomp").innerHTML = '<div class="montagem acomp"><p class="vazio" style="padding-top:120px">Carregando seu pedido…</p></div>';
+  mostrar("telaAcomp");
+  $("telaAcomp").scrollTop = 0;
+  document.body.style.overflow = "hidden";
+  renderBarraAcomp();
+}
+
+function fecharAcomp() {
+  esconder("telaAcomp");
+  document.body.style.overflow = "";
+  renderBarraAcomp();
+}
+
+$("telaAcomp").addEventListener("click", (e) => { if (e.target.closest("[data-sair-acomp]")) fecharAcomp(); });
+$("barraAcomp").addEventListener("click", abrirAcomp);
+
 let pedidoPronto = null;
 
 $("btnContinuar").addEventListener("click", () => {
@@ -548,7 +694,19 @@ $("btnEnviar").addEventListener("click", async () => {
   const janela = window.open("", "_blank");
   const d = pedidoPronto;
   try {
+    // acompanhamento ao vivo: se falhar (ex.: regras ainda sem "acompanhamento"), o pedido segue normalmente
+    let token = null;
+    try {
+      const ref = doc(collection(db, "acompanhamento"));
+      await setDoc(ref, {
+        status: "enviado", tipo: d.tipo, total: d.valorFinal, pagamento: d.pagamento, valorTroco: d.valorTroco || null,
+        resumo: d.itens.map((i) => i.nome).join(" + "), tempoEntrega: tempoEntregaTxt,
+        criadoEm: serverTimestamp(), horarios: { enviado: serverTimestamp() }
+      });
+      token = ref.id;
+    } catch (e) { console.warn("Acompanhamento indisponível:", e); }
     await addDoc(collection(db, "orders"), {
+      ...(token && { acompanhamento: token }),
       items: d.itens,
       totalProdutos: d.totalProdutos.toFixed(2),
       taxaEntrega: d.taxa,
@@ -571,7 +729,13 @@ $("btnEnviar").addEventListener("click", async () => {
     $("formaPagamento").dispatchEvent(new Event("change"));
     atualizarCarrinho();
     esconder("jConfirmar");
-    mostrar("jSucesso");
+    if (token) {
+      acomp = { token, criado: Date.now() };
+      gravarJSON("acompanhamento", acomp);
+      acompDados = null;
+      escutarAcomp();
+      abrirAcomp();
+    } else mostrar("jSucesso");
   } catch (err) {
     console.error(err);
     janela?.close();
@@ -625,6 +789,7 @@ onSnapshot(doc(db, "config", "entrega"), (snap) => {
   $("textoTaxa").textContent = LOJA.taxaEntrega ? brl(LOJA.taxaEntrega) : "grátis";
   $("taxaReceber").textContent = LOJA.taxaEntrega ? `taxa ${brl(LOJA.taxaEntrega)}` : "grátis";
   const tempo = String(d.tempoEntrega || "").trim();
+  tempoEntregaTxt = tempo;
   $("textoTempo").textContent = tempo;
   $("blocoTempo").classList.toggle("oculto", !tempo);
   atualizarCarrinho();
@@ -648,3 +813,4 @@ window.addEventListener("appinstalled", () => esconder("btnInstalar"));
 window.addEventListener("popstate", () => { if (mont) fecharMontagem(true); });
 
 atualizarCarrinho();
+escutarAcomp();
