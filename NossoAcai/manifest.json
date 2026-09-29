@@ -1,0 +1,14 @@
+{
+  "name": "Nosso Açaí",
+  "short_name": "Nosso Açaí",
+  "description": "Cardápio digital da Nosso Açaí — Urupês/SP",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6efe6",
+  "theme_color": "#f6efe6",
+  "icons": [
+    { "src": "img/logo-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "img/logo-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

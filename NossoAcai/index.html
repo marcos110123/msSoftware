@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Nosso Açaí · Cardápio</title>
+  <meta name="description" content="Cardápio digital da Nosso Açaí — Urupês/SP. Monte seu açaí e peça pelo WhatsApp.">
+  <meta name="theme-color" content="#f6efe6">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" type="image/png" href="./img/logo-192.png">
+  <link rel="apple-touch-icon" href="./img/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=2.0.0">
+</head>
+<body>
+  <div class="app">
+    <header class="topo">
+      <span>Urupês · SP</span>
+      <button class="btn-sacola" id="btnSacolaTopo" aria-label="Abrir sacola">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M6 7h12l-1.2 12.1a2 2 0 0 1-2 1.9H9.2a2 2 0 0 1-2-1.9L6 7Z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>
+        <span class="qtd oculto" id="qtdTopo">0</span>
+      </button>
+    </header>
+
+    <div class="fechado oculto" id="avisoFechado">Estamos fechados para novos pedidos no momento.</div>
+
+    <section class="cabeca">
+      <img src="img/logo.png" alt="Nosso Açaí" width="112" height="112">
+      <h1>O açaí da casa,<br><i>do seu jeito.</i></h1>
+      <p>Escolha o formato e monte com o que você mais gosta.</p>
+      <div class="info">
+        <span><i class="ponto" id="pontoAberto"></i><span id="textoAberto">Aberto agora</span></span>
+        <span>🛵 Entrega <span id="textoTaxa">R$ 2,00</span></span>
+        <span class="oculto" id="blocoTempo">⏱ <span id="textoTempo"></span></span>
+      </div>
+    </section>
+
+    <nav class="abas" id="abas"></nav>
+    <main id="lista"><p class="vazio">Carregando o cardápio…</p></main>
+
+    <footer class="rodape-site">
+      <img src="img/logo-192.png" alt="" width="54" height="54">
+      <p class="serif" style="font-size:18px;color:var(--tinta)">Nosso Açaí</p>
+      <p>Urupês · SP</p>
+      <button class="btn-instalar oculto" id="btnInstalar">📲 Instalar o app</button>
+      <p style="margin-top:14px">Desenvolvido por <b>MSSoftware</b> · versão <span id="versao"></span></p>
+    </footer>
+  </div>
+
+  <button class="barra oculto" id="barraSacola">
+    <span class="qtd"><span id="barraQtd">0 itens</span><b id="barraTotal">R$ 0,00</b></span>
+    <span class="ir">Ver sacola →</span>
+  </button>
+
+  <!-- montagem do açaí (preenchida pelo script) -->
+  <div class="tela-cheia oculto" id="telaMontagem"></div>
+
+  <!-- sacola -->
+  <div class="fundo oculto" id="jSacola">
+    <div class="folha">
+      <div class="alca"></div>
+      <h2>Sua sacola</h2>
+      <div class="lista-sacola" id="itensSacola"></div>
+      <div class="resumo"><p class="total"><span>Total</span><span id="totalSacola">R$ 0,00</span></p></div>
+      <div class="acoes">
+        <button class="btn-sec" data-fechar>Voltar</button>
+        <button class="btn-pri centro" id="btnAvancar">Avançar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- como receber -->
+  <div class="fundo oculto" id="jReceber">
+    <div class="folha">
+      <div class="alca"></div>
+      <h2>Como deseja receber?</h2>
+      <div class="opcoes-receber">
+        <button data-tipo="retirada"><span class="emo">🏃</span><b>Retirar</b><small>no balcão</small></button>
+        <button data-tipo="entrega"><span class="emo">🛵</span><b>Entrega</b><small id="taxaReceber">R$ 2,00</small></button>
+      </div>
+      <div class="acoes"><button class="btn-sec" style="width:100%" data-fechar>Voltar</button></div>
+    </div>
+  </div>
+
+  <!-- dados do cliente -->
+  <div class="fundo oculto" id="jDados">
+    <div class="folha form">
+      <div class="alca"></div>
+      <h2>Seus dados</h2>
+      <label class="rot" for="nomeCliente">Nome</label>
+      <input class="campo" id="nomeCliente" autocomplete="name" placeholder="Seu nome">
+      <label class="rot" for="telCliente">Telefone (WhatsApp)</label>
+      <input class="campo" id="telCliente" type="tel" autocomplete="tel" placeholder="(17) 99999-9999">
+      <div id="blocoEndereco">
+        <label class="rot" for="enderecoCliente">Endereço de entrega</label>
+        <textarea class="campo" id="enderecoCliente" rows="2" placeholder="Rua, número, bairro e ponto de referência"></textarea>
+      </div>
+      <label class="rot" for="formaPagamento">Forma de pagamento</label>
+      <select class="campo" id="formaPagamento">
+        <option value="">Selecione</option>
+        <option value="PIX">PIX</option>
+        <option value="Dinheiro">Dinheiro</option>
+        <option value="Cartão de Crédito">Cartão de crédito</option>
+        <option value="Cartão de Débito">Cartão de débito</option>
+      </select>
+      <div class="oculto" id="blocoTroco">
+        <label class="troco"><input type="checkbox" id="precisaTroco"> Precisa de troco?</label>
+        <input class="campo oculto" id="valorTroco" type="number" step="0.01" inputmode="decimal" placeholder="Troco para quanto?">
+      </div>
+      <div class="resumo">
+        <p><span>Produtos</span><span id="resProdutos">R$ 0,00</span></p>
+        <p id="linhaTaxa"><span>Entrega</span><span id="resTaxa">R$ 0,00</span></p>
+        <p class="total"><span>Total</span><span id="resTotal">R$ 0,00</span></p>
+      </div>
+      <div class="acoes">
+        <button class="btn-sec" data-voltar="jReceber">Voltar</button>
+        <button class="btn-pri centro" id="btnContinuar">Continuar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- confirmação -->
+  <div class="fundo oculto" id="jConfirmar">
+    <div class="folha">
+      <div class="alca"></div>
+      <h2>Confirme o pedido</h2>
+      <div class="conf" id="confDados"></div>
+      <div class="lista-sacola" id="confItens"></div>
+      <div class="resumo" id="confResumo"></div>
+      <div class="acoes">
+        <button class="btn-sec" data-voltar="jDados">Voltar</button>
+        <button class="btn-pri centro" id="btnEnviar">Enviar pelo WhatsApp</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- sucesso -->
+  <div class="fundo oculto" id="jSucesso">
+    <div class="folha sucesso">
+      <img src="img/logo-192.png" alt="">
+      <h2 style="margin-top:8px">Pedido enviado!</h2>
+      <p class="sub" style="margin:6px 0 18px">Finalize o envio da mensagem no WhatsApp. Obrigado! 💜</p>
+      <button class="btn-pri centro" data-fechar>Fechar</button>
+    </div>
+  </div>
+
+  <div class="aviso oculto" id="jAviso">
+    <div><h3>Atenção</h3><p id="textoAviso"></p><button class="btn-pri centro" id="btnAvisoOk">Ok</button></div>
+  </div>
+
+  <script>
+    if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});
+    const versaoSistema = "2.0.0"; // mude a cada publicação para forçar atualização do script
+    const s = document.createElement("script");
+    s.type = "module";
+    s.src = `script.js?v=${versaoSistema}`;
+    document.body.appendChild(s);
+    document.getElementById("versao").textContent = versaoSistema;
+  </script>
+</body>
+</html>
