@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=2.1.7">
+  <link rel="stylesheet" href="style.css?v=2.1.8">
 </head>
 <body>
   <div class="app">
@@ -46,6 +46,10 @@
       <img src="img/logo-192.png" alt="" width="54" height="54">
       <p class="serif" style="font-size:18px;color:var(--tinta)">Nosso Açaí</p>
       <p>Urupês · SP</p>
+      <p class="contatos-site">
+        <a href="https://wa.me/5517991276971" target="_blank" rel="noopener">💬 (17) 99127-6971</a>
+        <a href="https://instagram.com/nosso_acai.urupes" target="_blank" rel="noopener">📸 @nosso_acai.urupes</a>
+      </p>
       <button class="btn-instalar oculto" id="btnInstalar">📲 Instalar o app</button>
       <p style="margin-top:14px">Desenvolvido por <b>MSSoftware</b> · versão <span id="versao"></span></p>
     </footer>
@@ -159,7 +163,7 @@
 
   <script>
     if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});
-    const versaoSistema = "2.1.7"; // mude a cada publicação para forçar atualização do script
+    const versaoSistema = "2.1.8"; // mude a cada publicação para forçar atualização do script
     const s = document.createElement("script");
     s.type = "module";
     s.src = `script.js?v=${versaoSistema}`;

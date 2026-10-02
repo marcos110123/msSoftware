@@ -28,7 +28,7 @@ const db = getFirestore(initializeApp(firebaseConfig));
 // ----------------------
 const LOJA = {
   nome: "Nosso Açaí",
-  whatsapp: "5517991828457", // (17) 99182-8457
+  whatsapp: "5517991276971", // (17) 99127-6971
   taxaEntrega: 2.00          // padrão; o painel muda em Configurações (config/entrega.taxaEntrega)
 };
 
