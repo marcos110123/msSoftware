@@ -128,6 +128,16 @@ const ILU = {
 // Bebidas: lata ou garrafinha de água, na cor de cada sabor (desenho próprio, sem marca)
 function iluBebida(nome, alt) {
   const n = String(nome || "").toLowerCase();
+  if (/[áa]gua/.test(n) && /cop(o|inho)/.test(n)) {
+    // água no copinho (copo plástico lacrado)
+    return `<svg height="${alt}" viewBox="0 0 60 110" aria-hidden="true">
+      <path d="M8 34h44" stroke="#5fa8d3" stroke-width="4" stroke-linecap="round"/>
+      <path d="M10 36h40l-6 60a6 6 0 0 1-6 5H22a6 6 0 0 1-6-5z" fill="#d7ecf7"/>
+      <path d="M12 52h36l-3.2 40a5 5 0 0 1-5 4.6H20.2a5 5 0 0 1-5-4.6z" fill="#9fd0ec"/>
+      <path d="M10 36h40l-1.2 12H11.2z" fill="#5fa8d3"/>
+      <text x="30" y="45" font-size="7.5" font-weight="700" text-anchor="middle" fill="#fff" font-family="sans-serif">água</text>
+      <path d="M16 54h3l3 36h-3z" fill="#fff" opacity=".5"/></svg>`;
+  }
   if (/[áa]gua/.test(n)) {
     const gas = /com g[áa]s/.test(n);
     return `<svg height="${alt}" viewBox="0 0 50 110" aria-hidden="true">
