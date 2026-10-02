@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Nosso Açaí · Cardápio</title>
-  <meta name="description" content="Cardápio digital da Nosso Açaí — Urupês/SP. Monte seu açaí e peça pelo WhatsApp.">
+  <meta name="description" content="Cardápio digital da Nosso Açaí — Urupês/SP. Monte seu açaí e faça seu pedido.">
   <meta name="theme-color" content="#f6efe6">
   <link rel="manifest" href="./manifest.json">
   <link rel="icon" type="image/png" href="./img/logo-192.png">
@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=2.1.5">
+  <link rel="stylesheet" href="style.css?v=2.1.6">
 </head>
 <body>
   <div class="app">
@@ -138,7 +138,7 @@
       <div class="resumo" id="confResumo"></div>
       <div class="acoes">
         <button class="btn-sec" data-voltar="jDados">Voltar</button>
-        <button class="btn-pri centro" id="btnEnviar">Enviar pelo WhatsApp</button>
+        <button class="btn-pri centro" id="btnEnviar">Enviar pedido</button>
       </div>
     </div>
   </div>
@@ -159,7 +159,7 @@
 
   <script>
     if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});
-    const versaoSistema = "2.1.5"; // mude a cada publicação para forçar atualização do script
+    const versaoSistema = "2.1.6"; // mude a cada publicação para forçar atualização do script
     const s = document.createElement("script");
     s.type = "module";
     s.src = `script.js?v=${versaoSistema}`;
