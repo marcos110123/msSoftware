@@ -414,7 +414,7 @@ if ('serviceWorker' in navigator) {
 </script>
 
 <script>
-  const versaoSistema = "1.0.3"; // Atualize aqui também!
+  const versaoSistema = "1.0.4"; // Atualize aqui também!
 
   const script = document.createElement("script");
   script.type = "module";
@@ -522,8 +522,8 @@ if ('serviceWorker' in navigator) {
 
       <!-- Telefone -->
       <div>
-        <label for="telCliente" class="block text-sm font-medium text-gray-700">Telefone (WhatsApp)</label>
-        <input type="tel" id="telCliente" placeholder="(17) 99999-9999" class="w-full p-2 rounded border border-gray-300 focus:ring focus:ring-red-200">
+        <label for="telCliente" class="block text-sm font-medium text-gray-700">Celular (WhatsApp) com DDD</label>
+        <input type="tel" id="telCliente" inputmode="numeric" autocomplete="tel-national" maxlength="15" placeholder="(17) 99999-9999" class="w-full p-2 rounded border border-gray-300 focus:ring focus:ring-red-200">
       </div>
 
       <!-- Endereço -->

@@ -315,6 +315,30 @@ window.fecharModalEntrega = function () {
 };
 
 // ----------------------
+// Telefone: obriga o padrão (DDD) 9XXXX-XXXX para a loja conseguir avisar pelo WhatsApp
+// ----------------------
+function digitosTelefone(valor) {
+  let d = String(valor || "").replace(/\D/g, "");
+  if (d.length > 11 && d.startsWith("55")) d = d.slice(2); // colou com +55
+  if (d.length > 11 && d.startsWith("0")) d = d.replace(/^0+/, ""); // colou com 0 na frente
+  return d.slice(0, 11);
+}
+function formatarTelefone(valor) {
+  const d = digitosTelefone(valor);
+  if (d.length <= 2) return d.length ? `(${d}` : "";
+  if (d.length <= 7) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
+  return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+}
+// celular com DDD: 11 dígitos, DDD de 11 a 99 e começando com 9
+function telefoneValido(valor) {
+  return /^[1-9][1-9]9\d{8}$/.test(digitosTelefone(valor));
+}
+document.getElementById("telCliente")?.addEventListener("input", (e) => {
+  e.target.value = formatarTelefone(e.target.value);
+  e.target.classList.remove("border-red-500");
+});
+
+// ----------------------
 // Confirmação do Pedido
 // ----------------------
 window.confirmarDadosEntrega = function () {
@@ -332,9 +356,17 @@ window.confirmarDadosEntrega = function () {
     return;
   }
 
+  if (!telefoneValido(tel)) {
+    const campoTel = document.getElementById("telCliente");
+    campoTel.classList.add("border-red-500");
+    campoTel.focus();
+    mostrarAlerta("Informe o celular com DDD. Ex.: (17) 99999-9999");
+    return;
+  }
+
   // Preenche confirmação
   document.getElementById("confNomeCliente").textContent = nome;
-  document.getElementById("confTelefoneCliente").textContent = tel;
+  document.getElementById("confTelefoneCliente").textContent = formatarTelefone(tel);
   document.getElementById("confEnderecoCliente").textContent = endereco;
   document.getElementById("linhaEndereco").style.display =
     tipoPedidoSelecionado === "entrega" ? "block" : "none";
