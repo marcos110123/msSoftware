@@ -29,7 +29,7 @@ const db = getFirestore(app);
 // ----------------------
 const LOJA = {
   nome: "Gatini Flor & Sabor",
-  whatsapp: "5517996169592", // (17) 99616-9592
+  whatsapp: "5517996067416", // (17) 99606-7416
   taxaEntrega: 2.00          // CONFIRMAR com o cliente
 };
 
