@@ -410,17 +410,6 @@ document
     btnConfirmar.classList.add("opacity-60", "cursor-not-allowed");
     btnConfirmar.textContent = "Enviando...";
 
-    // abre a aba do WhatsApp já no toque (o iPhone bloqueia se abrir depois de salvar)
-    let janelaWhats = null;
-    try {
-      janelaWhats = window.open("", "_blank");
-      if (janelaWhats) {
-        janelaWhats.document.write(
-          '<p style="font-family:sans-serif;text-align:center;margin-top:40vh">Abrindo o WhatsApp…</p>'
-        );
-      }
-    } catch (e) {}
-
     const nome = document.getElementById("confNomeCliente").textContent;
     const tel = document.getElementById("confTelefoneCliente").textContent;
     const endereco = document.getElementById("confEnderecoCliente").textContent;
@@ -470,39 +459,15 @@ document
       });
 
       // --- WhatsApp ---
-      let mensagem = `📦 *Novo Pedido* (${tipoPedidoSelecionado.toUpperCase()})\n\n👤 Cliente: ${nome}\n📞 Tel: ${tel}`;
-      if (tipoPedidoSelecionado === "entrega") {
-        mensagem += `\n🏠 Endereço: ${endereco}`;
-        mensagem += `\n🚚 Taxa de entrega: R$ ${taxa.toFixed(2)}`;
-      }
-
-      mensagem += `\n\n🛒 *Itens:*\n`;
-      carrinho.forEach((item) => {
-        mensagem += `- ${item.nome} x${item.quantidade} - R$ ${item.subtotal.toFixed(2)}`;
-        if (item.observacao) {
-          mensagem += ` (Obs: ${item.observacao})`;
-        }
-        mensagem += `\n`;
+      const mensagem = mensagemPedidoWhats({
+        loja: "Esfirras em Casa", coracao: "❤️", tipo: tipoPedidoSelecionado, itens: carrinho,
+        produtos: totalProdutos, taxa, total: valorFinal, pagamento: formaPagamento,
+        troco: precisaTroco && valorTroco ? valorTroco : null,
+        nome, tel, endereco
       });
-
-      mensagem += `\n💳 Pagamento: ${formaPagamento}\n💰 Total: R$ ${valorFinal.toFixed(2)}`;
-
-      if (precisaTroco && valorTroco) {
-        const troco = (valorTroco - valorFinal).toFixed(2);
-        mensagem += `\n💵 Troco para: R$ ${valorTroco.toFixed(2)} (Troco: R$ ${troco})`;
-      }
-
-      // 👇 Agradecimento no final
-      mensagem += `\n\n🙏 Obrigado pela preferência!\n🍴 *Esfirras em Casa*`;
 
       const telefoneLoja = "5517992362238"; // 👈 coloque o número da loja
       const url = `https://wa.me/${telefoneLoja}?text=${encodeURIComponent(mensagem)}`;
-      if (janelaWhats && !janelaWhats.closed) {
-        janelaWhats.location.href = url;
-      } else {
-        const aberta = window.open(url, "_blank");
-        if (!aberta) window.location.href = url;
-      }
 
       // Resetar carrinho
       carrinho = [];
@@ -519,16 +484,17 @@ document
 
       document.getElementById("modalConfirmacao").classList.add("hidden");
       if (tokenAcomp) {
-        acomp = { token: tokenAcomp, criado: Date.now() };
+        // o cliente envia a mensagem pelo botão da tela de acompanhamento
+        acomp = { token: tokenAcomp, criado: Date.now(), whats: url, enviouWhats: false };
         try { localStorage.setItem("acompanhamento", JSON.stringify(acomp)); } catch (_) {}
         acompDados = null;
         escutarAcomp();
         abrirAcomp();
       } else {
-        document.getElementById("modalSucessoPedido").classList.remove("hidden");
+        // sem acompanhamento (falha ao criar): segue o jeito antigo, direto para o WhatsApp
+        window.location.href = url;
       }
     } catch (e) {
-      try { if (janelaWhats && !janelaWhats.closed) janelaWhats.close(); } catch (_) {}
       mostrarAlerta("Erro ao enviar pedido. Tente novamente.");
     } finally {
       enviandoPedido = false;
@@ -912,7 +878,7 @@ function acEtapas(d) {
 function acTextos(d) {
   const e = d.tipo === "entrega";
   return {
-    enviado: ["Pedido <i>enviado!</i>", "Assim que a loja confirmar, esta tela muda sozinha. Se ainda não enviou a mensagem no WhatsApp, finalize por lá."],
+    enviado: ["Pedido <i>enviado!</i>", "Recebemos seu pedido! Assim que a loja confirmar, esta tela muda sozinha."],
     preparando: ["Suas esfirras estão <i>no forno</i>", "A loja já recebeu seu pedido e está preparando tudo fresquinho."],
     saiu: ["Saiu para <i>entrega!</i>", "O entregador já está a caminho. Deixe o celular por perto."],
     pronto: ["Pronto para <i>retirar!</i>", "Seu pedido está esperando por você no balcão."],
@@ -921,10 +887,19 @@ function acTextos(d) {
   }[d.status] || ["Acompanhe seu <i>pedido</i>", ""];
 }
 
+// WhatsApp é opcional: o pedido já chegou na loja; o botão só manda a mensagem completa, se o cliente quiser
+function marcarWhatsEnviado() {
+  if (!acomp) return;
+  acomp.enviouWhats = true;
+  try { localStorage.setItem("acompanhamento", JSON.stringify(acomp)); } catch (_) {}
+  setTimeout(renderAcomp, 400);
+}
+
 function renderAcomp() {
   const d = acompDados;
   if (!d) return;
   const [titulo, sub] = acTextos(d);
+  const zapOpcional = !!acomp?.whats && !acomp.enviouWhats && !["concluido", "cancelado"].includes(d.status);
   const ordem = { enviado: 0, preparando: 1, saiu: 2, pronto: 2, concluido: 3 };
   const atual = ordem[d.status] ?? 0;
   const canc = d.status === "cancelado", fim = d.status === "concluido", ent = d.tipo === "entrega";
@@ -952,7 +927,8 @@ function renderAcomp() {
       }).join("")}</div>`}
       <div class="ac-resumo"><span>${acEsc(d.resumo || "")}<small>${acEsc(d.pagamento || "")}${troco}</small></span><b>${acBrl(d.total)}</b></div>
       <div class="ac-acoes">
-        <a class="ac-btn sec" href="https://wa.me/5517992362238?text=${msg}" target="_blank" rel="noopener">💬 Falar com a loja</a>
+        ${zapOpcional ? `<a class="ac-btn opc" href="${acomp.whats}" target="_blank" rel="noopener" data-enviar-whats><span class="ic">📲</span><span><b>Enviar pedido pelo WhatsApp</b><small>Opcional · seu pedido já chegou na loja</small></span></a>`
+          : `<a class="ac-btn sec" href="https://wa.me/5517992362238?text=${msg}" target="_blank" rel="noopener">💬 Falar com a loja</a>`}
         <button class="ac-btn pri" data-sair-acomp>Voltar ao cardápio</button>
       </div>
     </div>`;
@@ -986,6 +962,7 @@ function escutarAcomp() {
   pararAcomp = onSnapshot(doc(db, "acompanhamento", acomp.token), (snap) => {
     if (!snap.exists()) return;
     acompDados = snap.data();
+    talvezFestaSaiu(acompDados);
     if (!document.getElementById("telaAcomp").classList.contains("hidden")) renderAcomp(); else renderBarraAcomp();
   }, (e) => console.warn("Acompanhamento indisponível:", e));
 }
@@ -1007,6 +984,79 @@ function fecharAcomp() {
   renderBarraAcomp();
 }
 
-document.getElementById("telaAcomp").addEventListener("click", (e) => { if (e.target.closest("[data-sair-acomp]")) fecharAcomp(); });
+document.getElementById("telaAcomp").addEventListener("click", (e) => {
+  if (e.target.closest("[data-enviar-whats]")) return marcarWhatsEnviado();
+  if (e.target.closest("[data-sair-acomp]")) fecharAcomp();
+});
 document.getElementById("barraAcomp").addEventListener("click", abrirAcomp);
 escutarAcomp();
+
+
+// ----------------------
+// Animação "Saiu para entrega": aparece uma vez por pedido, quando a loja clica "Saiu p/ entrega"
+// (ou na próxima vez que o cliente abrir o cardápio, se o pedido saiu com ele fora)
+// ----------------------
+const FESTA_MOTO = `<svg viewBox="0 0 170 120" aria-hidden="true"><g class="fs-corpo">
+  <circle cx="42" cy="88" r="17" fill="#1a1a1a"/><circle cx="42" cy="88" r="7" fill="#ddd"/>
+  <circle cx="128" cy="88" r="17" fill="#1a1a1a"/><circle cx="128" cy="88" r="7" fill="#ddd"/>
+  <path d="M40 86l20-30h40l14 30z" fill="#dc2626"/><path d="M100 56l10-20h12" fill="none" stroke="#1a1a1a" stroke-width="6" stroke-linecap="round"/>
+  <rect x="52" y="28" width="42" height="32" rx="6" fill="#e8b84a"/><path d="M60 40h26M60 48h18" stroke="rgba(0,0,0,.35)" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="104" cy="22" r="10" fill="#f2c99b"/><path d="M95 21a10 10 0 0 1 19-5" fill="#dc2626"/></g></svg>`;
+
+function mostrarFestaSaiu() {
+  if (document.getElementById("festaSaiu")) return;
+  const conf = Array.from({ length: 22 }, (_, i) =>
+    `<span class="fs-confete" style="left:${(i * 47) % 100}%;background:${FESTA_CORES[i % FESTA_CORES.length]};animation-delay:${(i % 7) * 0.35}s;animation-duration:${2.2 + (i % 5) * 0.3}s"></span>`).join("");
+  const el = document.createElement("div");
+  el.id = "festaSaiu";
+  el.setAttribute("role", "alert");
+  el.innerHTML = `${conf}<div class="fs-estrada"></div>
+    <div class="fs-moto"><div class="fs-linhas"><span></span><span></span><span></span></div><span class="fs-fumaca"></span><span class="fs-fumaca b"></span>${FESTA_MOTO}</div>
+    <div class="fs-texto"><h2>Saiu para <i>entrega!</i></h2><p>O entregador já está a caminho. Deixe o celular por perto!</p><p class="fs-toque">toque para fechar</p></div>`;
+  document.body.appendChild(el);
+  try { navigator.vibrate?.([180, 90, 180]); } catch (_) {}
+  const fechar = () => { el.classList.add("fs-sai"); setTimeout(() => el.remove(), 350); };
+  el.addEventListener("click", fechar);
+  setTimeout(fechar, 4500);
+}
+
+function talvezFestaSaiu(d) {
+  if (!acomp || d?.status !== "saiu" || acomp.festaSaiu) return;
+  acomp.festaSaiu = true;
+  try { localStorage.setItem("acompanhamento", JSON.stringify(acomp)); } catch (_) {}
+  // se o cliente está em outro app (ex.: WhatsApp), espera ele voltar para mostrar
+  if (!document.hidden) return mostrarFestaSaiu();
+  const aoVoltar = () => { if (document.hidden) return; document.removeEventListener("visibilitychange", aoVoltar); mostrarFestaSaiu(); };
+  document.addEventListener("visibilitychange", aoVoltar);
+}
+const FESTA_CORES = ["#e8b84a", "#dc2626", "#fff3d6"];
+
+// ----------------------
+// Mensagem do pedido no WhatsApp (modelo MsSoftware: itens primeiro, valores em R$ 0,00, dados do cliente no fim)
+// ----------------------
+function mensagemPedidoWhats(p) {
+  const r = (v) => "R$ " + Number(v || 0).toFixed(2).replace(".", ",");
+  const ent = p.tipo === "entrega";
+  const LINHA = "─────────────";
+  const l = [`Olá, *${p.loja}*! 👋`, "Acabei de fazer um pedido pelo cardápio digital:", "",
+    `*${ent ? "🛵 PEDIDO PARA ENTREGA" : "🛍️ PEDIDO PARA RETIRADA"}*`, LINHA];
+  (p.itens || []).forEach((i) => {
+    l.push(`*${i.quantidade || 1}x ${i.nome}*  ·  ${r(i.subtotal)}`);
+    const grupos = new Map();
+    (i.complementos || []).forEach((c) => {
+      const k = c.grupo || "Extras";
+      if (!grupos.has(k)) grupos.set(k, []);
+      grupos.get(k).push(c.preco > 0 ? `${c.nome} (+${r(c.preco)})` : c.nome);
+    });
+    grupos.forEach((lista, g) => l.push(`      _${g}: ${lista.join(", ")}_`));
+    if (i.observacao) l.push(`      _Obs.: ${i.observacao}_`);
+  });
+  l.push(LINHA);
+  if (ent) l.push(`Subtotal: ${r(p.produtos)}`, `Entrega: ${r(p.taxa)}`);
+  l.push(`*Total: ${r(p.total)}*`, "", `💳 *Pagamento:* ${p.pagamento || "-"}`);
+  if (p.troco) l.push(`      _Troco para ${r(p.troco)} (levar ${r(p.troco - p.total)})_`);
+  l.push("", `👤 *${p.nome}*`, `📞 ${p.tel}`);
+  if (ent && p.endereco) l.push(`📍 ${p.endereco}`);
+  l.push("", `Obrigado! ${p.coracao}`);
+  return l.join("\n");
+}

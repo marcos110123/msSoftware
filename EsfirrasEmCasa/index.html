@@ -100,6 +100,36 @@
   .ac-btn { display: block; text-align: center; padding: 14px; border-radius: 16px; font-weight: 700; font-size: 14.5px; }
   .ac-btn.pri { background: linear-gradient(to bottom, #dc2626, #b91c1c); color: #fff; box-shadow: 0 8px 20px rgba(185,28,28,.35); }
   .ac-btn.sec { color: #fff; border: 1.5px solid rgba(255,255,255,.25); }
+  .ac-btn.opc { display: flex; align-items: center; gap: 12px; text-align: left; padding: 12px 14px; color: #fff; border: 1.5px dashed rgba(232,184,74,.55); background: rgba(255,255,255,.04); }
+  .ac-btn.opc .ic { width: 38px; height: 38px; border-radius: 12px; background: rgba(232,184,74,.16); display: grid; place-items: center; font-size: 18px; flex-shrink: 0; }
+  .ac-btn.opc b { display: block; font-size: 14.5px; } .ac-btn.opc small { display: block; font-weight: 500; font-size: 12px; color: #e6c9bd; margin-top: 1px; }
+
+/* ---------- animação "saiu para entrega" ---------- */
+#festaSaiu { position: fixed; inset: 0; z-index: 9998; overflow: hidden; cursor: pointer; background: radial-gradient(circle at 50% 45%, #7f1d1d, #2a0505 70%); animation: fsEntra .35s ease; }
+#festaSaiu.fs-sai { opacity: 0; transition: opacity .35s; }
+@keyframes fsEntra { from { opacity: 0; } }
+.fs-estrada { position: absolute; left: 0; right: 0; top: 48%; height: 4px; background: repeating-linear-gradient(90deg, rgba(255,255,255,.55) 0 22px, transparent 22px 44px); animation: fsEstrada .5s linear infinite; }
+@keyframes fsEstrada { to { background-position: -44px 0; } }
+.fs-moto { position: absolute; top: calc(48% - 112px); left: 0; animation: fsAtravessa 3.4s cubic-bezier(.5,0,.4,1) both; }
+.fs-moto svg { width: 170px; filter: drop-shadow(0 10px 18px rgba(0,0,0,.35)); }
+.fs-corpo { animation: fsTreme .18s linear infinite alternate; }
+@keyframes fsTreme { to { transform: translateY(-2px); } }
+@keyframes fsAtravessa { 0% { left: -200px; } 35%, 65% { left: calc(50% - 85px); } 100% { left: calc(100% + 40px); } }
+.fs-linhas { position: absolute; left: -46px; top: 40px; }
+.fs-linhas span { display: block; height: 4px; border-radius: 4px; margin-bottom: 9px; background: rgba(255,255,255,.6); animation: fsVento .35s linear infinite; width: 40px; }
+.fs-linhas span:nth-child(2) { width: 30px; margin-left: 10px; animation-delay: .1s; } .fs-linhas span:nth-child(3) { width: 24px; animation-delay: .2s; }
+@keyframes fsVento { 0% { opacity: 0; transform: translateX(10px); } 50% { opacity: 1; } 100% { opacity: 0; transform: translateX(-16px); } }
+.fs-fumaca { position: absolute; left: -10px; top: 92px; width: 14px; height: 14px; border-radius: 50%; background: rgba(255,255,255,.45); animation: fsFumaca .6s ease-out infinite; }
+.fs-fumaca.b { animation-delay: .3s; }
+@keyframes fsFumaca { from { transform: scale(.4); opacity: .8; } to { transform: translate(-30px, -10px) scale(1.6); opacity: 0; } }
+.fs-confete { position: absolute; z-index: 1; top: -20px; width: 8px; height: 14px; border-radius: 2px; animation: fsCai 2.6s linear infinite; }
+@keyframes fsCai { to { transform: translateY(110vh) rotate(540deg); } }
+.fs-texto { position: absolute; z-index: 3; left: 0; right: 0; top: 57%; padding: 0 24px; text-align: center; color: #fff; animation: fsSurge .6s .5s both; }
+@keyframes fsSurge { from { opacity: 0; transform: translateY(16px) scale(.96); } }
+.fs-texto h2 { font-size: 34px; font-weight: 900; line-height: 1.05; }
+.fs-texto h2 i { font-style: normal; color: #e8b84a; }
+.fs-texto p { margin-top: 10px; font-size: 14px; opacity: .85; }
+.fs-texto .fs-toque { margin-top: 26px; font-size: 12px; opacity: .55; letter-spacing: .08em; text-transform: uppercase; }
   #barraAcomp { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(max(16px, env(safe-area-inset-bottom)) + 76px); z-index: 49;
     width: calc(100% - 32px); max-width: 448px; background: #1c0606; border: 1.5px solid rgba(232,184,74,.5); color: #fff; border-radius: 20px;
     padding: 10px 10px 10px 12px; display: flex; align-items: center; gap: 12px; box-shadow: 0 14px 30px rgba(0,0,0,.5); text-align: left; }
@@ -471,7 +501,7 @@ if ('serviceWorker' in navigator) {
 </script>
 
 <script>
-  const versaoSistema = "1.0.7"; // Atualize aqui também!
+  const versaoSistema = "1.1.0"; // Atualize aqui também!
 
   const script = document.createElement("script");
   script.type = "module";

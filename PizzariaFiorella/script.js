@@ -483,30 +483,12 @@ document
       });
 
       // --- WhatsApp ---
-      let mensagem = `📦 *Novo Pedido* (${tipoPedidoSelecionado.toUpperCase()})\n\n👤 Cliente: ${nome}\n📞 Tel: ${tel}`;
-      if (tipoPedidoSelecionado === "entrega") {
-        mensagem += `\n🏠 Endereço: ${endereco}`;
-        mensagem += `\n🚚 Taxa de entrega: R$ ${taxa.toFixed(2)}`;
-      }
-
-      mensagem += `\n\n🛒 *Itens:*\n`;
-      carrinho.forEach((item) => {
-        mensagem += `- ${item.quantidade}x ${item.nome} - R$ ${item.subtotal.toFixed(2)}`;
-        if (item.observacao) {
-          mensagem += ` (Obs: ${item.observacao})`;
-        }
-        mensagem += `\n`;
+      const mensagem = mensagemPedidoWhats({
+        loja: "Fiorella Pizzaria", coracao: "❤️", tipo: tipoPedidoSelecionado, itens: carrinho,
+        produtos: totalProdutos, taxa, total: valorFinal, pagamento: formaPagamento,
+        troco: precisaTroco && valorTroco ? valorTroco : null,
+        nome, tel, endereco
       });
-
-      mensagem += `\n💳 Pagamento: ${formaPagamento}\n💰 Total: R$ ${valorFinal.toFixed(2)}`;
-
-      if (precisaTroco && valorTroco) {
-        const troco = (valorTroco - valorFinal).toFixed(2);
-        mensagem += `\n💵 Troco para: R$ ${valorTroco.toFixed(2)} (Troco: R$ ${troco})`;
-      }
-
-      // 👇 Agradecimento no final
-      mensagem += `\n\n🙏 Obrigado pela preferência!\n🍴 *Fiorella Pizzaria *`;
 
       const telefoneLoja = "5517992451988"; // 👈 coloque o número da loja
       const url = `https://wa.me/${telefoneLoja}?text=${encodeURIComponent(mensagem)}`;
@@ -1142,3 +1124,33 @@ function iniciarListenerTempoEntrega() {
 }
 
 iniciarListenerTempoEntrega();
+
+// ----------------------
+// Mensagem do pedido no WhatsApp (modelo MsSoftware: itens primeiro, valores em R$ 0,00, dados do cliente no fim)
+// ----------------------
+function mensagemPedidoWhats(p) {
+  const r = (v) => "R$ " + Number(v || 0).toFixed(2).replace(".", ",");
+  const ent = p.tipo === "entrega";
+  const LINHA = "─────────────";
+  const l = [`Olá, *${p.loja}*! 👋`, "Acabei de fazer um pedido pelo cardápio digital:", "",
+    `*${ent ? "🛵 PEDIDO PARA ENTREGA" : "🛍️ PEDIDO PARA RETIRADA"}*`, LINHA];
+  (p.itens || []).forEach((i) => {
+    l.push(`*${i.quantidade || 1}x ${i.nome}*  ·  ${r(i.subtotal)}`);
+    const grupos = new Map();
+    (i.complementos || []).forEach((c) => {
+      const k = c.grupo || "Extras";
+      if (!grupos.has(k)) grupos.set(k, []);
+      grupos.get(k).push(c.preco > 0 ? `${c.nome} (+${r(c.preco)})` : c.nome);
+    });
+    grupos.forEach((lista, g) => l.push(`      _${g}: ${lista.join(", ")}_`));
+    if (i.observacao) l.push(`      _Obs.: ${i.observacao}_`);
+  });
+  l.push(LINHA);
+  if (ent) l.push(`Subtotal: ${r(p.produtos)}`, `Entrega: ${r(p.taxa)}`);
+  l.push(`*Total: ${r(p.total)}*`, "", `💳 *Pagamento:* ${p.pagamento || "-"}`);
+  if (p.troco) l.push(`      _Troco para ${r(p.troco)} (levar ${r(p.troco - p.total)})_`);
+  l.push("", `👤 *${p.nome}*`, `📞 ${p.tel}`);
+  if (ent && p.endereco) l.push(`📍 ${p.endereco}`);
+  l.push("", `Obrigado! ${p.coracao}`);
+  return l.join("\n");
+}

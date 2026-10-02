@@ -536,25 +536,41 @@ $("btnCancelarConfirmacao").addEventListener("click", () => {
 });
 
 function montarMensagemWhatsApp(p) {
-  const entrega = p.tipo === "entrega";
-  let m = `📦 *Novo Pedido* (${entrega ? "ENTREGA" : "RETIRADA"})\n\n`;
-  m += `👤 Cliente: ${p.nome}\n📞 Tel: ${p.tel}`;
-  if (entrega) m += `\n🏠 Endereço: ${p.endereco}`;
-
-  m += `\n\n🛒 *Itens:*\n`;
-  p.itens.forEach((item) => {
-    m += `\n• *${item.nome}* — ${brl(item.subtotal)}`;
-    descreverComplementos(item).forEach((l) => (m += `\n   ↳ ${l}`));
-    if (item.observacao) m += `\n   ↳ Obs: ${item.observacao}`;
+  return mensagemPedidoWhats({
+    loja: LOJA.nome, coracao: "💚", tipo: p.tipo, itens: p.itens,
+    produtos: p.totalProdutos, taxa: p.taxa, total: p.valorFinal,
+    pagamento: p.pagamento, troco: p.valorTroco, nome: p.nome, tel: p.tel, endereco: p.endereco
   });
+}
 
-  m += `\n\nProdutos: ${brl(p.totalProdutos)}`;
-  if (entrega) m += `\n🚚 Entrega: ${brl(p.taxa)}`;
-  m += `\n💰 *Total: ${brl(p.valorFinal)}*`;
-  m += `\n💳 Pagamento: ${p.pagamento}`;
-  if (p.valorTroco) m += `\n💵 Troco para ${brl(p.valorTroco)} (levar ${brl(p.valorTroco - p.valorFinal)})`;
-  m += `\n\n🙏 Obrigado pela preferência!\n🌿 *${LOJA.nome}*`;
-  return m;
+// ----------------------
+// Mensagem do pedido no WhatsApp (modelo MsSoftware: itens primeiro, valores em R$ 0,00, dados do cliente no fim)
+// ----------------------
+function mensagemPedidoWhats(p) {
+  const r = (v) => "R$ " + Number(v || 0).toFixed(2).replace(".", ",");
+  const ent = p.tipo === "entrega";
+  const LINHA = "─────────────";
+  const l = [`Olá, *${p.loja}*! 👋`, "Acabei de fazer um pedido pelo cardápio digital:", "",
+    `*${ent ? "🛵 PEDIDO PARA ENTREGA" : "🛍️ PEDIDO PARA RETIRADA"}*`, LINHA];
+  (p.itens || []).forEach((i) => {
+    l.push(`*${i.quantidade || 1}x ${i.nome}*  ·  ${r(i.subtotal)}`);
+    const grupos = new Map();
+    (i.complementos || []).forEach((c) => {
+      const k = c.grupo || "Extras";
+      if (!grupos.has(k)) grupos.set(k, []);
+      grupos.get(k).push(c.preco > 0 ? `${c.nome} (+${r(c.preco)})` : c.nome);
+    });
+    grupos.forEach((lista, g) => l.push(`      _${g}: ${lista.join(", ")}_`));
+    if (i.observacao) l.push(`      _Obs.: ${i.observacao}_`);
+  });
+  l.push(LINHA);
+  if (ent) l.push(`Subtotal: ${r(p.produtos)}`, `Entrega: ${r(p.taxa)}`);
+  l.push(`*Total: ${r(p.total)}*`, "", `💳 *Pagamento:* ${p.pagamento || "-"}`);
+  if (p.troco) l.push(`      _Troco para ${r(p.troco)} (levar ${r(p.troco - p.total)})_`);
+  l.push("", `👤 *${p.nome}*`, `📞 ${p.tel}`);
+  if (ent && p.endereco) l.push(`📍 ${p.endereco}`);
+  l.push("", `Obrigado! ${p.coracao}`);
+  return l.join("\n");
 }
 
 $("btnConfirmarPedido").addEventListener("click", async () => {
