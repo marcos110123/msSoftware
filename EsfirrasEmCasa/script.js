@@ -38,7 +38,18 @@ let tipoPedidoSelecionado = null;
 
 // acompanhamento do pedido ao vivo (código guardado neste celular) — ver fim do arquivo
 let tempoEntregaTxt = "";
-let acomp = (() => { try { return JSON.parse(localStorage.getItem("acompanhamento") || "null"); } catch (_) { return null; } })();
+// vários pedidos no mesmo celular: lista "acompanhamentos" (o "acomp" é o pedido aberto na tela)
+let acomps = (() => {
+  try {
+    const lista = JSON.parse(localStorage.getItem("acompanhamentos") || "null");
+    if (Array.isArray(lista)) return lista;
+    const um = JSON.parse(localStorage.getItem("acompanhamento") || "null");   // formato antigo (1 pedido só)
+    return um?.token ? [um] : [];
+  } catch (_) { return []; }
+})().filter((a) => a?.token && Date.now() - (a.criado || 0) <= 12 * 60 * 60 * 1000);
+let acomp = acomps[0] || null;
+const dadosAcomp = {};      // token -> dados ao vivo do pedido
+const ouvintesAcomp = {};   // token -> escuta ativa no Firebase
 let acompDados = null;
 let pararAcomp = null;
 
@@ -330,6 +341,7 @@ window.selecionarTipoPedido = function (tipo) {
   atualizarCarrinho();
 
   document.getElementById("modalDadosEntrega")?.classList.remove("hidden");
+  document.querySelectorAll("#modalDadosEntrega, #modalDadosEntrega .modal-card").forEach((el) => (el.scrollTop = 0));
 };
 
 window.fecharModalEntrega = function () {
@@ -433,7 +445,7 @@ document
       try {
         const refAcomp = doc(collection(db, "acompanhamento"));
         await setDoc(refAcomp, {
-          status: "enviado", tipo: tipoPedidoSelecionado, total: valorFinal, pagamento: formaPagamento || "",
+          status: "enviado", tipo: tipoPedidoSelecionado, total: valorFinal, subtotal: totalProdutos, taxaEntrega: taxa, pagamento: formaPagamento || "",
           valorTroco: precisaTroco && valorTroco ? valorTroco : null,
           resumo: resumoAcomp(carrinho), tempoEntrega: tempoEntregaTxt,
           criadoEm: serverTimestamp(), horarios: { enviado: serverTimestamp() }
@@ -486,7 +498,8 @@ document
       if (tokenAcomp) {
         // o cliente envia a mensagem pelo botão da tela de acompanhamento
         acomp = { token: tokenAcomp, criado: Date.now(), whats: url, enviouWhats: false };
-        try { localStorage.setItem("acompanhamento", JSON.stringify(acomp)); } catch (_) {}
+      acomps.unshift(acomp); acomps = acomps.slice(0, 10);
+        salvarAcomps();
         acompDados = null;
         escutarAcomp();
         abrirAcomp();
@@ -616,7 +629,8 @@ document
     document.getElementById("modalConfirmacao").classList.add("hidden");
 
     // Reabre o modal de dados para edição
-    document.getElementById("modalDadosEntrega").classList.remove("hidden");
+    document.getElementById("modalDadosEntrega")?.classList.remove("hidden");
+  document.querySelectorAll("#modalDadosEntrega, #modalDadosEntrega .modal-card").forEach((el) => (el.scrollTop = 0));
   });
 
 // ----------------------
@@ -891,7 +905,7 @@ function acTextos(d) {
 function marcarWhatsEnviado() {
   if (!acomp) return;
   acomp.enviouWhats = true;
-  try { localStorage.setItem("acompanhamento", JSON.stringify(acomp)); } catch (_) {}
+  salvarAcomps();
   setTimeout(renderAcomp, 400);
 }
 
@@ -914,6 +928,7 @@ function renderAcomp() {
     <div class="ac-caixa ${canc ? "cancelado" : ""} ${fim ? "fim" : ""}">
       <div class="ac-topo"><img src="img/logo2-leve.jpg" alt=""><span>Esfirras em Casa</span>
         <button class="ac-fechar" data-sair-acomp aria-label="Fechar">✕</button></div>
+      ${seletorAcomps()}
       <div class="ac-palco"><span class="ac-onda b"></span><span class="ac-onda"></span>${ilu}</div>
       <p class="ac-num">${d.num ? `Pedido #${acEsc(d.num)}` : "Seu pedido"}${criado ? ` · ${criado}` : ""}</p>
       <h2 class="ac-titulo">${titulo}</h2>
@@ -925,7 +940,7 @@ function renderAcomp() {
         return `<div class="ac-p ${cls}"><span class="ac-bola">${cls === "ok" ? "✓" : ""}</span>
           <p class="ac-t">${cls === "agora" ? `<b>${e.nome}</b><small>${e.desc}</small>` : e.nome}</p><span class="ac-h">${h}</span></div>`;
       }).join("")}</div>`}
-      <div class="ac-resumo"><span>${acEsc(d.resumo || "")}<small>${acEsc(d.pagamento || "")}${troco}</small></span><b>${acBrl(d.total)}</b></div>
+      <div class="ac-resumo ac-resumo2"><div class="ac-r-it">${acEsc(d.resumo || "")}<small>${acEsc(d.pagamento || "")}${troco}</small></div>${valoresAcomp(d)}</div>
       <div class="ac-acoes">
         ${zapOpcional ? `<a class="ac-btn opc" href="${acomp.whats}" target="_blank" rel="noopener" data-enviar-whats><span class="ic">📲</span><span><b>Enviar pedido pelo WhatsApp</b><small>Opcional · seu pedido já chegou na loja</small></span></a>`
           : `<a class="ac-btn sec" href="https://wa.me/5517992362238?text=${msg}" target="_blank" rel="noopener">💬 Falar com a loja</a>`}
@@ -942,6 +957,8 @@ function acompAtivo() {
 function renderBarraAcomp() {
   const barra = document.getElementById("barraAcomp");
   const tela = document.getElementById("telaAcomp");
+  const ativosB = acompsAtivos();
+  if (document.getElementById("telaAcomp").classList.contains("hidden") && ativosB.length && !ativosB.includes(acomp)) { acomp = ativosB[0]; acompDados = dadosAcomp[acomp.token]; }
   const d = acompDados;
   const mostrar = acompAtivo() && d && !["concluido", "cancelado"].includes(d.status) && tela.classList.contains("hidden");
   barra.classList.toggle("hidden", !mostrar);
@@ -951,20 +968,26 @@ function renderBarraAcomp() {
     preparando: ["🔥", "Suas esfirras estão no forno", prev ? `Previsão: ${prev}` : "Toque para acompanhar"],
     saiu: ["🛵", "Seu pedido saiu para entrega", "Chega em breve"],
     pronto: ["🛍️", "Pronto para retirar", "Pode vir buscar no balcão"] }[d.status] || ["📦", "Acompanhe seu pedido", ""];
+  if (ativosB.length > 1) txt.splice(1, 2, `${ativosB.length} pedidos em andamento`, `Mais recente: ${txt[1]}`);
   barra.innerHTML = `<span class="ac-ic">${txt[0]}</span>
     <span class="ac-tx"><span class="ac-aovivo"></span>${d.num ? `#${acEsc(d.num)} · ` : ""}${txt[1]}<small>${txt[2]}</small></span><span class="ac-ver">Ver</span>`;
 }
 
 function escutarAcomp() {
-  pararAcomp?.();
-  pararAcomp = null;
-  if (!acompAtivo()) { acompDados = null; renderBarraAcomp(); return; }
-  pararAcomp = onSnapshot(doc(db, "acompanhamento", acomp.token), (snap) => {
-    if (!snap.exists()) return;
-    acompDados = snap.data();
-    talvezFestaSaiu(acompDados);
-    if (!document.getElementById("telaAcomp").classList.contains("hidden")) renderAcomp(); else renderBarraAcomp();
-  }, (e) => console.warn("Acompanhamento indisponível:", e));
+  acomps = acomps.filter((a) => Date.now() - (a.criado || 0) <= DOZE_HORAS);
+  if (!acomps.includes(acomp)) acomp = acomps[0] || null;
+  acomps.forEach((a) => {
+    if (ouvintesAcomp[a.token]) return;
+    ouvintesAcomp[a.token] = onSnapshot(doc(db, "acompanhamento", a.token), (snap) => {
+      if (!snap.exists()) return;
+      dadosAcomp[a.token] = snap.data();
+      talvezFestaSaiu(a, dadosAcomp[a.token]);
+      if (acomp === a) acompDados = dadosAcomp[a.token];
+      if (!document.getElementById("telaAcomp").classList.contains("hidden")) renderAcomp(); else renderBarraAcomp();
+    }, (e) => console.warn("Acompanhamento indisponível:", e));
+  });
+  acompDados = acomp ? dadosAcomp[acomp.token] || null : null;
+  renderBarraAcomp();
 }
 
 function abrirAcomp() {
@@ -985,6 +1008,13 @@ function fecharAcomp() {
 }
 
 document.getElementById("telaAcomp").addEventListener("click", (e) => {
+  const sel = e.target.closest("[data-acomp-token]");
+  if (sel) {
+    acomp = acomps.find((a) => a.token === sel.dataset.acompToken) || acomp;
+    acompDados = dadosAcomp[acomp.token] || null;
+    if (acompDados) renderAcomp();
+    return;
+  }
   if (e.target.closest("[data-enviar-whats]")) return marcarWhatsEnviado();
   if (e.target.closest("[data-sair-acomp]")) fecharAcomp();
 });
@@ -1020,10 +1050,10 @@ function mostrarFestaSaiu() {
   setTimeout(fechar, 4500);
 }
 
-function talvezFestaSaiu(d) {
-  if (!acomp || d?.status !== "saiu" || acomp.festaSaiu) return;
-  acomp.festaSaiu = true;
-  try { localStorage.setItem("acompanhamento", JSON.stringify(acomp)); } catch (_) {}
+function talvezFestaSaiu(a, d) {
+  if (!a || d?.status !== "saiu" || a.festaSaiu) return;
+  a.festaSaiu = true;
+  salvarAcomps();
   // se o cliente está em outro app (ex.: WhatsApp), espera ele voltar para mostrar
   if (!document.hidden) return mostrarFestaSaiu();
   const aoVoltar = () => { if (document.hidden) return; document.removeEventListener("visibilitychange", aoVoltar); mostrarFestaSaiu(); };
@@ -1059,4 +1089,36 @@ function mensagemPedidoWhats(p) {
   if (ent && p.endereco) l.push(`📍 ${p.endereco}`);
   l.push("", `Obrigado! ${p.coracao}`);
   return l.join("\n");
+}
+
+
+// ----------------------
+// Acompanhamento: vários pedidos no mesmo celular + valores (produtos, taxa de entrega e total)
+// ----------------------
+function salvarAcomps() {
+  try { localStorage.setItem("acompanhamentos", JSON.stringify(acomps)); localStorage.removeItem("acompanhamento"); } catch (_) {}
+}
+
+function acompsAtivos() {
+  return acomps.filter((a) => { const x = dadosAcomp[a.token]; return x && !["concluido", "cancelado"].includes(x.status); });
+}
+
+function seletorAcomps() {
+  if (acomps.length < 2) return "";
+  const rot = (x) => !x ? "carregando…" : ({ enviado: "Enviado", preparando: "Preparando", saiu: "Saiu p/ entrega", pronto: "Pronto",
+    concluido: x.tipo === "entrega" ? "Entregue" : "Retirado", cancelado: "Cancelado" }[x.status] || "");
+  return `<div class="ac-pedidos">${[...acomps].reverse().map((a) => {
+    const x = dadosAcomp[a.token];
+    const h = acHHMM(acHora(x?.criadoEm)) || acHHMM(new Date(a.criado));
+    return `<button type="button" class="${a === acomp ? "on" : ""}" data-acomp-token="${a.token}">Pedido ${h}<small>${rot(x)}</small></button>`;
+  }).join("")}</div>`;
+}
+
+function valoresAcomp(d) {
+  const taxa = Number(d.taxaEntrega) || 0;
+  const sub = d.subtotal != null ? Number(d.subtotal) : Number(d.total) - taxa;
+  const linhas = taxa > 0
+    ? `<p><span>Produtos</span><span>${acBrl(sub)}</span></p><p><span>Taxa de entrega</span><span>${acBrl(taxa)}</span></p>`
+    : d.tipo === "retirada" ? `<p><span>Retirada no balcão</span><span>sem taxa</span></p>` : "";
+  return `<div class="ac-r-val">${linhas}<p class="t"><span>Total</span><b>${acBrl(d.total)}</b></p></div>`;
 }

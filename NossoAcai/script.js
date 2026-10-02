@@ -64,7 +64,8 @@ function gravarJSON(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } 
 const limiteDe = (p) => Number(p.limiteGratis) || 0;
 const totalProdutos = () => carrinho.reduce((s, i) => s + Number(i.subtotal || 0), 0);
 const taxaAtual = () => (tipoPedido === "entrega" ? LOJA.taxaEntrega : 0);
-const mostrar = (id) => $(id).classList.remove("oculto");
+// ao abrir uma janela, ela sempre começa do topo
+const mostrar = (id) => { $(id).classList.remove("oculto"); $(id).scrollTop = 0; $(id).querySelectorAll(".folha").forEach((f) => (f.scrollTop = 0)); };
 const esconder = (id) => $(id).classList.add("oculto");
 
 // Agrupa os complementos por grupo: ["Cremes: Pistache", "Adicionais: Paçoca, Ovomaltine"]
@@ -520,7 +521,18 @@ $("precisaTroco").addEventListener("change", () => $("valorTroco").classList.tog
 // O painel atualiza a etapa quando o operador clica "Recebido", "Saiu p/ entrega"/"Pronto", "Concluir" ou "Cancelar".
 // ----------------------
 let tempoEntregaTxt = "";
-let acomp = lerJSON("acompanhamento", null);   // { token, criado }
+// vários pedidos no mesmo celular: lista "acompanhamentos" (o "acomp" é o pedido aberto na tela)
+let acomps = (() => {
+  try {
+    const lista = JSON.parse(localStorage.getItem("acompanhamentos") || "null");
+    if (Array.isArray(lista)) return lista;
+    const um = JSON.parse(localStorage.getItem("acompanhamento") || "null");   // formato antigo (1 pedido só)
+    return um?.token ? [um] : [];
+  } catch (_) { return []; }
+})().filter((a) => a?.token && Date.now() - (a.criado || 0) <= 12 * 60 * 60 * 1000);
+let acomp = acomps[0] || null;
+const dadosAcomp = {};      // token -> dados ao vivo do pedido
+const ouvintesAcomp = {};   // token -> escuta ativa no Firebase
 let acompDados = null;
 let pararAcomp = null;
 const DOZE_HORAS = 12 * 60 * 60 * 1000;
@@ -572,7 +584,7 @@ function textosDe(d) {
 function marcarWhatsEnviado() {
   if (!acomp) return;
   acomp.enviouWhats = true;
-  gravarJSON("acompanhamento", acomp);
+  salvarAcomps();
   setTimeout(renderAcomp, 400);
 }
 
@@ -598,6 +610,7 @@ function renderAcomp() {
     <div class="montagem acomp ${cancelado ? "cancelado" : ""} ${d.status === "concluido" ? "fim" : ""}">
       <div class="acomp-topo"><img src="img/logo-192.png" alt=""><span>Nosso Açaí</span>
         <button class="fechar" data-sair-acomp aria-label="Fechar">✕</button></div>
+      ${seletorAcomps()}
       <div class="acomp-palco"><span class="onda b"></span><span class="onda"></span>${palco}</div>
       <p class="acomp-num">${d.num ? `Pedido #${d.num}` : "Seu pedido"}${hora(d.criadoEm) ? ` · ${hhmm(hora(d.criadoEm))}` : ""}</p>
       <h2 class="acomp-titulo">${titulo}</h2>
@@ -610,7 +623,7 @@ function renderAcomp() {
           <p class="t">${cls === "agora" ? `<b>${e.nome}</b>` : e.nome}${cls === "agora" ? `<small>${e.desc}</small>` : ""}</p>
           <span class="h">${h}</span></div>`;
       }).join("")}</div>`}
-      <div class="acomp-resumo"><span>${esc(d.resumo || "")}<small>${esc(d.pagamento || "")}${troco}</small></span><b>${brl(d.total)}</b></div>
+      <div class="acomp-resumo ac-resumo2"><div class="ac-r-it">${esc(d.resumo || "")}<small>${esc(d.pagamento || "")}${troco}</small></div>${valoresAcomp(d)}</div>
       <div class="acomp-acoes">
         ${zapOpcional ? `<a class="btn-opc" href="${acomp.whats}" target="_blank" rel="noopener" data-enviar-whats><span class="ic">📲</span><span><b>Enviar pedido pelo WhatsApp</b><small>Opcional · seu pedido já chegou na loja</small></span></a>`
           : `<a class="btn-sec" href="https://wa.me/${LOJA.whatsapp}?text=${encodeURIComponent(`Olá! Sobre o meu pedido${d.num ? ` #${d.num}` : ""}…`)}" target="_blank" rel="noopener">💬 Falar com a loja</a>`}
@@ -627,6 +640,8 @@ function acompAtivo() {
 }
 
 function renderBarraAcomp() {
+  const ativosB = acompsAtivos();
+  if ($("telaAcomp").classList.contains("oculto") && ativosB.length && !ativosB.includes(acomp)) { acomp = ativosB[0]; acompDados = dadosAcomp[acomp.token]; }
   const d = acompDados;
   const mostrarBarra = acompAtivo() && d && !["concluido", "cancelado"].includes(d.status) && $("telaAcomp").classList.contains("oculto");
   $("barraAcomp").classList.toggle("oculto", !mostrarBarra);
@@ -635,20 +650,26 @@ function renderBarraAcomp() {
                 preparando: ["🍇", "Seu açaí está sendo preparado", d.tipo === "entrega" && previsaoEntrega(d) ? `Previsão: ${previsaoEntrega(d)}` : "Toque para acompanhar"],
                 saiu: ["🛵", "Seu pedido saiu para entrega", "Chega em breve"],
                 pronto: ["🛍️", "Pronto para retirar", "Pode vir buscar no balcão"] }[d.status] || ["📦", "Acompanhe seu pedido", ""];
+  if (ativosB.length > 1) txt.splice(1, 2, `${ativosB.length} pedidos em andamento`, `Mais recente: ${txt[1]}`);
   $("barraAcomp").innerHTML = `<span class="ic">${txt[0]}</span>
     <span class="tx"><span class="ao-vivo"></span>${d.num ? `#${d.num} · ` : ""}${txt[1]}<small>${txt[2]}</small></span><span class="ver">Ver</span>`;
 }
 
 function escutarAcomp() {
-  pararAcomp?.();
-  pararAcomp = null;
-  if (!acompAtivo()) { acompDados = null; renderBarraAcomp(); return; }
-  pararAcomp = onSnapshot(doc(db, "acompanhamento", acomp.token), (snap) => {
-    if (!snap.exists()) return;
-    acompDados = snap.data();
-    talvezFestaSaiu(acompDados);
-    if (!$("telaAcomp").classList.contains("oculto")) renderAcomp(); else renderBarraAcomp();
-  }, (e) => console.warn("Acompanhamento indisponível:", e));
+  acomps = acomps.filter((a) => Date.now() - (a.criado || 0) <= DOZE_HORAS);
+  if (!acomps.includes(acomp)) acomp = acomps[0] || null;
+  acomps.forEach((a) => {
+    if (ouvintesAcomp[a.token]) return;
+    ouvintesAcomp[a.token] = onSnapshot(doc(db, "acompanhamento", a.token), (snap) => {
+      if (!snap.exists()) return;
+      dadosAcomp[a.token] = snap.data();
+      talvezFestaSaiu(a, dadosAcomp[a.token]);
+      if (acomp === a) acompDados = dadosAcomp[a.token];
+      if (!$("telaAcomp").classList.contains("oculto")) renderAcomp(); else renderBarraAcomp();
+    }, (e) => console.warn("Acompanhamento indisponível:", e));
+  });
+  acompDados = acomp ? dadosAcomp[acomp.token] || null : null;
+  renderBarraAcomp();
 }
 
 function abrirAcomp() {
@@ -668,6 +689,13 @@ function fecharAcomp() {
 }
 
 $("telaAcomp").addEventListener("click", (e) => {
+  const sel = e.target.closest("[data-acomp-token]");
+  if (sel) {
+    acomp = acomps.find((a) => a.token === sel.dataset.acompToken) || acomp;
+    acompDados = dadosAcomp[acomp.token] || null;
+    if (acompDados) renderAcomp();
+    return;
+  }
   if (e.target.closest("[data-enviar-whats]")) return marcarWhatsEnviado();
   if (e.target.closest("[data-sair-acomp]")) fecharAcomp();
 });
@@ -757,7 +785,7 @@ $("btnEnviar").addEventListener("click", async () => {
     try {
       const ref = doc(collection(db, "acompanhamento"));
       await setDoc(ref, {
-        status: "enviado", tipo: d.tipo, total: d.valorFinal, pagamento: d.pagamento, valorTroco: d.valorTroco || null,
+        status: "enviado", tipo: d.tipo, total: d.valorFinal, subtotal: d.totalProdutos, taxaEntrega: d.taxa || 0, pagamento: d.pagamento, valorTroco: d.valorTroco || null,
         resumo: d.itens.map((i) => i.nome).join(" + "), tempoEntrega: tempoEntregaTxt,
         criadoEm: serverTimestamp(), horarios: { enviado: serverTimestamp() }
       });
@@ -789,7 +817,8 @@ $("btnEnviar").addEventListener("click", async () => {
     if (token) {
       // o cliente envia a mensagem pelo botão da tela de acompanhamento
       acomp = { token, criado: Date.now(), whats: url, enviouWhats: false };
-      gravarJSON("acompanhamento", acomp);
+      acomps.unshift(acomp); acomps = acomps.slice(0, 10);
+      salvarAcomps();
       acompDados = null;
       escutarAcomp();
       abrirAcomp();
@@ -904,13 +933,45 @@ function mostrarFestaSaiu() {
   setTimeout(fechar, 4500);
 }
 
-function talvezFestaSaiu(d) {
-  if (!acomp || d?.status !== "saiu" || acomp.festaSaiu) return;
-  acomp.festaSaiu = true;
-  try { localStorage.setItem("acompanhamento", JSON.stringify(acomp)); } catch (_) {}
+function talvezFestaSaiu(a, d) {
+  if (!a || d?.status !== "saiu" || a.festaSaiu) return;
+  a.festaSaiu = true;
+  salvarAcomps();
   // se o cliente está em outro app (ex.: WhatsApp), espera ele voltar para mostrar
   if (!document.hidden) return mostrarFestaSaiu();
   const aoVoltar = () => { if (document.hidden) return; document.removeEventListener("visibilitychange", aoVoltar); mostrarFestaSaiu(); };
   document.addEventListener("visibilitychange", aoVoltar);
 }
 const FESTA_CORES = ["#f2b8e6", "#a8409a", "#f6efe6", "#86b84d"];
+
+
+// ----------------------
+// Acompanhamento: vários pedidos no mesmo celular + valores (produtos, taxa de entrega e total)
+// ----------------------
+function salvarAcomps() {
+  try { localStorage.setItem("acompanhamentos", JSON.stringify(acomps)); localStorage.removeItem("acompanhamento"); } catch (_) {}
+}
+
+function acompsAtivos() {
+  return acomps.filter((a) => { const x = dadosAcomp[a.token]; return x && !["concluido", "cancelado"].includes(x.status); });
+}
+
+function seletorAcomps() {
+  if (acomps.length < 2) return "";
+  const rot = (x) => !x ? "carregando…" : ({ enviado: "Enviado", preparando: "Preparando", saiu: "Saiu p/ entrega", pronto: "Pronto",
+    concluido: x.tipo === "entrega" ? "Entregue" : "Retirado", cancelado: "Cancelado" }[x.status] || "");
+  return `<div class="ac-pedidos">${[...acomps].reverse().map((a) => {
+    const x = dadosAcomp[a.token];
+    const h = hhmm(hora(x?.criadoEm)) || hhmm(new Date(a.criado));
+    return `<button type="button" class="${a === acomp ? "on" : ""}" data-acomp-token="${a.token}">Pedido ${h}<small>${rot(x)}</small></button>`;
+  }).join("")}</div>`;
+}
+
+function valoresAcomp(d) {
+  const taxa = Number(d.taxaEntrega) || 0;
+  const sub = d.subtotal != null ? Number(d.subtotal) : Number(d.total) - taxa;
+  const linhas = taxa > 0
+    ? `<p><span>Produtos</span><span>${brl(sub)}</span></p><p><span>Taxa de entrega</span><span>${brl(taxa)}</span></p>`
+    : d.tipo === "retirada" ? `<p><span>Retirada no balcão</span><span>sem taxa</span></p>` : "";
+  return `<div class="ac-r-val">${linhas}<p class="t"><span>Total</span><b>${brl(d.total)}</b></p></div>`;
+}
