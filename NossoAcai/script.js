@@ -37,7 +37,8 @@ const CATEGORIAS = [
   { id: "copos",   aba: "Copo",    titulo: "No copo",   descricao: "Cremes, adicionais e frutas",   ilu: "copo" },
   { id: "tigelas", aba: "Tigela",  titulo: "Na tigela", descricao: "A mesma montagem, na tigela",   ilu: "tigela" },
   { id: "garrafa", aba: "Garrafa", titulo: "Na garrafa", descricao: "300 ml com 1 creme à escolha", ilu: "garrafa" },
-  { id: "marmita", aba: "Marmita", titulo: "Marmita",   descricao: "Para compartilhar",             ilu: "marmita" }
+  { id: "marmita", aba: "Marmita", titulo: "Marmita",   descricao: "Para compartilhar",             ilu: "marmita" },
+  { id: "bebidas", aba: "Bebidas", titulo: "Bebidas",   descricao: "Geladinhas",                    ilu: "lata" }
 ];
 const ORDEM_TAM = ["PP", "P", "M", "G", "GG"];
 
@@ -123,6 +124,32 @@ const ILU = {
       <text x="60" y="62" font-size="13" text-anchor="middle" fill="#f6efe6" font-family="serif">1 kg</text></svg>`;
   }
 };
+// Bebidas: lata ou garrafinha de água, na cor de cada sabor (desenho próprio, sem marca)
+function iluBebida(nome, alt) {
+  const n = String(nome || "").toLowerCase();
+  if (/[áa]gua/.test(n)) {
+    const gas = /com g[áa]s/.test(n);
+    return `<svg height="${alt}" viewBox="0 0 50 110" aria-hidden="true">
+      <rect x="18" y="2" width="14" height="10" rx="3" fill="${gas ? "#1f6fb2" : "#5fa8d3"}"/>
+      <path d="M16 13h18l5 13v72a8 8 0 0 1-8 8H19a8 8 0 0 1-8-8V26z" fill="#d7ecf7"/>
+      <path d="M11 44h28v30H11z" fill="${gas ? "#1f6fb2" : "#5fa8d3"}"/>
+      <text x="25" y="63" font-size="8.5" font-weight="700" text-anchor="middle" fill="#fff" font-family="sans-serif">${gas ? "c/ gás" : "s/ gás"}</text>
+      ${gas ? '<g fill="#fff" opacity=".9"><circle cx="18" cy="86" r="2"/><circle cx="28" cy="92" r="1.6"/><circle cx="31" cy="82" r="1.3"/><circle cx="21" cy="96" r="1.2"/></g>' : ""}
+      <path d="M14 26h4v66h-4z" fill="#fff" opacity=".45"/></svg>`;
+  }
+  const [corpo, faixa] = /zero/.test(n) && /coca/.test(n) ? ["#1c1c1c", "#d7192b"]
+    : /coca/.test(n) ? ["#d7192b", "#ffffff"]
+    : /sprite/.test(n) ? ["#0b7a3b", "#f2d94e"]
+    : /guaran/.test(n) ? ["#1d7f3a", "#d7192b"]
+    : ["#a8409a", "#f6efe6"];
+  return `<svg height="${alt}" viewBox="0 0 60 110" aria-hidden="true">
+    <rect x="12" y="4" width="36" height="8" rx="3" fill="#c9c9cf"/>
+    <path d="M10 12h40v86a6 6 0 0 1-6 6H16a6 6 0 0 1-6-6z" fill="${corpo}"/>
+    <path d="M10 46c12 8 28-8 40 0v16c-12-8-28 8-40 0z" fill="${faixa}"/>
+    <rect x="12" y="98" width="36" height="6" rx="3" fill="#c9c9cf"/>
+    <path d="M15 16h4v78h-4z" fill="#fff" opacity=".25"/></svg>`;
+}
+
 const iluCategoria = (cat, tam) => {
   const f = ILU[cat?.ilu] || ILU.tigela;
   return cat?.ilu === "tigela" ? f(tam) : f(Math.round(tam * 0.92));
@@ -195,7 +222,8 @@ function cartao(f) {
     : `<div class="tams"><span><b>${brl(f.membros[0].p.preco)}</b></span></div>`;
   return `
     <button class="item" data-fam="${esc(f.id)}">
-      <div class="ilu">${f.imagem ? `<img src="${esc(f.imagem)}" alt="" loading="lazy">` : iluCategoria(f.cat, 62)}</div>
+      <div class="ilu">${f.imagem ? `<img src="${esc(f.imagem)}" alt="" loading="lazy">`
+        : f.cat.ilu === "lata" ? iluBebida(f.titulo, 58) : iluCategoria(f.cat, 62)}</div>
       <div class="txt">
         ${f.promocao ? '<span class="promo">Promoção</span>' : ""}
         <h3>${esc(f.titulo)}</h3>
