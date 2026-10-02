@@ -48,6 +48,20 @@ let taxaEntregaFixa = 2.0;
 // ----------------------
 // Carregar produtos
 // ----------------------
+// Produtos sem foto própria usam o logo: troca o arquivo de 2 MB pela versão leve (mesma imagem)
+const FOTO_LEVE = { "img/logo2.jpeg": "img/logo2-leve.jpg", "img/logo2.png": "img/logo2-leve.jpg" };
+const fotoDoProduto = (src) => FOTO_LEVE[src] || src || "img/logo2-leve.jpg";
+
+// As seções ficam escondidas até o cliente abrir, e o navegador só baixaria a foto nessa hora.
+// Então, com a página já carregada, baixamos as fotos em segundo plano: ao abrir a categoria, já estão prontas.
+const fotosPreCarregadas = new Set();
+function preCarregarFotos(lista) {
+  const novas = [...new Set(lista)].filter((src) => src && !fotosPreCarregadas.has(src));
+  if (!novas.length) return;
+  const baixar = () => novas.forEach((src) => { fotosPreCarregadas.add(src); const im = new Image(); im.decoding = "async"; im.src = src; });
+  if ("requestIdleCallback" in window) requestIdleCallback(baixar, { timeout: 2000 }); else setTimeout(baixar, 800);
+}
+
 function carregarProdutosDoFirestore() {
   const ref = collection(db, "produtos");
   const q = query(ref, orderBy("nome", "asc")); // ordena pelo campo "nome"
@@ -56,6 +70,7 @@ function carregarProdutosDoFirestore() {
     document
       .querySelectorAll(".produtos-grid")
       .forEach((grid) => (grid.innerHTML = ""));
+    preCarregarFotos(snapshot.docs.filter((d) => d.data().status === "ativo").map((d) => fotoDoProduto(d.data().imagem)));
 
     snapshot.forEach((docSnap) => {
       const produto = docSnap.data();
@@ -72,7 +87,7 @@ function carregarProdutosDoFirestore() {
       card.className = "menu-item bg-gray-800 rounded-lg shadow-lg p-4";
 
       card.innerHTML = `
-  <img src="${produto.imagem || ""}" 
+  <img src="${fotoDoProduto(produto.imagem)}" 
        alt="${produto.nome}" 
        class="w-full h-48 object-cover rounded-md shadow-lg" 
        loading="lazy" 
