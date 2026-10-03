@@ -6,7 +6,7 @@
   <title>Cardápio Digital - Gatini Flor & Sabor</title>
   <meta name="theme-color" content="#445f25">
   <link rel="manifest" href="./manifest.json">
-  <link rel="icon" type="image/svg+xml" href="./img/logo.svg">
+  <link rel="icon" type="image/png" href="./img/logo.png">
   <link rel="apple-touch-icon" href="./img/logo.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -55,7 +55,7 @@
   <header class="sticky top-0 z-40 bg-creme/90 backdrop-blur border-b border-brand-100">
     <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
       <a href="#" class="flex items-center gap-3 min-w-0">
-        <img src="img/logo.svg" alt="Logo Gatini Flor & Sabor" class="w-11 h-11 shrink-0">
+        <img src="img/logo.png" alt="Logo Gatini Flor & Sabor" class="w-11 h-11 shrink-0">
         <span class="leading-tight min-w-0">
           <span class="block font-display font-extrabold text-xl text-brand-800 truncate">Gatini</span>
           <span class="block text-[11px] uppercase tracking-[.2em] text-coral-600 font-bold truncate">Flor &amp; Sabor</span>
@@ -80,7 +80,7 @@
   <section class="px-4 pt-5">
     <div class="hero-bg relative overflow-hidden max-w-6xl mx-auto rounded-3xl text-white px-5 py-7 md:px-12 md:py-12 shadow-xl">
       <div class="relative flex flex-col md:flex-row items-center gap-6 md:gap-10 text-center md:text-left">
-        <img src="img/logo.svg" alt="" class="w-24 h-24 md:w-44 md:h-44 drop-shadow-2xl shrink-0">
+        <img src="img/logo.png" alt="" class="w-24 h-24 md:w-44 md:h-44 drop-shadow-2xl shrink-0">
         <div>
           <p class="text-brand-200 font-bold uppercase tracking-[.25em] text-xs">Cardápio digital</p>
           <h1 class="font-display font-extrabold text-[2.1rem] md:text-6xl mt-1 leading-none">
@@ -111,7 +111,7 @@
 
   <footer class="bg-brand-800 text-brand-100 mt-12 pt-8 pb-28">
     <div class="max-w-6xl mx-auto px-4 flex flex-col items-center text-center gap-3">
-      <img src="img/logo.svg" alt="" class="w-14 h-14">
+      <img src="img/logo.png" alt="" class="w-14 h-14">
       <p class="font-display font-extrabold text-xl text-white">Gatini Flor &amp; Sabor</p>
       <button id="install-button"
         class="hidden bg-white text-brand-800 px-5 py-2.5 rounded-full font-bold shadow-lg hover:bg-brand-50">
@@ -245,7 +245,7 @@
   <!-- Sucesso -->
   <div id="modalSucessoPedido" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 hidden">
     <div class="bg-white rounded-3xl p-6 w-11/12 max-w-sm text-center shadow-xl">
-      <img src="img/logo.svg" alt="" class="w-20 h-20 mx-auto mb-3">
+      <img src="img/logo.png" alt="" class="w-20 h-20 mx-auto mb-3">
       <h2 class="font-display font-extrabold text-2xl mb-2 text-brand-800">Pedido enviado!</h2>
       <p class="mb-5 text-gray-600">Finalize o envio da mensagem no WhatsApp. Obrigado! 💚</p>
       <button onclick="fecharModalSucesso()" class="bg-brand-700 hover:bg-brand-800 text-white px-6 py-3 rounded-2xl font-bold w-full">Fechar</button>
@@ -267,7 +267,7 @@
       navigator.serviceWorker.register('./sw.js').catch(() => {});
     }
 
-    const versaoSistema = "2.1.4"; // mude a cada publicação para forçar atualização do script
+    const versaoSistema = "2.1.5"; // mude a cada publicação para forçar atualização do script
     const s = document.createElement("script");
     s.type = "module";
     s.src = `script.js?v=${versaoSistema}`;
