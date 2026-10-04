@@ -92,6 +92,7 @@
           <div class="mt-5 flex flex-wrap justify-center md:justify-start gap-2 text-xs md:text-sm font-semibold">
             <span class="bg-white/15 backdrop-blur px-3 py-1.5 rounded-full">Lanches Naturais</span>
             <span class="bg-white/15 backdrop-blur px-3 py-1.5 rounded-full">Saladas</span>
+            <span class="bg-white/15 backdrop-blur px-3 py-1.5 rounded-full">Omeletes</span>
             <span class="bg-white/15 backdrop-blur px-3 py-1.5 rounded-full">Sucos</span>
             <span class="bg-white/15 backdrop-blur px-3 py-1.5 rounded-full">Smoothies</span>
           </div>
@@ -267,7 +268,7 @@
       navigator.serviceWorker.register('./sw.js').catch(() => {});
     }
 
-    const versaoSistema = "2.1.5"; // mude a cada publicação para forçar atualização do script
+    const versaoSistema = "2.1.6"; // mude a cada publicação para forçar atualização do script
     const s = document.createElement("script");
     s.type = "module";
     s.src = `script.js?v=${versaoSistema}`;

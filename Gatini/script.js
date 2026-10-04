@@ -39,6 +39,7 @@ const CATEGORIAS = [
   { id: "promocoes",    nome: "Promoções",          emoji: "⭐" },
   { id: "lanches",      nome: "Lanches Naturais",   emoji: "🥪" },
   { id: "saladas",      nome: "Saladas",            emoji: "🥗" },
+  { id: "omeletes",     nome: "Omeletes",           emoji: "🍳" },
   { id: "sucos",        nome: "Sucos Tradicionais", emoji: "🍊" },
   { id: "nutricionais", nome: "Sucos Nutricionais", emoji: "🥬" },
   { id: "smoothies",    nome: "Smoothies",          emoji: "🍓" },
