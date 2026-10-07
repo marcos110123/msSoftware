@@ -165,10 +165,11 @@
         <button onclick="selecionarTipoPedido('retirada')" class="flex flex-col items-center gap-2 border-2 border-brand-200 hover:border-brand-500 hover:bg-brand-50 text-brand-800 font-bold py-5 rounded-2xl transition">
           <span class="text-4xl">🏃</span> Retirada no balcão
         </button>
-        <button onclick="selecionarTipoPedido('entrega')" class="flex flex-col items-center gap-2 border-2 border-coral-100 hover:border-coral-500 hover:bg-coral-50 text-coral-600 font-bold py-5 rounded-2xl transition">
+        <button id="btnTipoEntrega" onclick="selecionarTipoPedido('entrega')" class="flex flex-col items-center gap-2 border-2 border-coral-100 hover:border-coral-500 hover:bg-coral-50 text-coral-600 font-bold py-5 rounded-2xl transition">
           <span class="text-4xl">🛵</span> Entrega em domicílio
         </button>
       </div>
+      <p id="avisoSemEntrega" class="hidden mt-4 text-center text-sm font-semibold text-coral-600"></p>
     </div>
   </div>
 
@@ -268,7 +269,7 @@
       navigator.serviceWorker.register('./sw.js').catch(() => {});
     }
 
-    const versaoSistema = "2.1.6"; // mude a cada publicação para forçar atualização do script
+    const versaoSistema = "2.1.7"; // mude a cada publicação para forçar atualização do script
     const s = document.createElement("script");
     s.type = "module";
     s.src = `script.js?v=${versaoSistema}`;

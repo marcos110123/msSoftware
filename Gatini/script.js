@@ -30,7 +30,8 @@ const db = getFirestore(app);
 const LOJA = {
   nome: "Gatini Flor & Sabor",
   whatsapp: "5517996067416", // (17) 99606-7416
-  taxaEntrega: 2.00          // CONFIRMAR com o cliente
+  taxaEntrega: 2.00,         // CONFIRMAR com o cliente
+  entregaAte: 17             // hora limite da entrega (horário de Brasília); depois disso, só retirada. null = sem limite
 };
 
 // Ordem e nomes das categorias. O "id" é o valor do campo "categoria" no produto.
@@ -75,6 +76,14 @@ function salvarCarrinho() {
   try { localStorage.setItem("carrinho", JSON.stringify(carrinho)); } catch {}
 }
 const totalProdutos = () => carrinho.reduce((s, i) => s + Number(i.subtotal || 0), 0);
+// Entrega só até a hora limite (pelo horário de Brasília, não pelo relógio do aparelho)
+function entregaDisponivel() {
+  if (LOJA.entregaAte == null) return true;
+  const hora = Number(new Intl.DateTimeFormat("en-GB", { timeZone: "America/Sao_Paulo", hour: "2-digit", hourCycle: "h23" }).format(new Date()));
+  return hora < LOJA.entregaAte;
+}
+const AVISO_SEM_ENTREGA = `As entregas são feitas até as ${LOJA.entregaAte}h. Agora, apenas retirada no balcão.`;
+
 const taxaAtual = () => (tipoPedidoSelecionado === "entrega" ? LOJA.taxaEntrega : 0);
 
 // Agrupa os complementos por grupo: ["Tamanho: G 500ml (+R$ 3,00)", "Pão: Pão sírio (+R$ 2,00)"]
@@ -448,10 +457,17 @@ $("orderForm").addEventListener("submit", async (e) => {
     mostrarAlerta("Seu carrinho está vazio!");
     return;
   }
+  const comEntrega = entregaDisponivel();
+  $("btnTipoEntrega").disabled = !comEntrega;
+  $("btnTipoEntrega").classList.toggle("opacity-40", !comEntrega);
+  $("btnTipoEntrega").classList.toggle("cursor-not-allowed", !comEntrega);
+  $("avisoSemEntrega").textContent = AVISO_SEM_ENTREGA;
+  $("avisoSemEntrega").classList.toggle("hidden", comEntrega);
   $("modalTipoPedido").classList.remove("hidden");
 });
 
 function selecionarTipoPedido(tipo) {
+  if (tipo === "entrega" && !entregaDisponivel()) return mostrarAlerta(AVISO_SEM_ENTREGA);
   tipoPedidoSelecionado = tipo;
   $("modalTipoPedido").classList.add("hidden");
 
@@ -575,6 +591,11 @@ function mensagemPedidoWhats(p) {
 }
 
 $("btnConfirmarPedido").addEventListener("click", async () => {
+  // Pedido de entrega montado antes do limite e confirmado depois: volta para escolher retirada
+  if (tipoPedidoSelecionado === "entrega" && !entregaDisponivel()) {
+    $("modalConfirmacao").classList.add("hidden");
+    return mostrarAlerta(AVISO_SEM_ENTREGA);
+  }
   const btn = $("btnConfirmarPedido");
   btn.disabled = true;
 
