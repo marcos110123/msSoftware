@@ -249,7 +249,7 @@ function regraGrupo(g) {
   const min = Number(g.min) || 0;
   let t = max === 1 ? "Escolha 1" : min > 0 ? `Escolha de ${min} a ${max}` : `Até ${max}`;
   if (g.gratis) t = `${g.gratis} ${Number(g.gratis) === 1 ? "incluso" : "inclusos"} · +${brl(g.precoExcedente)} cada adicional`;
-  return t + (min > 0 ? " · obrigatório" : "");
+  return t;
 }
 
 function abrirModalOpcoes(p) {
