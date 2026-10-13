@@ -228,6 +228,15 @@ function renderLista() {
     </section>`).join("");
 }
 
+// "Puro" = só o açaí, sem acompanhamentos, pelo preço do campo precoPuro do produto (0/vazio = não oferece)
+const precoPuroDe = (p) => (Number(p?.precoPuro) > 0 ? Number(p.precoPuro) : 0);
+function dicaPuro(f) {
+  const com = f.membros.filter((m) => precoPuroDe(m.p));
+  if (!com.length) return "";
+  const txt = f.membros.length > 1 ? com.map((m) => `${esc(m.tam)} ${curto(precoPuroDe(m.p))}`).join(" · ") : brl(precoPuroDe(com[0].p));
+  return `<p class="dica-puro">Puro, só o açaí: ${txt}</p>`;
+}
+
 function cartao(f) {
   const preco = f.membros.length > 1
     ? `<div class="tams">${f.membros.map((m) => `<span><b>${esc(m.tam)}</b>${curto(m.p.preco)}</span>`).join("")}</div>`
@@ -241,6 +250,7 @@ function cartao(f) {
         <h3>${esc(f.titulo)}</h3>
         <p>${esc(f.descricao)}</p>
         ${preco}
+        ${dicaPuro(f)}
       </div>
       <span class="mais" aria-hidden="true">+</span>
     </button>`;
@@ -289,11 +299,13 @@ function fecharMontagem(peloVoltar = false) {
 }
 
 const produtoAtual = () => mont.fam.membros[mont.idx].p;
+const ehPuro = () => !!mont?.puro && precoPuroDe(produtoAtual()) > 0;
 const gruposDe = (p) => (p.grupos || []).map((k) => grupos.get(k)).filter(Boolean);
 const marcados = (g) => mont.sel.get(g.id) || new Set();
 
 function calcular() {
   const p = produtoAtual();
+  if (ehPuro()) return { selecionados: [], extras: 0, escolhidos: 0, lim: 0, total: precoPuroDe(p) };
   const lim = limiteDe(p);
   const selecionados = [];
   let extras = 0, escolhidos = 0;
@@ -332,12 +344,21 @@ function regraGrupo(g, p) {
 function renderMontagem() {
   const { fam } = mont;
   const p = produtoAtual();
-  const lim = limiteDe(p);
+  const puro = ehPuro();
+  const lim = puro ? 0 : limiteDe(p);
   const palco = fam.imagem ? `<img class="foto" src="${esc(fam.imagem)}" alt="">` : iluCategoria(fam.cat, 230);
   const seg = fam.membros.length > 1 ? `
     <div class="seg">${fam.membros.map((m, i) => `
       <button data-tam="${i}" class="${i === mont.idx ? "on" : ""}"><b>${esc(m.tam)}</b>
-        <span>${brl(m.p.preco).replace(",00", "")}${limiteDe(m.p) ? ` · ${limiteDe(m.p)} itens` : ""}</span></button>`).join("")}
+        <span>${mont.puro && precoPuroDe(m.p) ? brl(precoPuroDe(m.p)).replace(",00", "")
+          : `${brl(m.p.preco).replace(",00", "")}${limiteDe(m.p) ? ` · ${limiteDe(m.p)} itens` : ""}`}</span></button>`).join("")}
+    </div>` : "";
+  const modo = precoPuroDe(p) ? `
+    <div class="seg modo">
+      <button data-modo="montar" class="${puro ? "" : "on"}"><b>Montado</b>
+        <span>${brl(p.preco).replace(",00", "")}${limiteDe(p) ? ` · ${limiteDe(p)} itens à escolha` : " · com acompanhamentos"}</span></button>
+      <button data-modo="puro" class="${puro ? "on" : ""}"><b>Puro</b>
+        <span>${brl(precoPuroDe(p)).replace(",00", "")} · só o açaí</span></button>
     </div>` : "";
 
   $("telaMontagem").innerHTML = `
@@ -345,10 +366,11 @@ function renderMontagem() {
       <div class="palco"><button class="voltar" data-sair aria-label="Voltar">←</button>${palco}</div>
       <div class="painel">
         <h2>${esc(fam.membros.length > 1 ? fam.titulo : p.nome)}</h2>
-        <p class="sub">${esc(p.descricao || fam.descricao)}</p>
+        <p class="sub">${puro ? "Só o açaí, sem acompanhamentos." : esc(p.descricao || fam.descricao)}</p>
         ${seg}
+        ${modo}
         ${lim ? `<div class="prog" id="prog"><div class="anel" id="anel"><span id="anelTxt"></span></div><p id="progTxt"></p></div>` : ""}
-        ${gruposDe(p).map((g) => {
+        ${(puro ? [] : gruposDe(p)).map((g) => {
           const r = regraGrupo(g, p);
           const radio = (Number(g.max) || 1) === 1 && !(g.contaLimite && lim);
           return `
@@ -361,7 +383,7 @@ function renderMontagem() {
           </div>`;
         }).join("")}
         <div class="obs"><label for="obsItem">Observação</label>
-          <textarea class="campo" id="obsItem" rows="2" placeholder="Ex.: leite condensado por cima, sem granola…">${esc(mont.obs)}</textarea></div>
+          <textarea class="campo" id="obsItem" rows="2" placeholder="${puro ? "Alguma observação para a loja?" : "Ex.: leite condensado por cima, sem granola…"}">${esc(mont.obs)}</textarea></div>
       </div>
       <div class="fixo-baixo"><button class="btn-pri" id="btnAdicionar"><span>Adicionar à sacola</span><span id="precoMont"></span></button></div>
     </div>`;
@@ -396,6 +418,15 @@ $("telaMontagem").addEventListener("click", (e) => {
     $("telaMontagem").scrollTop = rolagem;
     return;
   }
+  const m = e.target.closest("[data-modo]");
+  if (m) {
+    mont.obs = $("obsItem").value;
+    mont.puro = m.dataset.modo === "puro";
+    const rolagem = $("telaMontagem").scrollTop;
+    renderMontagem();
+    $("telaMontagem").scrollTop = rolagem;
+    return;
+  }
   if (e.target.closest("#btnAdicionar")) confirmarMontagem();
 });
 
@@ -421,6 +452,10 @@ $("telaMontagem").addEventListener("change", (e) => {
 
 function confirmarMontagem() {
   const p = produtoAtual();
+  if (ehPuro()) {
+    adicionarAoCarrinho({ nome: `${p.nome} (puro)`, precoBase: precoPuroDe(p), observacao: $("obsItem").value.trim() });
+    return fecharMontagem();
+  }
   for (const g of gruposDe(p)) {
     const min = Number(g.min) || 0;
     if (marcados(g).size < min) {
