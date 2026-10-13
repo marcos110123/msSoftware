@@ -50,6 +50,7 @@ const grupos = new Map();
 let carrinho = lerJSON("carrinho", []);
 let tipoPedido = null;
 let lojaAberta = true;
+let entregaPausada = false; // painel pausa só as entregas (config/estadoPedidos.entregaPausada); retirada continua
 
 // ----------------------
 // Helpers
@@ -496,6 +497,8 @@ $("btnAvancar").addEventListener("click", async () => {
   try {
     const snap = await getDoc(doc(db, "config", "estadoPedidos"));
     lojaAberta = snap.exists() ? snap.data().recebendo !== false : true;
+    entregaPausada = snap.exists() && snap.data().entregaPausada === true;
+    renderEntrega();
   } catch (err) { console.warn("Não foi possível verificar o status da loja:", err); }
   if (!lojaAberta) return avisar("A loja está fechada para pedidos no momento.");
   esconder("jSacola");
@@ -505,6 +508,7 @@ $("btnAvancar").addEventListener("click", async () => {
 $("jReceber").addEventListener("click", (e) => {
   const b = e.target.closest("[data-tipo]");
   if (!b) return;
+  if (b.dataset.tipo === "entrega" && entregaPausada) return avisar(AVISO_SEM_ENTREGA);
   tipoPedido = b.dataset.tipo;
   const entrega = tipoPedido === "entrega";
   $("blocoEndereco").classList.toggle("oculto", !entrega);
@@ -787,6 +791,7 @@ function mensagemPedidoWhats(p) {
 $("btnEnviar").addEventListener("click", async () => {
   const btn = $("btnEnviar");
   if (btn.disabled || !pedidoPronto) return;
+  if (pedidoPronto.tipo === "entrega" && entregaPausada) return avisar(AVISO_SEM_ENTREGA);
   btn.disabled = true;
   const d = pedidoPronto;
   try {
@@ -879,18 +884,28 @@ onSnapshot(doc(db, "config", "estadoPedidos"), (snap) => {
   $("avisoFechado").classList.toggle("oculto", lojaAberta);
   $("pontoAberto").classList.toggle("off", !lojaAberta);
   $("textoAberto").textContent = lojaAberta ? "Aberto agora" : "Fechado agora";
+  entregaPausada = snap.exists() && snap.data().entregaPausada === true;
+  renderEntrega();
 });
+
+const AVISO_SEM_ENTREGA = "As entregas estão pausadas no momento. Você pode pedir para retirar no balcão.";
+function renderEntrega() {
+  const taxa = LOJA.taxaEntrega ? brl(LOJA.taxaEntrega) : "grátis";
+  $("textoTaxa").textContent = entregaPausada ? "indisponível" : taxa;
+  $("taxaReceber").textContent = entregaPausada ? "indisponível agora" : LOJA.taxaEntrega ? `taxa ${taxa}` : "grátis";
+  $("btnTipoEntrega").disabled = entregaPausada;
+  $("blocoTempo").classList.toggle("oculto", entregaPausada || !tempoEntregaTxt);
+  $("avisoEntrega").classList.toggle("oculto", !entregaPausada || !lojaAberta);
+}
 
 onSnapshot(doc(db, "config", "entrega"), (snap) => {
   const d = snap.exists() ? snap.data() : {};
   const taxa = Number(d.taxaEntrega);
   if (d.taxaEntrega !== undefined && d.taxaEntrega !== "" && Number.isFinite(taxa) && taxa >= 0) LOJA.taxaEntrega = taxa;
-  $("textoTaxa").textContent = LOJA.taxaEntrega ? brl(LOJA.taxaEntrega) : "grátis";
-  $("taxaReceber").textContent = LOJA.taxaEntrega ? `taxa ${brl(LOJA.taxaEntrega)}` : "grátis";
   const tempo = String(d.tempoEntrega || "").trim();
   tempoEntregaTxt = tempo;
   $("textoTempo").textContent = tempo;
-  $("blocoTempo").classList.toggle("oculto", !tempo);
+  renderEntrega();
   atualizarCarrinho();
 }, (e) => console.error("Erro ao carregar dados de entrega:", e));
 
