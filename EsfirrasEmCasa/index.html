@@ -204,6 +204,15 @@ body{
   .ac-r-val p.t { font-size: 15px; font-weight: 800; color: #b91c1c; margin-top: 4px; }
   .ac-r-val p.t b { color: #b91c1c; }
 </style>
+<style>
+  /* avisos do topo (loja fechada / entregas pausadas): faixa fina translúcida */
+  .aviso-loja { --cor: 251,191,36; text-align: center; padding: 9px 12px;
+    background: linear-gradient(90deg, rgba(var(--cor),0), rgba(var(--cor),.16) 25%, rgba(var(--cor),.16) 75%, rgba(var(--cor),0));
+    border-top: 1px solid rgba(var(--cor),.35); border-bottom: 1px solid rgba(var(--cor),.35); }
+  .aviso-loja.fechada { --cor: 248,113,113; }
+  .aviso-loja b { font-size: 11.5px; font-weight: 700; letter-spacing: 1.6px; text-transform: uppercase; color: rgb(var(--cor)); }
+  .aviso-loja span { display: block; font-size: 12.5px; color: rgba(255,255,255,.75); margin-top: 2px; }
+</style>
 </head>
 
 <!-- HEADER / HERO MINI -->
@@ -240,12 +249,8 @@ bg-[radial-gradient(ellipse_at_center,_#991b1b_0%,_#450a0a_45%,_#1f0505_100%)]">
 
 <body class="font-sans text-white bg-gradient-to-b from-[#450a0a] via-[#7f1d1d] to-[#1f0505] min-h-screen">
 
-  <div id="aviso-fechado" class="bg-red-600 text-white text-center py-2 font-bold hidden">
-  ❌ Estamos fechados para novos pedidos.
-</div>
-  <div id="aviso-entrega" class="bg-red-600 text-white text-center py-2 px-3 font-bold hidden">
-  🛵 Entregas pausadas no momento. Pedidos somente para retirada no balcão.
-</div>
+  <div id="aviso-fechado" class="aviso-loja fechada hidden"><b>Estamos fechados</b><span>Não estamos recebendo pedidos no momento.</span></div>
+  <div id="aviso-entrega" class="aviso-loja hidden"><b>Entregas pausadas</b><span>No momento, apenas retirada no balcão.</span></div>
 
 <nav class="relative overflow-hidden
 bg-[radial-gradient(circle_at_center,_#7f1d1d_0%,_#450a0a_55%,_#1f0505_100%)]
@@ -518,7 +523,7 @@ if ('serviceWorker' in navigator) {
 </script>
 
 <script>
-  const versaoSistema = "1.1.2"; // Atualize aqui também!
+  const versaoSistema = "1.1.3"; // Atualize aqui também!
 
   const script = document.createElement("script");
   script.type = "module";

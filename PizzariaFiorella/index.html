@@ -70,6 +70,15 @@ body{
   border-radius:20px;
 }
   </style>
+<style>
+  /* avisos do topo (loja fechada / entregas pausadas): faixa fina translúcida */
+  .aviso-loja { --cor: 251,191,36; text-align: center; padding: 9px 12px;
+    background: linear-gradient(90deg, rgba(var(--cor),0), rgba(var(--cor),.16) 25%, rgba(var(--cor),.16) 75%, rgba(var(--cor),0));
+    border-top: 1px solid rgba(var(--cor),.35); border-bottom: 1px solid rgba(var(--cor),.35); }
+  .aviso-loja.fechada { --cor: 248,113,113; }
+  .aviso-loja b { font-size: 11.5px; font-weight: 700; letter-spacing: 1.6px; text-transform: uppercase; color: rgb(var(--cor)); }
+  .aviso-loja span { display: block; font-size: 12.5px; color: rgba(255,255,255,.75); margin-top: 2px; }
+</style>
 </head>
 
 <!-- HEADER PREMIUM SEM TEXTOS -->
@@ -148,12 +157,8 @@ via-[#120608]
 to-[#090909]
 min-h-screen">
 
-  <div id="aviso-fechado" class="bg-red-600 text-white text-center py-2 font-bold hidden">
-  ❌ Estamos fechados para novos pedidos.
-</div>
-  <div id="aviso-entrega" class="bg-red-600 text-white text-center py-2 px-3 font-bold hidden">
-  🛵 Entregas pausadas no momento. Pedidos somente para retirada no balcão.
-</div>
+  <div id="aviso-fechado" class="aviso-loja fechada hidden"><b>Estamos fechados</b><span>Não estamos recebendo pedidos no momento.</span></div>
+  <div id="aviso-entrega" class="aviso-loja hidden"><b>Entregas pausadas</b><span>No momento, apenas retirada no balcão.</span></div>
 
 <nav class="relative overflow-hidden
 bg-[radial-gradient(circle_at_center,_#C8102E_0%,_#7D0F22_55%,_#1A1A1A_100%)]
@@ -580,7 +585,7 @@ transition z-50 flex items-center gap-2 font-bold" text-white px-5 py-3 rounded-
 
 
 <script>
-const versaoSistema = "1.0.6"; // altere quando subir atualização
+const versaoSistema = "1.0.7"; // altere quando subir atualização
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', async () => {
