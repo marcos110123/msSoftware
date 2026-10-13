@@ -243,6 +243,9 @@ bg-[radial-gradient(ellipse_at_center,_#991b1b_0%,_#450a0a_45%,_#1f0505_100%)]">
   <div id="aviso-fechado" class="bg-red-600 text-white text-center py-2 font-bold hidden">
   ❌ Estamos fechados para novos pedidos.
 </div>
+  <div id="aviso-entrega" class="bg-red-600 text-white text-center py-2 px-3 font-bold hidden">
+  🛵 Entregas pausadas no momento. Pedidos somente para retirada no balcão.
+</div>
 
 <nav class="relative overflow-hidden
 bg-[radial-gradient(circle_at_center,_#7f1d1d_0%,_#450a0a_55%,_#1f0505_100%)]
@@ -515,7 +518,7 @@ if ('serviceWorker' in navigator) {
 </script>
 
 <script>
-  const versaoSistema = "1.1.1"; // Atualize aqui também!
+  const versaoSistema = "1.1.2"; // Atualize aqui também!
 
   const script = document.createElement("script");
   script.type = "module";
@@ -601,9 +604,10 @@ if ('serviceWorker' in navigator) {
       <button onclick="selecionarTipoPedido('retirada')" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded-md transition-all">
         🏃‍♂️ Retirada no balcão
       </button>
-      <button onclick="selecionarTipoPedido('entrega')" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded-md transition-all">
+      <button id="btnTipoEntrega" onclick="selecionarTipoPedido('entrega')" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded-md transition-all">
         🛵 Entrega em domicílio
       </button>
+      <p id="avisoSemEntrega" class="hidden text-center text-sm font-semibold text-red-700">Entregas pausadas no momento. Disponível apenas retirada no balcão.</p>
     </div>
   </div>
 </div>

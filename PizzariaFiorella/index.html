@@ -151,6 +151,9 @@ min-h-screen">
   <div id="aviso-fechado" class="bg-red-600 text-white text-center py-2 font-bold hidden">
   ❌ Estamos fechados para novos pedidos.
 </div>
+  <div id="aviso-entrega" class="bg-red-600 text-white text-center py-2 px-3 font-bold hidden">
+  🛵 Entregas pausadas no momento. Pedidos somente para retirada no balcão.
+</div>
 
 <nav class="relative overflow-hidden
 bg-[radial-gradient(circle_at_center,_#C8102E_0%,_#7D0F22_55%,_#1A1A1A_100%)]
@@ -577,7 +580,7 @@ transition z-50 flex items-center gap-2 font-bold" text-white px-5 py-3 rounded-
 
 
 <script>
-const versaoSistema = "1.0.5"; // altere quando subir atualização
+const versaoSistema = "1.0.6"; // altere quando subir atualização
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', async () => {
@@ -939,7 +942,7 @@ window.addEventListener("DOMContentLoaded", () => {
       </button>
 
       <!-- entrega -->
-      <button
+      <button id="btnTipoEntrega"
         onclick="selecionarTipoPedido('entrega')"
         class="group
         bg-[#222]
@@ -969,6 +972,7 @@ window.addEventListener("DOMContentLoaded", () => {
         </div>
 
       </button>
+      <p id="avisoSemEntrega" class="hidden text-center text-sm font-semibold text-yellow-400">Entregas pausadas no momento. Disponível apenas retirada no balcão.</p>
 
     </div>
 

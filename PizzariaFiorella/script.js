@@ -35,6 +35,23 @@ let total = 0;
 let secaoAtiva = null;
 let tipoPedidoSelecionado = null;
 
+// Entregas pausadas pelo painel (config/estadoPedidos.entregaPausada): o cardápio aceita só retirada
+let entregaPausada = false;
+const AVISO_SEM_ENTREGA = "As entregas estão pausadas no momento. Você pode pedir para retirar no balcão.";
+function atualizarEntregaPausada(snap, recebendo = true) {
+  entregaPausada = snap.exists() && snap.data().entregaPausada === true;
+  const aviso = document.getElementById("aviso-entrega");
+  if (aviso) aviso.classList.toggle("hidden", !entregaPausada || !recebendo);
+  const btn = document.getElementById("btnTipoEntrega");
+  if (btn) {
+    btn.disabled = entregaPausada;
+    btn.classList.toggle("opacity-40", entregaPausada);
+    btn.classList.toggle("cursor-not-allowed", entregaPausada);
+  }
+  const nota = document.getElementById("avisoSemEntrega");
+  if (nota) nota.classList.toggle("hidden", !entregaPausada);
+}
+
 const taxaEntregaFixa = 0.0;
 
 function arredondar99(valor) {
@@ -340,6 +357,7 @@ document
     const estadoRef = doc(db, "config", "estadoPedidos");
     const snap = await getDoc(estadoRef);
     const recebendo = snap.exists() ? snap.data().recebendo : true;
+    atualizarEntregaPausada(snap);
 
     if (!recebendo) {
       mostrarAlerta("⚠️ O sistema está temporariamente fechado para pedidos.");
@@ -355,6 +373,7 @@ document
   });
 
 window.selecionarTipoPedido = function (tipo) {
+  if (tipo === "entrega" && entregaPausada) return mostrarAlerta(AVISO_SEM_ENTREGA);
   tipoPedidoSelecionado = tipo;
 
   if (tipo === "retirada") {
@@ -448,6 +467,7 @@ window.confirmarDadosEntrega = function () {
 document
   .getElementById("btnConfirmarPedido")
   .addEventListener("click", async () => {
+    if (tipoPedidoSelecionado === "entrega" && entregaPausada) return mostrarAlerta(AVISO_SEM_ENTREGA);
     const nome = document.getElementById("confNomeCliente").textContent;
     const tel = document.getElementById("confTelefoneCliente").textContent;
     const endereco = document.getElementById("confEnderecoCliente").textContent;
@@ -592,6 +612,7 @@ const estadoRef = doc(db, "config", "estadoPedidos");
 onSnapshot(estadoRef, (snap) => {
   const recebendo = snap.exists() ? snap.data().recebendo : true;
   const aviso = document.getElementById("aviso-fechado");
+  atualizarEntregaPausada(snap, recebendo);
   if (!aviso) return;
   aviso.classList.toggle("hidden", recebendo);
 });

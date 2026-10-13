@@ -77,12 +77,16 @@ function salvarCarrinho() {
 }
 const totalProdutos = () => carrinho.reduce((s, i) => s + Number(i.subtotal || 0), 0);
 // Entrega só até a hora limite (pelo horário de Brasília, não pelo relógio do aparelho)
+let entregaPausada = false; // painel pausa só as entregas (config/estadoPedidos.entregaPausada); retirada continua
 function entregaDisponivel() {
+  if (entregaPausada) return false;
   if (LOJA.entregaAte == null) return true;
   const hora = Number(new Intl.DateTimeFormat("en-GB", { timeZone: "America/Sao_Paulo", hour: "2-digit", hourCycle: "h23" }).format(new Date()));
   return hora < LOJA.entregaAte;
 }
-const AVISO_SEM_ENTREGA = `As entregas são feitas até as ${LOJA.entregaAte}h. Agora, apenas retirada no balcão.`;
+const avisoSemEntrega = () => entregaPausada
+  ? "As entregas estão pausadas no momento. Você pode pedir para retirar no balcão."
+  : `As entregas são feitas até as ${LOJA.entregaAte}h. Agora, apenas retirada no balcão.`;
 
 const taxaAtual = () => (tipoPedidoSelecionado === "entrega" ? LOJA.taxaEntrega : 0);
 
@@ -445,6 +449,7 @@ $("orderForm").addEventListener("submit", async (e) => {
   try {
     const snap = await getDoc(doc(db, "config", "estadoPedidos"));
     const recebendo = snap.exists() ? snap.data().recebendo !== false : true;
+    entregaPausada = snap.exists() && snap.data().entregaPausada === true;
     if (!recebendo) {
       mostrarAlerta("A loja está fechada para pedidos no momento.");
       return;
@@ -461,13 +466,13 @@ $("orderForm").addEventListener("submit", async (e) => {
   $("btnTipoEntrega").disabled = !comEntrega;
   $("btnTipoEntrega").classList.toggle("opacity-40", !comEntrega);
   $("btnTipoEntrega").classList.toggle("cursor-not-allowed", !comEntrega);
-  $("avisoSemEntrega").textContent = AVISO_SEM_ENTREGA;
+  $("avisoSemEntrega").textContent = avisoSemEntrega();
   $("avisoSemEntrega").classList.toggle("hidden", comEntrega);
   $("modalTipoPedido").classList.remove("hidden");
 });
 
 function selecionarTipoPedido(tipo) {
-  if (tipo === "entrega" && !entregaDisponivel()) return mostrarAlerta(AVISO_SEM_ENTREGA);
+  if (tipo === "entrega" && !entregaDisponivel()) return mostrarAlerta(avisoSemEntrega());
   tipoPedidoSelecionado = tipo;
   $("modalTipoPedido").classList.add("hidden");
 
@@ -594,7 +599,7 @@ $("btnConfirmarPedido").addEventListener("click", async () => {
   // Pedido de entrega montado antes do limite e confirmado depois: volta para escolher retirada
   if (tipoPedidoSelecionado === "entrega" && !entregaDisponivel()) {
     $("modalConfirmacao").classList.add("hidden");
-    return mostrarAlerta(AVISO_SEM_ENTREGA);
+    return mostrarAlerta(avisoSemEntrega());
   }
   const btn = $("btnConfirmarPedido");
   btn.disabled = true;
@@ -663,6 +668,8 @@ function fecharModalSucesso() { $("modalSucessoPedido").classList.add("hidden");
 onSnapshot(doc(db, "config", "estadoPedidos"), (snap) => {
   const recebendo = snap.exists() ? snap.data().recebendo !== false : true;
   $("aviso-fechado").classList.toggle("hidden", recebendo);
+  entregaPausada = snap.exists() && snap.data().entregaPausada === true;
+  $("aviso-entrega").classList.toggle("hidden", !entregaPausada || !recebendo);
 });
 
 // ----------------------

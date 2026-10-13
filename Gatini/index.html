@@ -75,6 +75,9 @@
   <div id="aviso-fechado" class="bg-coral-500 text-white text-center py-2 px-4 font-bold hidden">
     🕒 Estamos fechados para novos pedidos no momento.
   </div>
+  <div id="aviso-entrega" class="bg-coral-500 text-white text-center py-2 px-4 font-bold hidden">
+    🛵 Entregas pausadas no momento. Pedidos somente para retirada no balcão.
+  </div>
 
   <!-- HERO -->
   <section class="px-4 pt-5">
@@ -269,7 +272,7 @@
       navigator.serviceWorker.register('./sw.js').catch(() => {});
     }
 
-    const versaoSistema = "2.1.8"; // mude a cada publicação para forçar atualização do script
+    const versaoSistema = "2.1.9"; // mude a cada publicação para forçar atualização do script
     const s = document.createElement("script");
     s.type = "module";
     s.src = `script.js?v=${versaoSistema}`;
