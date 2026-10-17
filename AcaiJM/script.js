@@ -29,7 +29,8 @@ const db = getFirestore(initializeApp(firebaseConfig));
 const LOJA = {
   nome: "Açaí JM",
   whatsapp: "5517976036595", // (17) 97603-6595
-  taxaEntrega: 3.00
+  taxaEntrega: 3.00,
+  soEntrega: true          // a JM não tem retirada: pula a tela "Como deseja receber?"
 };
 
 // Formatos (o "id" é o campo "categoria" do produto). Produtos "Copo P/M/G" viram um item só, com os tamanhos.
@@ -578,6 +579,11 @@ $("btnAvancar").addEventListener("click", async () => {
     renderEntrega();
   } catch (err) { console.warn("Não foi possível verificar o status da loja:", err); }
   if (!lojaAberta) return avisar("A loja está fechada para pedidos no momento.");
+  if (LOJA.soEntrega) {
+    if (entregaPausada) return avisar(AVISO_SEM_ENTREGA);
+    esconder("jSacola");
+    return escolherTipo("entrega");
+  }
   esconder("jSacola");
   mostrar("jReceber");
 });
@@ -586,7 +592,11 @@ $("jReceber").addEventListener("click", (e) => {
   const b = e.target.closest("[data-tipo]");
   if (!b) return;
   if (b.dataset.tipo === "entrega" && entregaPausada) return avisar(AVISO_SEM_ENTREGA);
-  tipoPedido = b.dataset.tipo;
+  escolherTipo(b.dataset.tipo);
+});
+
+function escolherTipo(tipo) {
+  tipoPedido = tipo;
   const entrega = tipoPedido === "entrega";
   $("blocoEndereco").classList.toggle("oculto", !entrega);
   $("linhaTaxa").classList.toggle("oculto", !entrega);
@@ -597,7 +607,9 @@ $("jReceber").addEventListener("click", (e) => {
   atualizarCarrinho();
   esconder("jReceber");
   mostrar("jDados");
-});
+}
+// só entrega: o "Voltar" dos dados volta para a sacola
+if (LOJA.soEntrega) document.querySelector('#jDados [data-voltar="jReceber"]')?.setAttribute("data-voltar", "jSacola");
 
 $("formaPagamento").addEventListener("change", () => {
   const dinheiro = $("formaPagamento").value === "Dinheiro";
@@ -965,7 +977,7 @@ onSnapshot(doc(db, "config", "estadoPedidos"), (snap) => {
   renderEntrega();
 });
 
-const AVISO_SEM_ENTREGA = "As entregas estão pausadas no momento. Você pode pedir para retirar no balcão.";
+const AVISO_SEM_ENTREGA = LOJA.soEntrega ? "As entregas estão pausadas no momento. Tente novamente em instantes." : "As entregas estão pausadas no momento. Você pode pedir para retirar no balcão.";
 function renderEntrega() {
   const taxa = LOJA.taxaEntrega ? brl(LOJA.taxaEntrega) : "grátis";
   $("textoTaxa").textContent = entregaPausada ? "indisponível" : taxa;
