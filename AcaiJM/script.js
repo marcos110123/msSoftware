@@ -283,7 +283,7 @@ function abrirMontagem(fam) {
   }
   const faltando = fam.membros.some((m) => (m.p.grupos || []).some((k) => !grupos.has(k)));
   if (faltando) return avisar("Não foi possível carregar as opções deste produto. Tente novamente em instantes.");
-  mont = { fam, idx: 0, sel: new Map(), obs: "" };
+  mont = { fam, idx: 0, sel: new Map(), qtd: new Map(), obs: "" };
   renderMontagem();
   mostrar("telaMontagem");
   $("telaMontagem").scrollTop = 0;
@@ -303,6 +303,10 @@ const ehPuro = () => !!mont?.puro && precoPuroDe(produtoAtual()) > 0;
 const gruposDe = (p) => (p.grupos || []).map((k) => grupos.get(k)).filter(Boolean);
 const gruposPuro = (p) => gruposDe(p).filter((g) => !g.contaLimite && Number(g.min) > 0);
 const marcados = (g) => mont.sel.get(g.id) || new Set();
+// Repetir o mesmo item (ex.: 2x Granola): vale nos grupos que contam nos inclusos e nos de "N inclusos" (frutas do copo).
+// Pela regra da loja, o item repetido é cobrado à parte (preço por item a mais) e não gasta os inclusos.
+const podeRepetir = (g, p) => (g.contaLimite && limiteDe(p) > 0) || Number(g.gratis) > 0;
+const qtdDe = (g, nome) => mont.qtd.get(g.id + "|" + nome) || 1;
 
 function calcular() {
   const p = produtoAtual();
@@ -313,16 +317,23 @@ function calcular() {
   const lim = limiteDe(p);
   const selecionados = [];
   let extras = 0, escolhidos = 0;
+  let repetidos = 0;
   gruposDe(p).forEach((g) => {
     const nomes = [...marcados(g)];
+    const rep = podeRepetir(g, p);
+    let unidades = 0;
     g.itens.filter((it) => nomes.includes(it.nome)).forEach((it) => {
-      const preco = Number(it.preco) || 0;
-      selecionados.push({ nome: it.nome, preco, grupo: g.titulo });
+      const q = rep ? qtdDe(g, it.nome) : 1;
+      unidades += q;
+      const aMais = g.contaLimite && lim ? (q - 1) * (Number(p.precoAdicional) || 0) : 0;
+      if (g.contaLimite && lim) repetidos += q - 1;
+      const preco = (Number(it.preco) || 0) * q + aMais;
+      selecionados.push({ nome: q > 1 ? `${it.nome} (${q}x)` : it.nome, preco, grupo: g.titulo });
       extras += preco;
     });
     if (g.contaLimite && lim) escolhidos += nomes.length;
-    if (g.gratis && nomes.length > g.gratis) {
-      const n = nomes.length - g.gratis, valor = n * (Number(g.precoExcedente) || 0);
+    if (g.gratis && unidades > g.gratis) {
+      const n = unidades - g.gratis, valor = n * (Number(g.precoExcedente) || 0);
       selecionados.push({ nome: `${n} adicional(is)`, preco: valor, grupo: g.titulo });
       extras += valor;
     }
@@ -333,11 +344,11 @@ function calcular() {
     selecionados.push({ nome: `${excedentes} além dos ${lim} inclusos`, preco: valor, grupo: "Itens extras" });
     extras += valor;
   }
-  return { selecionados, extras, escolhidos, lim, total: Number(p.preco) + extras };
+  return { selecionados, extras, escolhidos, lim, repetidos, total: Number(p.preco) + extras };
 }
 
 function regraGrupo(g, p) {
-  if (g.contaLimite && limiteDe(p)) return { txt: "conta nos inclusos" };
+  if (g.contaLimite && limiteDe(p)) return { txt: `conta nos inclusos · repetir +${brl(p.precoAdicional).replace(",00", "")}` };
   const max = Number(g.max) || 1, min = Number(g.min) || 0;
   const precos = [...new Set(g.itens.map((i) => Number(i.preco) || 0))];
   if (min > 0) return { txt: max === 1 ? "escolha 1 · obrigatório" : `escolha ${min} a ${max}`, obrig: true };
@@ -380,9 +391,15 @@ function renderMontagem() {
           return `
           <div class="grupo" data-grupo="${esc(g.id)}">
             <h4>${esc(g.titulo)} <small class="${r.obrig ? "obrig" : ""}">${esc(r.txt)}</small></h4>
-            <div class="linhas">${g.itens.map((it) => `
-              <label class="ln"><span>${esc(it.nome)}</span>${Number(it.preco) > 0 ? `<em>+${brl(it.preco)}</em>` : ""}
-                <input type="${radio ? "radio" : "checkbox"}" name="g_${esc(g.id)}" value="${esc(it.nome)}" ${marcados(g).has(it.nome) ? "checked" : ""}></label>`).join("")}
+            <div class="linhas">${g.itens.map((it) => {
+              const q = qtdDe(g, it.nome);
+              const passo = !puro && podeRepetir(g, p) && marcados(g).has(it.nome) ? `
+                <span class="rep" title="Repetir este item"><button type="button" data-rep="-" data-g="${esc(g.id)}" data-n="${esc(it.nome)}" ${q <= 1 ? "disabled" : ""} aria-label="Menos">−</button>
+                  <b>${q}x</b><button type="button" data-rep="+" data-g="${esc(g.id)}" data-n="${esc(it.nome)}" aria-label="Repetir">+</button></span>` : "";
+              return `
+              <label class="ln"><span>${esc(it.nome)}</span>${Number(it.preco) > 0 ? `<em>+${brl(it.preco)}</em>` : ""}${passo}
+                <input type="${radio ? "radio" : "checkbox"}" name="g_${esc(g.id)}" value="${esc(it.nome)}" ${marcados(g).has(it.nome) ? "checked" : ""}></label>`;
+            }).join("")}
             </div>
           </div>`;
         }).join("")}
@@ -395,7 +412,7 @@ function renderMontagem() {
 }
 
 function atualizarMontagem() {
-  const { escolhidos, lim, total } = calcular();
+  const { escolhidos, lim, total, repetidos } = calcular();
   $("precoMont").textContent = brl(total);
   if (!lim) return;
   const pct = Math.min(100, (escolhidos / lim) * 100);
@@ -408,11 +425,24 @@ function atualizarMontagem() {
     : escolhidos === lim
       ? `Todos os ${lim} inclusos escolhidos<small>Cada item a mais: ${brl(p.precoAdicional)}</small>`
       : `${escolhidos - lim} ${escolhidos - lim === 1 ? "item" : "itens"} a mais · +${brl((escolhidos - lim) * (Number(p.precoAdicional) || 0))}<small>${lim} inclusos no tamanho escolhido</small>`;
+  if (repetidos) $("progTxt").innerHTML += `<small>${repetidos} repetido${repetidos > 1 ? "s" : ""} · +${brl(repetidos * (Number(p.precoAdicional) || 0))}</small>`;
   $("prog").classList.toggle("passou", passou);
 }
 
 $("telaMontagem").addEventListener("click", (e) => {
   if (e.target === $("telaMontagem") || e.target.closest("[data-sair]")) return fecharMontagem();
+  const r = e.target.closest("[data-rep]");
+  if (r) {
+    e.preventDefault(); // o botão fica dentro do label: não desmarcar o item
+    const chave = r.dataset.g + "|" + r.dataset.n;
+    const q = Math.max(1, Math.min(10, (mont.qtd.get(chave) || 1) + (r.dataset.rep === "+" ? 1 : -1)));
+    if (q > 1) mont.qtd.set(chave, q); else mont.qtd.delete(chave);
+    mont.obs = $("obsItem").value;
+    const rolagem = $("telaMontagem").scrollTop;
+    renderMontagem();
+    $("telaMontagem").scrollTop = rolagem;
+    return;
+  }
   const t = e.target.closest("[data-tam]");
   if (t) {
     mont.obs = $("obsItem").value;
@@ -449,8 +479,16 @@ $("telaMontagem").addEventListener("change", (e) => {
       return avisar(`Em "${g.titulo}" você pode escolher até ${max} ${max === 1 ? "opção" : "opções"}.`);
     }
     set.add(input.value);
-  } else set.delete(input.value);
+  } else { set.delete(input.value); mont.qtd.delete(g.id + "|" + input.value); }
   mont.sel.set(g.id, set);
+  if (podeRepetir(g, p)) {
+    // mostra/esconde o "− 1x +" do item
+    mont.obs = $("obsItem").value;
+    const rolagem = $("telaMontagem").scrollTop;
+    renderMontagem();
+    $("telaMontagem").scrollTop = rolagem;
+    return;
+  }
   atualizarMontagem();
 });
 

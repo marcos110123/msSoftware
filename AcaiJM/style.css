@@ -289,3 +289,9 @@ input, textarea, select { font: inherit; color: inherit; }
 .barra { background: #2a0752; }
 .barra .ir { background: var(--ouro); color: #2a0752; font-weight: 600; }
 .palco { background: radial-gradient(260px 200px at 50% 60%, #dcc5f7, var(--lilas) 60%, #f1e8fc); }
+
+/* repetir o mesmo acompanhamento */
+.ln .rep { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 2px; background: var(--lilas); border-radius: 99px; padding: 2px; }
+.ln .rep button { width: 28px; height: 28px; border-radius: 50%; background: #fff; color: var(--magenta2); font-size: 17px; font-weight: 600; line-height: 1; display: grid; place-items: center; }
+.ln .rep button:disabled { opacity: .35; }
+.ln .rep b { min-width: 26px; text-align: center; font-size: 13px; font-weight: 600; color: var(--tinta); }
