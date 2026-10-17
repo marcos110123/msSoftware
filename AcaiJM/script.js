@@ -234,13 +234,12 @@ const precoPuroDe = (p) => (Number(p?.precoPuro) > 0 ? Number(p.precoPuro) : 0);
 function dicaPuro(f) {
   const com = f.membros.filter((m) => precoPuroDe(m.p));
   if (!com.length) return "";
-  const txt = f.membros.length > 1 ? com.map((m) => `${esc(m.tam)} ${curto(precoPuroDe(m.p))}`).join(" · ") : brl(precoPuroDe(com[0].p));
-  return `<p class="dica-puro">Puro, sem acompanhamentos: ${txt}</p>`;
+  return `<p class="dica-puro">Também tem puro, sem acompanhamentos</p>`;
 }
 
 function cartao(f) {
   const preco = f.membros.length > 1
-    ? `<div class="tams">${f.membros.map((m) => `<span><b>${esc(m.tam)}</b>${curto(m.p.preco)}</span>`).join("")}</div>`
+    ? `<div class="tams">${f.membros.map((m) => `<span><b>${esc(m.tam)}</b></span>`).join("")}</div>`
     : `<div class="tams"><span><b>${brl(f.membros[0].p.preco)}</b></span></div>`;
   return `
     <button class="item" data-fam="${esc(f.id)}">
