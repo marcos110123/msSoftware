@@ -926,17 +926,17 @@ $("btnEnviar").addEventListener("click", async () => {
     atualizarCarrinho();
     esconder("jConfirmar");
     if (token) {
-      // o cliente envia a mensagem pelo botão da tela de acompanhamento
-      acomp = { token, criado: Date.now(), whats: url, enviouWhats: false };
+      // guarda o acompanhamento (fica na barra "Acompanhar pedido" quando o cliente voltar ao cardápio)
+      acomp = { token, criado: Date.now(), whats: url, enviouWhats: true };
       acomps.unshift(acomp); acomps = acomps.slice(0, 10);
       salvarAcomps();
       acompDados = null;
       escutarAcomp();
       abrirAcomp();
-    } else {
-      // sem acompanhamento (falha ao criar): segue o jeito antigo, direto para o WhatsApp
-      window.location.href = url;
     }
+    // pedido da loja: ao finalizar, vai direto para o WhatsApp com o pedido (como era antes do acompanhamento)
+    toast("Pedido enviado! Abrindo o WhatsApp…");
+    setTimeout(() => { window.location.href = url; }, 1500);
   } catch (err) {
     console.error(err);
     avisar("Erro ao enviar o pedido. Tente novamente.");
