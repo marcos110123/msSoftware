@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=1.0.0-5">
+  <link rel="stylesheet" href="style.css?v=1.0.0-6">
 </head>
 <body>
   <div class="app">
@@ -165,7 +165,7 @@
   <script>
     if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});
     const versaoSistema = "1.0.0"; // versão mostrada no rodapé
-    const atualizacao = 5;         // aumente a cada publicação para forçar atualização do script e do estilo
+    const atualizacao = 6;         // aumente a cada publicação para forçar atualização do script e do estilo
     const s = document.createElement("script");
     s.type = "module";
     s.src = `script.js?v=${versaoSistema}-${atualizacao}`;

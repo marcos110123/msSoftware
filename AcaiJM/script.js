@@ -306,39 +306,41 @@ const gruposPuro = (p) => gruposDe(p).filter((g) => !g.contaLimite && Number(g.m
 const marcados = (g) => mont.sel.get(g.id) || new Set();
 // Repetir o mesmo item (ex.: 2x Granola): vale nos grupos que contam nos inclusos e nos de "N inclusos" (frutas do copo).
 // Pela regra da loja, o item repetido é cobrado à parte (preço por item a mais) e não gasta os inclusos.
-const podeRepetir = (g, p) => (g.contaLimite && limiteDe(p) > 0) || Number(g.gratis) > 0;
+// Grupo "N inclusos" (ex.: fruta do copo) em produto com itens inclusos: entra junto na conta dos inclusos,
+// como qualquer acompanhamento. Copo de 500 ml = 1 fruta + 2 → "3 acompanhamentos à escolha" (fruta ou não).
+const contaNoLimite = (g, p) => limiteDe(p) > 0 && (g.contaLimite || Number(g.gratis) > 0);
+const limiteTotal = (p) => limiteDe(p) ? limiteDe(p) + gruposDe(p).filter((g) => Number(g.gratis) > 0 && !g.contaLimite)
+  .reduce((s, g) => s + Number(g.gratis), 0) : 0;
+const podeRepetir = (g, p) => contaNoLimite(g, p) || Number(g.gratis) > 0;
+// "Fruta · 1 inclusa" vira só "Fruta" quando a fruta entra na conta dos inclusos
+const tituloGrupo = (g, p) => (Number(g.gratis) > 0 && contaNoLimite(g, p) ? String(g.titulo).replace(/\s*·.*$/, "") : g.titulo);
 const qtdDe = (g, nome) => mont.qtd.get(g.id + "|" + nome) || 1;
-const unidadesDe = (g, p) => [...marcados(g)].reduce((s, nome) => s + (podeRepetir(g, p) ? qtdDe(g, nome) : 1), 0);
-// Itens inclusos de um grupo "N inclusos" (ex.: fruta do copo) que não foram usados viram acompanhamentos a mais:
-// quem não quer fruta no copo de 500 ml leva 3 acompanhamentos em vez de 1 fruta + 2.
-const bonusInclusos = (p) => limiteDe(p) ? gruposDe(p).filter((g) => Number(g.gratis) > 0 && !g.contaLimite)
-  .reduce((s, g) => s + Math.max(0, Number(g.gratis) - unidadesDe(g, p)), 0) : 0;
-
 function calcular() {
   const p = produtoAtual();
   if (ehPuro()) {
     const selecionados = gruposPuro(p).flatMap((g) => [...marcados(g)].map((nome) => ({ nome, preco: 0, grupo: g.titulo })));
     return { selecionados, extras: 0, escolhidos: 0, lim: 0, total: precoPuroDe(p) };
   }
-  const lim = limiteDe(p) + bonusInclusos(p);
+  const lim = limiteTotal(p);
   const selecionados = [];
   let extras = 0, escolhidos = 0;
   let repetidos = 0;
   gruposDe(p).forEach((g) => {
     const nomes = [...marcados(g)];
     const rep = podeRepetir(g, p);
+    const conta = contaNoLimite(g, p);
     let unidades = 0;
     g.itens.filter((it) => nomes.includes(it.nome)).forEach((it) => {
       const q = rep ? qtdDe(g, it.nome) : 1;
       unidades += q;
-      const aMais = g.contaLimite && lim ? (q - 1) * (Number(p.precoAdicional) || 0) : 0;
-      if (g.contaLimite && lim) repetidos += q - 1;
+      const aMais = conta ? (q - 1) * (Number(p.precoAdicional) || 0) : 0;
+      if (conta) repetidos += q - 1;
       const preco = (Number(it.preco) || 0) * q + aMais;
-      selecionados.push({ nome: q > 1 ? `${it.nome} (${q}x)` : it.nome, preco, grupo: g.titulo });
+      selecionados.push({ nome: q > 1 ? `${it.nome} (${q}x)` : it.nome, preco, grupo: tituloGrupo(g, p) });
       extras += preco;
     });
-    if (g.contaLimite && lim) escolhidos += nomes.length;
-    if (g.gratis && unidades > g.gratis) {
+    if (conta) escolhidos += nomes.length;
+    if (!conta && g.gratis && unidades > g.gratis) {
       const n = unidades - g.gratis, valor = n * (Number(g.precoExcedente) || 0);
       selecionados.push({ nome: `${n} adicional(is)`, preco: valor, grupo: g.titulo });
       extras += valor;
@@ -354,8 +356,7 @@ function calcular() {
 }
 
 function regraGrupo(g, p) {
-  if (g.contaLimite && limiteDe(p)) return { txt: `conta nos inclusos · repetir +${brl(p.precoAdicional).replace(",00", "")}` };
-  if (Number(g.gratis) > 0 && limiteDe(p)) return { txt: `${g.gratis} inclusa${g.gratis > 1 ? "s" : ""} · sem ela, +1 acompanhamento` };
+  if (contaNoLimite(g, p)) return { txt: `conta nos inclusos · repetir +${brl(p.precoAdicional).replace(",00", "")}` };
   const max = Number(g.max) || 1, min = Number(g.min) || 0;
   const precos = [...new Set(g.itens.map((i) => Number(i.preco) || 0))];
   if (min > 0) return { txt: max === 1 ? "escolha 1 · obrigatório" : `escolha ${min} a ${max}`, obrig: true };
@@ -367,18 +368,18 @@ function renderMontagem() {
   const { fam } = mont;
   const p = produtoAtual();
   const puro = ehPuro();
-  const lim = puro ? 0 : limiteDe(p);
+  const lim = puro ? 0 : limiteTotal(p);
   const palco = fam.imagem ? `<img class="foto" src="${esc(fam.imagem)}" alt="">` : iluCategoria(fam.cat, 230);
   const seg = fam.membros.length > 1 ? `
     <div class="seg">${fam.membros.map((m, i) => `
       <button data-tam="${i}" class="${i === mont.idx ? "on" : ""}"><b>${esc(m.tam)}</b>
         <span>${mont.puro && precoPuroDe(m.p) ? brl(precoPuroDe(m.p)).replace(",00", "")
-          : `${brl(m.p.preco).replace(",00", "")}${limiteDe(m.p) ? ` · ${limiteDe(m.p)} itens` : ""}`}</span></button>`).join("")}
+          : `${brl(m.p.preco).replace(",00", "")}${limiteTotal(m.p) ? ` · ${limiteTotal(m.p)} itens` : ""}`}</span></button>`).join("")}
     </div>` : "";
   const modo = precoPuroDe(p) ? `
     <div class="seg modo">
       <button data-modo="montar" class="${puro ? "" : "on"}"><b>Montado</b>
-        <span>${brl(p.preco).replace(",00", "")}${limiteDe(p) ? ` · ${limiteDe(p)} itens à escolha` : " · com acompanhamentos"}</span></button>
+        <span>${brl(p.preco).replace(",00", "")}${limiteTotal(p) ? ` · ${limiteTotal(p)} itens à escolha` : " · com acompanhamentos"}</span></button>
       <button data-modo="puro" class="${puro ? "on" : ""}"><b>Puro</b>
         <span>${brl(precoPuroDe(p)).replace(",00", "")} · sem acompanhamentos</span></button>
     </div>` : "";
@@ -394,10 +395,10 @@ function renderMontagem() {
         ${lim ? `<div class="prog" id="prog"><div class="anel" id="anel"><span id="anelTxt"></span></div><p id="progTxt"></p></div>` : ""}
         ${(puro ? gruposPuro(p) : gruposDe(p)).map((g) => {
           const r = regraGrupo(g, p);
-          const radio = (Number(g.max) || 1) === 1 && !(g.contaLimite && lim);
+          const radio = (Number(g.max) || 1) === 1 && !(contaNoLimite(g, p) && lim);
           return `
           <div class="grupo" data-grupo="${esc(g.id)}">
-            <h4>${esc(g.titulo)} <small class="${r.obrig ? "obrig" : ""}">${esc(r.txt)}</small></h4>
+            <h4>${esc(tituloGrupo(g, p))} <small class="${r.obrig ? "obrig" : ""}">${esc(r.txt)}</small></h4>
             <div class="linhas">${g.itens.map((it) => {
               const q = qtdDe(g, it.nome);
               const passo = !puro && podeRepetir(g, p) && marcados(g).has(it.nome) ? `
@@ -479,7 +480,7 @@ $("telaMontagem").addEventListener("change", (e) => {
   const set = new Set(marcados(g));
   if (input.type === "radio") { set.clear(); set.add(input.value); }
   else if (input.checked) {
-    const semMax = g.contaLimite && limiteDe(p);
+    const semMax = contaNoLimite(g, p);
     const max = Number(g.max) || 1;
     if (!semMax && set.size >= max) {
       input.checked = false;
