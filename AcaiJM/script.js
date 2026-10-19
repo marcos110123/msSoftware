@@ -308,6 +308,11 @@ const marcados = (g) => mont.sel.get(g.id) || new Set();
 // Pela regra da loja, o item repetido é cobrado à parte (preço por item a mais) e não gasta os inclusos.
 const podeRepetir = (g, p) => (g.contaLimite && limiteDe(p) > 0) || Number(g.gratis) > 0;
 const qtdDe = (g, nome) => mont.qtd.get(g.id + "|" + nome) || 1;
+const unidadesDe = (g, p) => [...marcados(g)].reduce((s, nome) => s + (podeRepetir(g, p) ? qtdDe(g, nome) : 1), 0);
+// Itens inclusos de um grupo "N inclusos" (ex.: fruta do copo) que não foram usados viram acompanhamentos a mais:
+// quem não quer fruta no copo de 500 ml leva 3 acompanhamentos em vez de 1 fruta + 2.
+const bonusInclusos = (p) => limiteDe(p) ? gruposDe(p).filter((g) => Number(g.gratis) > 0 && !g.contaLimite)
+  .reduce((s, g) => s + Math.max(0, Number(g.gratis) - unidadesDe(g, p)), 0) : 0;
 
 function calcular() {
   const p = produtoAtual();
@@ -315,7 +320,7 @@ function calcular() {
     const selecionados = gruposPuro(p).flatMap((g) => [...marcados(g)].map((nome) => ({ nome, preco: 0, grupo: g.titulo })));
     return { selecionados, extras: 0, escolhidos: 0, lim: 0, total: precoPuroDe(p) };
   }
-  const lim = limiteDe(p);
+  const lim = limiteDe(p) + bonusInclusos(p);
   const selecionados = [];
   let extras = 0, escolhidos = 0;
   let repetidos = 0;
@@ -350,6 +355,7 @@ function calcular() {
 
 function regraGrupo(g, p) {
   if (g.contaLimite && limiteDe(p)) return { txt: `conta nos inclusos · repetir +${brl(p.precoAdicional).replace(",00", "")}` };
+  if (Number(g.gratis) > 0 && limiteDe(p)) return { txt: `${g.gratis} inclusa${g.gratis > 1 ? "s" : ""} · sem ela, +1 acompanhamento` };
   const max = Number(g.max) || 1, min = Number(g.min) || 0;
   const precos = [...new Set(g.itens.map((i) => Number(i.preco) || 0))];
   if (min > 0) return { txt: max === 1 ? "escolha 1 · obrigatório" : `escolha ${min} a ${max}`, obrig: true };
