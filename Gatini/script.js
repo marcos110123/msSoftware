@@ -588,6 +588,7 @@ function mensagemPedidoWhats(p) {
   l.push(LINHA);
   if (ent) l.push(`Subtotal: ${r(p.produtos)}`, `Entrega: ${r(p.taxa)}`);
   l.push(`*Total: ${r(p.total)}*`, "", `💳 *Pagamento:* ${p.pagamento || "-"}`);
+  if (p.pagamento === "PIX") l.push("      _Envio o comprovante do PIX em seguida._");
   if (p.troco) l.push(`      _Troco para ${r(p.troco)} (levar ${r(p.troco - p.total)})_`);
   l.push("", `👤 *${p.nome}*`, `📞 ${p.tel}`);
   if (ent && p.endereco) l.push(`📍 ${p.endereco}`);
@@ -604,11 +605,13 @@ $("btnConfirmarPedido").addEventListener("click", async () => {
   const btn = $("btnConfirmarPedido");
   btn.disabled = true;
 
-  // Abre a aba antes do "await": se abrir depois, o navegador do celular bloqueia o pop-up
-  const janela = window.open("", "_blank");
-
   const tipo = tipoPedidoSelecionado;
   const pagamento = $("formaPagamento").value;
+  // PIX com chave cadastrada: mostra a tela da chave e o cliente abre o WhatsApp por ela
+  const pagaPix = pagamento === "PIX" && !!chavePix;
+
+  // Abre a aba antes do "await": se abrir depois, o navegador do celular bloqueia o pop-up
+  const janela = pagaPix ? null : window.open("", "_blank");
   const precisaTroco = $("precisaTroco").checked;
   const valorTroco = precisaTroco ? parseFloat($("valorTroco").value) || null : null;
   const taxa = taxaAtual();
@@ -641,7 +644,8 @@ $("btnConfirmarPedido").addEventListener("click", async () => {
     });
 
     const url = `https://wa.me/${LOJA.whatsapp}?text=${encodeURIComponent(montarMensagemWhatsApp(dados))}`;
-    if (janela) janela.location.href = url;
+    if (pagaPix) urlWhatsPix = url;
+    else if (janela) janela.location.href = url;
     else window.location.href = url;
 
     carrinho = [];
@@ -650,7 +654,14 @@ $("btnConfirmarPedido").addEventListener("click", async () => {
     $("formaPagamento").value = "";
     $("formaPagamento").dispatchEvent(new Event("change"));
     $("modalConfirmacao").classList.add("hidden");
-    $("modalSucessoPedido").classList.remove("hidden");
+    if (pagaPix) {
+      $("pixValor").textContent = "R$ " + valorFinal.toFixed(2).replace(".", ",");
+      $("pixChave").textContent = chavePix;
+      $("btnCopiarPix").textContent = "📋 Copiar chave PIX";
+      $("modalPix").classList.remove("hidden");
+    } else {
+      $("modalSucessoPedido").classList.remove("hidden");
+    }
   } catch (err) {
     console.error(err);
     janela?.close();
@@ -661,6 +672,37 @@ $("btnConfirmarPedido").addEventListener("click", async () => {
 });
 
 function fecharModalSucesso() { $("modalSucessoPedido").classList.add("hidden"); }
+
+// ----------------------
+// PIX: chave cadastrada no painel (config/loja.chavePix); vazia = fluxo normal, direto para o WhatsApp
+// ----------------------
+let chavePix = "";
+let urlWhatsPix = "";
+onSnapshot(doc(db, "config", "loja"), (snap) => {
+  chavePix = snap.exists() ? String(snap.data().chavePix || "").trim() : "";
+}, (err) => console.warn("Chave PIX indisponível:", err));
+
+async function copiarChavePix() {
+  try {
+    await navigator.clipboard.writeText(chavePix);
+  } catch (_) {
+    // navegadores antigos: copia selecionando um campo temporário
+    const t = document.createElement("textarea");
+    t.value = chavePix;
+    document.body.appendChild(t);
+    t.select();
+    document.execCommand("copy");
+    t.remove();
+  }
+  $("btnCopiarPix").textContent = "✅ Chave copiada!";
+}
+
+function enviarPixWhats() {
+  if (!urlWhatsPix) return;
+  if (!window.open(urlWhatsPix, "_blank")) window.location.href = urlWhatsPix;
+}
+
+function fecharModalPix() { $("modalPix").classList.add("hidden"); }
 
 // ----------------------
 // Loja aberta/fechada
@@ -722,7 +764,10 @@ Object.assign(window, {
   fecharModalTipoPedido,
   confirmarEntrega: confirmarDadosEntrega,
   fecharModalSucesso,
-  fecharModalAlerta
+  fecharModalAlerta,
+  copiarChavePix,
+  enviarPixWhats,
+  fecharModalPix
 });
 
 // ----------------------
