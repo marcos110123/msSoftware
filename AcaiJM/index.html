@@ -165,7 +165,7 @@
   <script>
     if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});
     const versaoSistema = "1.0.0"; // versão mostrada no rodapé
-    const atualizacao = 7;         // aumente a cada publicação para forçar atualização do script e do estilo
+    const atualizacao = 8;         // aumente a cada publicação para forçar atualização do script e do estilo
     const s = document.createElement("script");
     s.type = "module";
     s.src = `script.js?v=${versaoSistema}-${atualizacao}`;

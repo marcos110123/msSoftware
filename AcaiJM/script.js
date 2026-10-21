@@ -284,7 +284,8 @@ function abrirMontagem(fam) {
   }
   const faltando = fam.membros.some((m) => (m.p.grupos || []).some((k) => !grupos.has(k)));
   if (faltando) return avisar("Não foi possível carregar as opções deste produto. Tente novamente em instantes.");
-  mont = { fam, idx: 0, sel: new Map(), qtd: new Map(), obs: "" };
+  mont = { fam, idx: 0, sel: new Map(), qtd: new Map(), obs: "", copo: 0 };
+  mont.copos = [{ sel: mont.sel, qtd: mont.qtd }];
   renderMontagem();
   mostrar("telaMontagem");
   $("telaMontagem").scrollTop = 0;
@@ -355,6 +356,33 @@ function calcular() {
   return { selecionados, extras, escolhidos, lim, repetidos, total: Number(p.preco) + extras };
 }
 
+// Combo (campo "copos" do produto, ex.: 4 copos de 300 ml): cada copo é montado separado, com os inclusos em cada um.
+// O preço do produto é o do combo inteiro; itens a mais/repetidos são cobrados por copo.
+const coposDe = (p) => Math.min(10, Math.max(1, Math.floor(Number(p?.copos) || 1)));
+function usarCopo(i) {
+  while (mont.copos.length <= i) mont.copos.push({ sel: new Map(), qtd: new Map() });
+  mont.copo = i;
+  mont.sel = mont.copos[i].sel;
+  mont.qtd = mont.copos[i].qtd;
+}
+// soma todos os copos; nos combos, o grupo vira "Copo 1 · Cremes"
+function calcularTudo() {
+  const p = produtoAtual();
+  const n = ehPuro() ? 1 : coposDe(p);
+  if (n === 1) return calcular();
+  const atual = mont.copo;
+  const selecionados = [];
+  let extras = 0;
+  for (let i = 0; i < n; i++) {
+    usarCopo(i);
+    const r = calcular();
+    r.selecionados.forEach((c) => selecionados.push({ ...c, grupo: `Copo ${i + 1} · ${c.grupo}` }));
+    extras += r.extras;
+  }
+  usarCopo(atual);
+  return { selecionados, extras, total: Number(p.preco) + extras };
+}
+
 function regraGrupo(g, p) {
   if (contaNoLimite(g, p)) return { txt: `conta nos inclusos · repetir +${brl(p.precoAdicional).replace(",00", "")}` };
   const max = Number(g.max) || 1, min = Number(g.min) || 0;
@@ -383,6 +411,20 @@ function renderMontagem() {
       <button data-modo="puro" class="${puro ? "on" : ""}"><b>Puro</b>
         <span>${brl(precoPuroDe(p)).replace(",00", "")} · sem acompanhamentos</span></button>
     </div>` : "";
+  const nCopos = puro ? 1 : coposDe(p);
+  let abasCopos = "";
+  if (nCopos > 1) {
+    const atual = mont.copo;
+    const status = [];
+    for (let i = 0; i < nCopos; i++) { usarCopo(i); status.push(calcular().escolhidos); }
+    usarCopo(atual);
+    abasCopos = `
+    <p class="sub" style="margin:14px 0 6px"><b>Monte cada copo</b> · ${lim} itens à escolha em cada</p>
+    <div class="seg copos">${status.map((n, i) => `
+      <button data-copo="${i}" class="${i === mont.copo ? "on" : ""}"><b>Copo ${i + 1}</b>
+        <span>${n ? `${n}/${lim}${n >= lim ? " ✓" : ""}` : "montar"}</span></button>`).join("")}
+    </div>`;
+  }
 
   $("telaMontagem").innerHTML = `
     <div class="montagem">
@@ -392,6 +434,7 @@ function renderMontagem() {
         <p class="sub">${puro ? "Puro, sem acompanhamentos." : esc(p.descricao || fam.descricao)}</p>
         ${seg}
         ${modo}
+        ${abasCopos}
         ${lim ? `<div class="prog" id="prog"><div class="anel" id="anel"><span id="anelTxt"></span></div><p id="progTxt"></p></div>` : ""}
         ${(puro ? gruposPuro(p) : gruposDe(p)).map((g) => {
           const r = regraGrupo(g, p);
@@ -420,8 +463,11 @@ function renderMontagem() {
 }
 
 function atualizarMontagem() {
-  const { escolhidos, lim, total, repetidos } = calcular();
-  $("precoMont").textContent = brl(total);
+  const { escolhidos, lim, repetidos } = calcular();
+  $("precoMont").textContent = brl(calcularTudo().total);
+  // combo: atualiza o "2/3" do copo aberto
+  const abaCopo = document.querySelector(`[data-copo="${mont.copo}"] span`);
+  if (abaCopo) abaCopo.textContent = escolhidos ? `${escolhidos}/${lim}${escolhidos >= lim ? " ✓" : ""}` : "montar";
   if (!lim) return;
   const pct = Math.min(100, (escolhidos / lim) * 100);
   const passou = escolhidos > lim;
@@ -446,6 +492,15 @@ $("telaMontagem").addEventListener("click", (e) => {
     const q = Math.max(1, Math.min(10, (mont.qtd.get(chave) || 1) + (r.dataset.rep === "+" ? 1 : -1)));
     if (q > 1) mont.qtd.set(chave, q); else mont.qtd.delete(chave);
     mont.obs = $("obsItem").value;
+    const rolagem = $("telaMontagem").scrollTop;
+    renderMontagem();
+    $("telaMontagem").scrollTop = rolagem;
+    return;
+  }
+  const c = e.target.closest("[data-copo]");
+  if (c) {
+    mont.obs = $("obsItem").value;
+    usarCopo(Number(c.dataset.copo));
     const rolagem = $("telaMontagem").scrollTop;
     renderMontagem();
     $("telaMontagem").scrollTop = rolagem;
@@ -502,18 +557,31 @@ $("telaMontagem").addEventListener("change", (e) => {
 
 function confirmarMontagem() {
   const p = produtoAtual();
-  for (const g of ehPuro() ? gruposPuro(p) : gruposDe(p)) {
-    const min = Number(g.min) || 0;
-    if (marcados(g).size < min) {
-      document.querySelector(`[data-grupo="${CSS.escape(g.id)}"]`)?.scrollIntoView({ behavior: "smooth", block: "center" });
-      return avisar(min === 1 ? `Escolha uma opção em "${g.titulo}".` : `Escolha pelo menos ${min} opções em "${g.titulo}".`);
+  const nCopos = ehPuro() ? 1 : coposDe(p);
+  for (let i = 0; i < nCopos; i++) {
+    if (nCopos > 1) usarCopo(i);
+    const copo = nCopos > 1 ? ` do Copo ${i + 1}` : "";
+    for (const g of ehPuro() ? gruposPuro(p) : gruposDe(p)) {
+      const min = Number(g.min) || 0;
+      if (marcados(g).size < min) {
+        if (nCopos > 1) { mont.obs = $("obsItem").value; renderMontagem(); }
+        document.querySelector(`[data-grupo="${CSS.escape(g.id)}"]`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+        return avisar(min === 1 ? `Escolha uma opção em "${g.titulo}"${copo}.` : `Escolha pelo menos ${min} opções em "${g.titulo}"${copo}.`);
+      }
+    }
+    // combo: não deixa passar copo sem nada (o cliente pode ter esquecido de montar)
+    if (nCopos > 1 && !calcular().escolhidos && limiteTotal(p)) {
+      mont.obs = $("obsItem").value;
+      renderMontagem();
+      $("telaMontagem").scrollTop = 0;
+      return avisar(`Falta montar o Copo ${i + 1}.`);
     }
   }
   if (ehPuro()) {
     adicionarAoCarrinho({ nome: `${p.nome} (puro)`, precoBase: precoPuroDe(p), complementos: calcular().selecionados, observacao: $("obsItem").value.trim() });
     return fecharMontagem();
   }
-  const { selecionados, extras } = calcular();
+  const { selecionados, extras } = calcularTudo();
   adicionarAoCarrinho({ nome: p.nome, precoBase: Number(p.preco), complementos: selecionados, extras, observacao: $("obsItem").value.trim() });
   fecharMontagem();
 }
