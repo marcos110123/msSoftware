@@ -4,115 +4,162 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#0b1120">
   <title>Painel MsSoftware</title>
   <link rel="icon" href="../assets/favicon-64.png" type="image/png">
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Poppins', system-ui, sans-serif; background: #f5f7fb; color: #0f172a; }
-    .topo { background: radial-gradient(900px 400px at 85% -40%, #12204a, transparent 60%), #0b1120; }
-    .aba { padding: 10px 16px; border-radius: 999px; font-weight: 600; font-size: 14px; color: #b8c4dd; white-space: nowrap; }
-    .aba.on { background: #2563eb; color: #fff; }
-    .cartao { background: #fff; border: 1px solid #e3e8f2; border-radius: 18px; box-shadow: 0 10px 30px rgba(15,23,42,.06); }
-    .campo { width: 100%; border: 1px solid #cfd8e8; border-radius: 12px; padding: 10px 12px; background: #fff; font-size: 14px; }
-    .campo:focus { outline: 2px solid #93c5fd; border-color: #2563eb; }
-    .rot { display: block; font-size: 12.5px; font-weight: 600; color: #55627a; margin-bottom: 4px; }
-    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-weight: 600; border-radius: 12px; padding: 10px 16px; font-size: 14px; }
-    .btn-pri { background: #2563eb; color: #fff; } .btn-pri:hover { background: #1d4ed8; }
-    .btn-sec { background: #fff; border: 1px solid #cfd8e8; color: #0f172a; } .btn-sec:hover { background: #f1f5fb; }
+    :root { --azul: #2563eb; --azul2: #1d4ed8; --tinta: #0f172a; --suave: #64748b; --linha: #e2e8f0; --fundo: #f4f6fb; --escuro: #0b1120; }
+    body { font-family: 'Poppins', system-ui, sans-serif; background: var(--fundo); color: var(--tinta); }
+    .oculto { display: none !important; }
+
+    /* estrutura: menu lateral escuro no computador, barra no topo no celular */
+    .lateral { background: radial-gradient(600px 400px at 0% 0%, #12204a, transparent 70%), var(--escuro); }
+    .menu-item { display: flex; align-items: center; gap: 12px; width: 100%; padding: 11px 14px; border-radius: 14px;
+      color: #94a3c4; font-weight: 600; font-size: 14px; white-space: nowrap; transition: background .15s, color .15s; }
+    .menu-item:hover { background: rgba(255,255,255,.06); color: #fff; }
+    .menu-item.on { background: var(--azul); color: #fff; box-shadow: 0 8px 20px rgba(37,99,235,.35); }
+    .menu-item .ic { width: 22px; text-align: center; font-size: 17px; }
+
+    .cartao { background: #fff; border: 1px solid var(--linha); border-radius: 20px; box-shadow: 0 1px 2px rgba(15,23,42,.04), 0 8px 24px rgba(15,23,42,.04); }
+    .titulo-tela { font-size: 26px; font-weight: 800; letter-spacing: -.02em; }
+    .sub-tela { color: var(--suave); font-size: 14px; }
+
+    .campo { width: 100%; border: 1.5px solid var(--linha); border-radius: 12px; padding: 10px 13px; background: #fff; font-size: 14px; transition: border-color .15s, box-shadow .15s; }
+    .campo:focus { outline: none; border-color: var(--azul); box-shadow: 0 0 0 4px rgba(37,99,235,.12); }
+    .rot { display: block; font-size: 12.5px; font-weight: 600; color: #475569; margin-bottom: 5px; }
+
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; font-weight: 600; border-radius: 12px; padding: 10px 16px; font-size: 14px; transition: background .15s, transform .1s; white-space: nowrap; }
+    .btn:active { transform: scale(.97); }
+    .btn-pri { background: var(--azul); color: #fff; box-shadow: 0 6px 16px rgba(37,99,235,.25); } .btn-pri:hover { background: var(--azul2); }
+    .btn-sec { background: #fff; border: 1.5px solid var(--linha); color: var(--tinta); } .btn-sec:hover { background: #f8fafc; border-color: #cbd5e1; }
     .btn-zap { background: #16a34a; color: #fff; } .btn-zap:hover { background: #15803d; }
     .btn-perigo { color: #dc2626; } .btn-perigo:hover { background: #fef2f2; }
-    .selo { font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 999px; white-space: nowrap; }
+    .btn-ic { width: 38px; height: 38px; padding: 0; }
+
+    .selo { display: inline-flex; align-items: center; gap: 4px; font-size: 11.5px; font-weight: 700; padding: 3px 10px; border-radius: 999px; white-space: nowrap; }
     .selo.pago { background: #dcfce7; color: #166534; } .selo.atrasado { background: #fee2e2; color: #991b1b; }
-    .selo.aberto { background: #fef9c3; color: #854d0e; } .selo.inativo { background: #e5e7eb; color: #4b5563; }
-    .oculto { display: none !important; }
+    .selo.aberto { background: #fef3c7; color: #92400e; } .selo.inativo { background: #f1f5f9; color: #64748b; }
+    .selo.site { background: #dbeafe; color: #1e40af; } .selo.semvalor { background: #fff7ed; color: #9a3412; }
+
+    /* chave liga/desliga */
+    .chave { position: relative; display: inline-flex; align-items: center; gap: 10px; cursor: pointer; font-size: 13.5px; font-weight: 600; user-select: none; }
+    .chave input { position: absolute; opacity: 0; }
+    .chave .trilho { width: 42px; height: 24px; border-radius: 999px; background: #cbd5e1; position: relative; transition: background .2s; flex-shrink: 0; }
+    .chave .trilho::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 999px; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.25); transition: transform .2s; }
+    .chave input:checked + .trilho { background: var(--azul); }
+    .chave input:checked + .trilho::after { transform: translateX(18px); }
+
+    .avatar { width: 56px; height: 56px; border-radius: 16px; object-fit: cover; background: #fff; border: 1px solid var(--linha); flex-shrink: 0; }
+    .avatar.inteira { object-fit: contain; padding: 4px; }
+    .avatar-vazio { width: 56px; height: 56px; border-radius: 16px; display: grid; place-items: center; font-weight: 800; font-size: 20px;
+      color: #fff; background: linear-gradient(135deg, #3b82f6, #1e40af); flex-shrink: 0; }
+
+    .stat { border-radius: 20px; padding: 18px 20px; color: #fff; position: relative; overflow: hidden; }
+    .stat::after { content: ""; position: absolute; right: -30px; top: -30px; width: 110px; height: 110px; border-radius: 999px; background: rgba(255,255,255,.12); }
+    .stat p.r { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; opacity: .85; }
+    .stat p.v { font-size: 26px; font-weight: 800; margin-top: 4px; }
+    .stat p.s { font-size: 12.5px; opacity: .85; margin-top: 2px; }
+
     .bloco-site summary { cursor: pointer; list-style: none; } .bloco-site summary::-webkit-details-marker { display: none; }
-    .bloco-site[open] .seta { transform: rotate(90deg); } .seta { transition: transform .2s; display: inline-block; }
+    .bloco-site[open] .seta { transform: rotate(90deg); } .seta { transition: transform .2s; display: inline-block; color: var(--suave); }
+
     #aviso { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 90; }
+    .rolagem-fina::-webkit-scrollbar { height: 0; }
   </style>
 </head>
 <body>
 
 <!-- Login -->
-<div id="telaLogin" class="min-h-screen topo flex items-center justify-center p-5">
-  <form id="formLogin" class="cartao w-full max-w-sm p-7">
-    <div class="flex items-center gap-3 mb-6">
-      <img src="../assets/logo-ms.jpg" alt="" class="h-11 w-11 rounded-full object-cover">
-      <div><p class="text-xl font-extrabold"><span class="text-blue-600">Ms</span>Software</p><p class="text-xs text-slate-500">Painel administrativo</p></div>
+<div id="telaLogin" class="min-h-screen lateral flex items-center justify-center p-5">
+  <form id="formLogin" class="cartao w-full max-w-sm p-8">
+    <div class="flex flex-col items-center text-center mb-7">
+      <img src="../assets/logo-ms.jpg" alt="" class="h-16 w-16 rounded-2xl object-cover shadow-lg mb-3">
+      <p class="text-2xl font-extrabold"><span class="text-blue-600">Ms</span>Software</p>
+      <p class="text-sm text-slate-500">Painel administrativo</p>
     </div>
     <label class="rot" for="email">E-mail</label>
-    <input class="campo mb-3" id="email" type="email" autocomplete="username" required>
+    <input class="campo mb-4" id="email" type="email" autocomplete="username" required>
     <label class="rot" for="senha">Senha</label>
-    <input class="campo mb-5" id="senha" type="password" autocomplete="current-password" required>
-    <button class="btn btn-pri w-full">Entrar</button>
-    <p id="erroLogin" class="text-sm text-red-600 mt-3 oculto"></p>
+    <input class="campo mb-6" id="senha" type="password" autocomplete="current-password" required>
+    <button class="btn btn-pri w-full !py-3">Entrar</button>
+    <p id="erroLogin" class="text-sm text-red-600 mt-3 text-center oculto"></p>
   </form>
 </div>
 
 <!-- Painel -->
-<div id="telaPainel" class="oculto">
-  <header class="topo text-white">
-    <div class="max-w-6xl mx-auto px-5 pt-5 pb-4">
-      <div class="flex items-center justify-between gap-3">
-        <div class="flex items-center gap-3">
-          <img src="../assets/logo-ms.jpg" alt="" class="h-10 w-10 rounded-full object-cover">
-          <div><p class="text-lg font-extrabold leading-tight"><span class="text-blue-400">Ms</span>Software</p><p class="text-xs text-slate-400">Painel administrativo</p></div>
-        </div>
-        <div class="flex items-center gap-2 text-sm">
-          <a href="../" target="_blank" class="text-slate-300 hover:text-white hidden sm:inline">Ver site ↗</a>
-          <button id="btnSair" class="text-slate-300 hover:text-white px-3 py-1.5 rounded-lg border border-slate-600">Sair</button>
-        </div>
+<div id="telaPainel" class="oculto lg:flex min-h-screen">
+  <!-- menu -->
+  <aside class="lateral text-white lg:w-64 lg:min-h-screen lg:sticky lg:top-0 lg:h-screen flex flex-col">
+    <div class="flex items-center justify-between gap-3 px-5 pt-5 pb-3 lg:pb-6">
+      <div class="flex items-center gap-3">
+        <img src="../assets/logo-ms.jpg" alt="" class="h-10 w-10 rounded-xl object-cover">
+        <div><p class="font-extrabold leading-tight"><span class="text-blue-400">Ms</span>Software</p><p class="text-xs text-slate-400">Painel administrativo</p></div>
       </div>
-      <nav class="flex gap-1 mt-5 overflow-x-auto" id="abas">
-        <button class="aba on" data-aba="resumo">📊 Resumo</button>
-        <button class="aba" data-aba="clientes">👥 Clientes</button>
-        <button class="aba" data-aba="cobrancas">💰 Cobranças</button>
-        <button class="aba" data-aba="site">🌐 Site</button>
-        <button class="aba" data-aba="config">⚙️ PIX e mensagem</button>
-      </nav>
+      <button id="btnSair2" class="lg:hidden text-sm text-slate-300 border border-slate-600 rounded-lg px-3 py-1.5">Sair</button>
     </div>
-  </header>
+    <nav id="abas" class="flex lg:flex-col gap-1 px-3 pb-3 overflow-x-auto rolagem-fina lg:flex-1">
+      <button class="menu-item on" data-aba="resumo"><span class="ic">📊</span>Resumo</button>
+      <button class="menu-item" data-aba="clientes"><span class="ic">👥</span>Clientes</button>
+      <button class="menu-item" data-aba="cobrancas"><span class="ic">💰</span>Cobranças</button>
+      <button class="menu-item" data-aba="site"><span class="ic">🌐</span>Site</button>
+      <button class="menu-item" data-aba="config"><span class="ic">⚙️</span>PIX e mensagem</button>
+    </nav>
+    <div class="hidden lg:block p-4 border-t border-white/10 text-sm">
+      <a href="../" target="_blank" class="menu-item"><span class="ic">↗</span>Ver o site</a>
+      <button id="btnSair" class="menu-item"><span class="ic">⎋</span>Sair</button>
+    </div>
+  </aside>
 
-  <main class="max-w-6xl mx-auto px-5 py-6">
+  <main class="flex-1 min-w-0 px-5 py-6 lg:px-10 lg:py-9 max-w-6xl">
+    <!-- Resumo -->
     <section data-tela="resumo"><div id="resumo"></div></section>
 
+    <!-- Clientes -->
     <section data-tela="clientes" class="oculto">
-      <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-        <h1 class="text-2xl font-extrabold">Clientes</h1>
-        <div class="flex gap-2">
-          <input id="buscaCliente" class="campo !w-56" placeholder="Buscar…">
+      <div class="flex flex-wrap items-end justify-between gap-3 mb-5">
+        <div><h1 class="titulo-tela">Clientes</h1><p class="sub-tela" id="contaClientes"></p></div>
+        <div class="flex flex-wrap gap-2">
+          <input id="buscaCliente" class="campo !w-56" placeholder="🔍 Buscar cliente…">
           <button id="btnNovoCliente" class="btn btn-pri">+ Novo cliente</button>
         </div>
       </div>
-      <div id="listaClientes" class="space-y-3"></div>
+      <div id="listaClientes" class="grid md:grid-cols-2 gap-4"></div>
     </section>
 
+    <!-- Cobranças -->
     <section data-tela="cobrancas" class="oculto">
-      <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-        <h1 class="text-2xl font-extrabold">Cobranças</h1>
+      <div class="flex flex-wrap items-end justify-between gap-3 mb-5">
+        <div><h1 class="titulo-tela">Cobranças</h1><p class="sub-tela">Uma por cliente ativo por mês. Gerar de novo não duplica.</p></div>
         <div class="flex flex-wrap gap-2 items-center">
           <input id="mesCobranca" type="month" class="campo !w-44">
           <button id="btnGerar" class="btn btn-pri">Gerar cobranças do mês</button>
         </div>
       </div>
-      <div id="totaisCobranca" class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4"></div>
+      <div id="totaisCobranca" class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5"></div>
       <div id="listaCobrancas" class="space-y-3"></div>
     </section>
 
+    <!-- Site -->
     <section data-tela="site" class="oculto">
-      <div class="flex flex-wrap items-center justify-between gap-3 mb-2">
-        <h1 class="text-2xl font-extrabold">Conteúdo do site</h1>
+      <div class="flex flex-wrap items-end justify-between gap-3 mb-2">
+        <div><h1 class="titulo-tela">Conteúdo do site</h1>
+          <p class="sub-tela">Edite e clique em <b>Publicar</b>. Os clientes que aparecem no site são escolhidos na aba <b>Clientes</b> (chave “Aparece no site”).</p></div>
         <div class="flex gap-2">
           <a href="../" target="_blank" class="btn btn-sec">Ver site ↗</a>
           <button id="btnSalvarSite" class="btn btn-pri">Publicar alterações</button>
         </div>
       </div>
-      <p class="text-sm text-slate-500 mb-4">Edite os textos e as listas e clique em <b>Publicar alterações</b>. O site atualiza na hora (quem estiver com ele aberto vê ao recarregar).</p>
-      <div id="editorSite" class="space-y-3"></div>
+      <div id="editorSite" class="space-y-3 mt-5"></div>
     </section>
 
+    <!-- Config -->
     <section data-tela="config" class="oculto">
-      <h1 class="text-2xl font-extrabold mb-4">PIX e mensagem de cobrança</h1>
+      <h1 class="titulo-tela">PIX e mensagem de cobrança</h1>
+      <p class="sub-tela mb-5">Dados usados para gerar o PIX copia e cola com o valor de cada cobrança.</p>
       <form id="formConfig" class="cartao p-6 space-y-4 max-w-2xl">
         <div class="grid sm:grid-cols-3 gap-3">
           <div><label class="rot" for="cfgTipo">Tipo da chave</label>
@@ -139,32 +186,73 @@
 </div>
 
 <!-- Cliente -->
-<div id="modalCliente" class="oculto fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center p-0 sm:p-5">
-  <form id="formCliente" class="bg-white w-full sm:max-w-2xl max-h-[92vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl p-6 space-y-3">
-    <h2 id="tituloCliente" class="text-xl font-extrabold">Novo cliente</h2>
-    <div class="grid sm:grid-cols-2 gap-3">
-      <div><label class="rot" for="cNome">Empresa / cliente *</label><input id="cNome" class="campo" required></div>
-      <div><label class="rot" for="cResp">Responsável (para a mensagem)</label><input id="cResp" class="campo" placeholder="Ex.: Izabela"></div>
-      <div><label class="rot" for="cZap">WhatsApp *</label><input id="cZap" class="campo" inputmode="tel" placeholder="(17) 99999-9999" required></div>
-      <div><label class="rot" for="cPlano">Plano</label>
-        <input id="cPlano" class="campo" list="planosLista" placeholder="Básico, Com NF-e, Plus…"><datalist id="planosLista"><option>Básico</option><option>Com NF-e</option><option>Plus</option></datalist></div>
-      <div><label class="rot" for="cValor">Mensalidade (R$) *</label><input id="cValor" class="campo" inputmode="decimal" placeholder="179,90" required></div>
-      <div><label class="rot" for="cDia">Dia do vencimento *</label><input id="cDia" class="campo" type="number" min="1" max="28" required></div>
-      <div><label class="rot" for="cInicio">Cliente desde</label><input id="cInicio" class="campo" type="date"></div>
-      <div class="flex items-end"><label class="flex items-center gap-2 font-semibold text-sm py-2"><input id="cAtivo" type="checkbox" class="w-5 h-5" checked> Ativo (gera cobrança)</label></div>
-      <div><label class="rot" for="cCardapio">Link do cardápio</label><input id="cCardapio" class="campo" placeholder="https://…"></div>
-      <div><label class="rot" for="cPainel">Link do painel</label><input id="cPainel" class="campo" placeholder="https://…"></div>
+<div id="modalCliente" class="oculto fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-5">
+  <form id="formCliente" class="bg-white w-full sm:max-w-2xl max-h-[94vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl">
+    <div class="sticky top-0 bg-white/95 backdrop-blur px-6 pt-5 pb-3 border-b border-slate-100 flex items-center justify-between z-10">
+      <h2 id="tituloCliente" class="text-xl font-extrabold">Novo cliente</h2>
+      <button type="button" data-fechar class="btn btn-ic btn-sec">✕</button>
     </div>
-    <div><label class="rot" for="cObs">Observações</label><textarea id="cObs" class="campo" rows="3" placeholder="Firebase, impressora, combinados…"></textarea></div>
-    <div class="flex flex-wrap justify-between gap-2 pt-2">
-      <button type="button" id="btnExcluirCliente" class="btn btn-perigo oculto">Excluir</button>
+    <div class="px-6 py-5 space-y-6">
+      <div>
+        <p class="text-xs font-bold uppercase tracking-wider text-blue-600 mb-3">Dados do cliente</p>
+        <div class="grid sm:grid-cols-2 gap-3">
+          <div class="sm:col-span-2"><label class="rot" for="cNome">Empresa / cliente *</label><input id="cNome" class="campo" required></div>
+          <div><label class="rot" for="cResp">Responsável</label><input id="cResp" class="campo" placeholder="Nome usado na mensagem"></div>
+          <div><label class="rot" for="cZap">WhatsApp do responsável</label><input id="cZap" class="campo" inputmode="tel" placeholder="(17) 99999-9999"></div>
+          <div><label class="rot" for="cInicio">Cliente desde</label><input id="cInicio" class="campo" type="date"></div>
+          <div class="flex items-end pb-2"><label class="chave"><input id="cAtivo" type="checkbox" checked><span class="trilho"></span>Ativo (gera cobrança)</label></div>
+        </div>
+      </div>
+      <div>
+        <p class="text-xs font-bold uppercase tracking-wider text-blue-600 mb-3">Mensalidade</p>
+        <div class="grid sm:grid-cols-3 gap-3">
+          <div><label class="rot" for="cPlano">Plano</label>
+            <input id="cPlano" class="campo" list="planosLista" placeholder="Básico…"><datalist id="planosLista"><option>Básico</option><option>Com NF-e</option><option>Plus</option><option>Site</option></datalist></div>
+          <div><label class="rot" for="cValor">Valor (R$)</label><input id="cValor" class="campo" inputmode="decimal" placeholder="179,90"></div>
+          <div><label class="rot" for="cDia">Vence todo dia</label><input id="cDia" class="campo" type="number" min="1" max="28" placeholder="10"></div>
+        </div>
+      </div>
+      <div>
+        <p class="text-xs font-bold uppercase tracking-wider text-blue-600 mb-3">No site mssoftware.com.br</p>
+        <div class="flex items-center gap-4 mb-3">
+          <div id="cLogoPrevia"></div>
+          <div class="flex-1">
+            <label class="rot">Logo</label>
+            <div class="flex gap-2">
+              <input id="cLogo" class="campo" placeholder="assets/… ou envie →">
+              <label class="btn btn-sec cursor-pointer">📷 Enviar<input id="cLogoArquivo" type="file" accept="image/*" class="hidden"></label>
+            </div>
+          </div>
+        </div>
+        <div class="flex flex-wrap gap-x-6 gap-y-3 mb-3">
+          <label class="chave"><input id="cSite" type="checkbox"><span class="trilho"></span>Aparece no site (faixa de clientes)</label>
+          <label class="chave"><input id="cProjeto" type="checkbox"><span class="trilho"></span>Destaque em “Projetos no ar”</label>
+          <label class="chave"><input id="cInteira" type="checkbox"><span class="trilho"></span>Logo inteira (sem cortar)</label>
+        </div>
+        <div class="grid sm:grid-cols-2 gap-3">
+          <div class="sm:col-span-2"><label class="rot" for="cTextoSite">Descrição no cartão de projeto</label><input id="cTextoSite" class="campo" placeholder="Ex.: Cardápio delivery e painel de pedidos"></div>
+          <div><label class="rot" for="cImagemProjeto">Foto do cartão de projeto (opcional)</label><input id="cImagemProjeto" class="campo" placeholder="vazio = usa a logo"></div>
+          <div><label class="rot" for="cOrdem">Ordem no site</label><input id="cOrdem" class="campo" type="number" min="1" placeholder="1 = primeiro"></div>
+        </div>
+      </div>
+      <div>
+        <p class="text-xs font-bold uppercase tracking-wider text-blue-600 mb-3">Links e anotações</p>
+        <div class="grid sm:grid-cols-2 gap-3">
+          <div><label class="rot" for="cCardapio">Link do cardápio / site</label><input id="cCardapio" class="campo" placeholder="https://…"></div>
+          <div><label class="rot" for="cPainel">Link do painel</label><input id="cPainel" class="campo" placeholder="https://…"></div>
+          <div class="sm:col-span-2"><label class="rot" for="cObs">Observações</label><textarea id="cObs" class="campo" rows="3" placeholder="Firebase, impressora, combinados…"></textarea></div>
+        </div>
+      </div>
+    </div>
+    <div class="sticky bottom-0 bg-white border-t border-slate-100 px-6 py-4 flex flex-wrap justify-between gap-2">
+      <button type="button" id="btnExcluirCliente" class="btn btn-perigo oculto">Excluir cliente</button>
       <div class="flex gap-2 ml-auto"><button type="button" data-fechar class="btn btn-sec">Cancelar</button><button class="btn btn-pri">Salvar</button></div>
     </div>
   </form>
 </div>
 
-<div id="aviso" class="oculto bg-slate-900 text-white text-sm font-semibold px-5 py-3 rounded-full shadow-xl"></div>
+<div id="aviso" class="oculto bg-slate-900 text-white text-sm font-semibold px-5 py-3 rounded-full shadow-2xl"></div>
 
-<script type="module" src="adm.js?v=1"></script>
+<script type="module" src="adm.js?v=2"></script>
 </body>
 </html>
