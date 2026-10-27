@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Painel MsSoftware</title>
+  <link rel="icon" href="../assets/favicon-64.png" type="image/png">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Poppins', system-ui, sans-serif; background: #f5f7fb; color: #0f172a; }
+    .topo { background: radial-gradient(900px 400px at 85% -40%, #12204a, transparent 60%), #0b1120; }
+    .aba { padding: 10px 16px; border-radius: 999px; font-weight: 600; font-size: 14px; color: #b8c4dd; white-space: nowrap; }
+    .aba.on { background: #2563eb; color: #fff; }
+    .cartao { background: #fff; border: 1px solid #e3e8f2; border-radius: 18px; box-shadow: 0 10px 30px rgba(15,23,42,.06); }
+    .campo { width: 100%; border: 1px solid #cfd8e8; border-radius: 12px; padding: 10px 12px; background: #fff; font-size: 14px; }
+    .campo:focus { outline: 2px solid #93c5fd; border-color: #2563eb; }
+    .rot { display: block; font-size: 12.5px; font-weight: 600; color: #55627a; margin-bottom: 4px; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-weight: 600; border-radius: 12px; padding: 10px 16px; font-size: 14px; }
+    .btn-pri { background: #2563eb; color: #fff; } .btn-pri:hover { background: #1d4ed8; }
+    .btn-sec { background: #fff; border: 1px solid #cfd8e8; color: #0f172a; } .btn-sec:hover { background: #f1f5fb; }
+    .btn-zap { background: #16a34a; color: #fff; } .btn-zap:hover { background: #15803d; }
+    .btn-perigo { color: #dc2626; } .btn-perigo:hover { background: #fef2f2; }
+    .selo { font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 999px; white-space: nowrap; }
+    .selo.pago { background: #dcfce7; color: #166534; } .selo.atrasado { background: #fee2e2; color: #991b1b; }
+    .selo.aberto { background: #fef9c3; color: #854d0e; } .selo.inativo { background: #e5e7eb; color: #4b5563; }
+    .oculto { display: none !important; }
+    .bloco-site summary { cursor: pointer; list-style: none; } .bloco-site summary::-webkit-details-marker { display: none; }
+    .bloco-site[open] .seta { transform: rotate(90deg); } .seta { transition: transform .2s; display: inline-block; }
+    #aviso { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 90; }
+  </style>
+</head>
+<body>
+
+<!-- Login -->
+<div id="telaLogin" class="min-h-screen topo flex items-center justify-center p-5">
+  <form id="formLogin" class="cartao w-full max-w-sm p-7">
+    <div class="flex items-center gap-3 mb-6">
+      <img src="../assets/logo-ms.jpg" alt="" class="h-11 w-11 rounded-full object-cover">
+      <div><p class="text-xl font-extrabold"><span class="text-blue-600">Ms</span>Software</p><p class="text-xs text-slate-500">Painel administrativo</p></div>
+    </div>
+    <label class="rot" for="email">E-mail</label>
+    <input class="campo mb-3" id="email" type="email" autocomplete="username" required>
+    <label class="rot" for="senha">Senha</label>
+    <input class="campo mb-5" id="senha" type="password" autocomplete="current-password" required>
+    <button class="btn btn-pri w-full">Entrar</button>
+    <p id="erroLogin" class="text-sm text-red-600 mt-3 oculto"></p>
+  </form>
+</div>
+
+<!-- Painel -->
+<div id="telaPainel" class="oculto">
+  <header class="topo text-white">
+    <div class="max-w-6xl mx-auto px-5 pt-5 pb-4">
+      <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <img src="../assets/logo-ms.jpg" alt="" class="h-10 w-10 rounded-full object-cover">
+          <div><p class="text-lg font-extrabold leading-tight"><span class="text-blue-400">Ms</span>Software</p><p class="text-xs text-slate-400">Painel administrativo</p></div>
+        </div>
+        <div class="flex items-center gap-2 text-sm">
+          <a href="../" target="_blank" class="text-slate-300 hover:text-white hidden sm:inline">Ver site ↗</a>
+          <button id="btnSair" class="text-slate-300 hover:text-white px-3 py-1.5 rounded-lg border border-slate-600">Sair</button>
+        </div>
+      </div>
+      <nav class="flex gap-1 mt-5 overflow-x-auto" id="abas">
+        <button class="aba on" data-aba="resumo">📊 Resumo</button>
+        <button class="aba" data-aba="clientes">👥 Clientes</button>
+        <button class="aba" data-aba="cobrancas">💰 Cobranças</button>
+        <button class="aba" data-aba="site">🌐 Site</button>
+        <button class="aba" data-aba="config">⚙️ PIX e mensagem</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-5 py-6">
+    <section data-tela="resumo"><div id="resumo"></div></section>
+
+    <section data-tela="clientes" class="oculto">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+        <h1 class="text-2xl font-extrabold">Clientes</h1>
+        <div class="flex gap-2">
+          <input id="buscaCliente" class="campo !w-56" placeholder="Buscar…">
+          <button id="btnNovoCliente" class="btn btn-pri">+ Novo cliente</button>
+        </div>
+      </div>
+      <div id="listaClientes" class="space-y-3"></div>
+    </section>
+
+    <section data-tela="cobrancas" class="oculto">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+        <h1 class="text-2xl font-extrabold">Cobranças</h1>
+        <div class="flex flex-wrap gap-2 items-center">
+          <input id="mesCobranca" type="month" class="campo !w-44">
+          <button id="btnGerar" class="btn btn-pri">Gerar cobranças do mês</button>
+        </div>
+      </div>
+      <div id="totaisCobranca" class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4"></div>
+      <div id="listaCobrancas" class="space-y-3"></div>
+    </section>
+
+    <section data-tela="site" class="oculto">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-2">
+        <h1 class="text-2xl font-extrabold">Conteúdo do site</h1>
+        <div class="flex gap-2">
+          <a href="../" target="_blank" class="btn btn-sec">Ver site ↗</a>
+          <button id="btnSalvarSite" class="btn btn-pri">Publicar alterações</button>
+        </div>
+      </div>
+      <p class="text-sm text-slate-500 mb-4">Edite os textos e as listas e clique em <b>Publicar alterações</b>. O site atualiza na hora (quem estiver com ele aberto vê ao recarregar).</p>
+      <div id="editorSite" class="space-y-3"></div>
+    </section>
+
+    <section data-tela="config" class="oculto">
+      <h1 class="text-2xl font-extrabold mb-4">PIX e mensagem de cobrança</h1>
+      <form id="formConfig" class="cartao p-6 space-y-4 max-w-2xl">
+        <div class="grid sm:grid-cols-3 gap-3">
+          <div><label class="rot" for="cfgTipo">Tipo da chave</label>
+            <select id="cfgTipo" class="campo"><option value="celular">Celular</option><option value="cpf">CPF</option><option value="cnpj">CNPJ</option><option value="email">E-mail</option><option value="aleatoria">Aleatória</option></select></div>
+          <div class="sm:col-span-2"><label class="rot" for="cfgChave">Chave PIX</label><input id="cfgChave" class="campo" required></div>
+        </div>
+        <div class="grid sm:grid-cols-3 gap-3">
+          <div class="sm:col-span-2"><label class="rot" for="cfgNome">Nome do recebedor (como no banco)</label><input id="cfgNome" class="campo" required></div>
+          <div><label class="rot" for="cfgCidade">Cidade</label><input id="cfgCidade" class="campo" required></div>
+        </div>
+        <div>
+          <label class="rot" for="cfgMensagem">Mensagem da cobrança no WhatsApp</label>
+          <textarea id="cfgMensagem" class="campo" rows="10"></textarea>
+          <p class="text-xs text-slate-500 mt-1">Use: {responsavel} {cliente} {plano} {mes} {valor} {vencimento} {pix}</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button class="btn btn-pri">Salvar</button>
+          <button type="button" id="btnTestarPix" class="btn btn-sec">Gerar PIX de teste (R$ 1,00)</button>
+        </div>
+        <textarea id="pixTeste" class="campo font-mono text-xs oculto" rows="3" readonly></textarea>
+      </form>
+    </section>
+  </main>
+</div>
+
+<!-- Cliente -->
+<div id="modalCliente" class="oculto fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center p-0 sm:p-5">
+  <form id="formCliente" class="bg-white w-full sm:max-w-2xl max-h-[92vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl p-6 space-y-3">
+    <h2 id="tituloCliente" class="text-xl font-extrabold">Novo cliente</h2>
+    <div class="grid sm:grid-cols-2 gap-3">
+      <div><label class="rot" for="cNome">Empresa / cliente *</label><input id="cNome" class="campo" required></div>
+      <div><label class="rot" for="cResp">Responsável (para a mensagem)</label><input id="cResp" class="campo" placeholder="Ex.: Izabela"></div>
+      <div><label class="rot" for="cZap">WhatsApp *</label><input id="cZap" class="campo" inputmode="tel" placeholder="(17) 99999-9999" required></div>
+      <div><label class="rot" for="cPlano">Plano</label>
+        <input id="cPlano" class="campo" list="planosLista" placeholder="Básico, Com NF-e, Plus…"><datalist id="planosLista"><option>Básico</option><option>Com NF-e</option><option>Plus</option></datalist></div>
+      <div><label class="rot" for="cValor">Mensalidade (R$) *</label><input id="cValor" class="campo" inputmode="decimal" placeholder="179,90" required></div>
+      <div><label class="rot" for="cDia">Dia do vencimento *</label><input id="cDia" class="campo" type="number" min="1" max="28" required></div>
+      <div><label class="rot" for="cInicio">Cliente desde</label><input id="cInicio" class="campo" type="date"></div>
+      <div class="flex items-end"><label class="flex items-center gap-2 font-semibold text-sm py-2"><input id="cAtivo" type="checkbox" class="w-5 h-5" checked> Ativo (gera cobrança)</label></div>
+      <div><label class="rot" for="cCardapio">Link do cardápio</label><input id="cCardapio" class="campo" placeholder="https://…"></div>
+      <div><label class="rot" for="cPainel">Link do painel</label><input id="cPainel" class="campo" placeholder="https://…"></div>
+    </div>
+    <div><label class="rot" for="cObs">Observações</label><textarea id="cObs" class="campo" rows="3" placeholder="Firebase, impressora, combinados…"></textarea></div>
+    <div class="flex flex-wrap justify-between gap-2 pt-2">
+      <button type="button" id="btnExcluirCliente" class="btn btn-perigo oculto">Excluir</button>
+      <div class="flex gap-2 ml-auto"><button type="button" data-fechar class="btn btn-sec">Cancelar</button><button class="btn btn-pri">Salvar</button></div>
+    </div>
+  </form>
+</div>
+
+<div id="aviso" class="oculto bg-slate-900 text-white text-sm font-semibold px-5 py-3 rounded-full shadow-xl"></div>
+
+<script type="module" src="adm.js?v=1"></script>
+</body>
+</html>
