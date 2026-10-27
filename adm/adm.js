@@ -3,7 +3,7 @@ import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from
 import {
   getFirestore, collection, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-import { PADRAO, completar } from "../assets/site.js?v=1";
+import { PADRAO, completar } from "../assets/site.js?v=2";
 import { gerarPix } from "./pix.js?v=1";
 
 // ----------------------
@@ -452,14 +452,17 @@ $("btnTestarPix").addEventListener("click", async () => {
 // ----------------------
 // nomes das seções (o mesmo nome pode ser campo dentro de outra seção, ex.: "chamada")
 const SECOES = {
-  contato: ["📞", "Contato e WhatsApp"], topo: ["🏠", "Topo da página"], diferenciais: ["✨", "Diferenciais (3 cartões)"], servicos: ["🧰", "Serviços"],
-  projetos: ["⭐", "Projetos no ar"], planos: ["💳", "Planos e preços"], passos: ["🪜", "Como trabalhamos"], clientes: ["🤝", "Clientes (faixa de logos)"],
+  contato: ["📞", "Contato e WhatsApp"], topo: ["🏠", "Topo da página"], clientes: ["🤝", "Clientes (faixa de logos)"],
+  recursos: ["✨", "Recursos"], comoFunciona: ["🔄", "Como funciona"], projetos: ["⭐", "Projetos no ar"], planos: ["💳", "Planos e preços"],
+  depoimentos: ["💬", "Depoimentos"], passos: ["🪜", "Como começar"], servicos: ["🧰", "Outros serviços"],
   perguntas: ["❓", "Perguntas frequentes"], chamada: ["📣", "Chamada final"], rodape: ["⬇️", "Rodapé"]
 };
+// "versao" é controle interno do site, não aparece no editor
+const OCULTOS = new Set(["versao"]);
 // listas que vêm da aba Clientes (não se edita aqui)
 const DA_ABA_CLIENTES = new Set(["projetos.itens", "clientes.logos"]);
 const ROTULOS = {
-  diferenciais: "Cartões",
+  vantagens: "Vantagens (abaixo dos botões)", imagem2: "Imagem do celular de trás", loja: "Loja",
   whatsapp: "WhatsApp (com DDD)", mensagem: "Mensagem inicial do WhatsApp", whatsappTexto: "WhatsApp como aparece no rodapé", email: "E-mail", instagram: "Instagram (@)",
   chip: "Faixa pequena", titulo: "Título", destaque: "Título em destaque (azul)", subtitulo: "Subtítulo", botao: "Botão", botao2: "Segundo botão",
   etiqueta: "Etiqueta (acima do título)", itens: "Itens", icone: "Ícone (emoji)", texto: "Texto", nome: "Nome", link: "Link", imagem: "Imagem",
@@ -495,7 +498,7 @@ function campoHTML(chave, valor, caminho) {
       </div>`).join("")}
       <button type="button" class="btn btn-sec" data-adicionar="${caminho}">+ Adicionar</button></div></div>`;
   }
-  if (chave === "imagem") return `<div><label class="rot">${rot(chave)}</label>
+  if (chave === "imagem" || chave === "imagem2") return `<div><label class="rot">${rot(chave)}</label>
     <div class="flex gap-2 items-center">${valor ? `<img src="${esc(imgUrl(valor))}" class="w-11 h-11 rounded-lg object-cover border" alt="">` : ""}
       <input class="campo" data-caminho="${caminho}" value="${esc(String(valor).startsWith("data:") ? "" : valor)}" placeholder="${String(valor).startsWith("data:") ? "Imagem enviada do aparelho" : "assets/… ou https://…"}">
       <label class="btn btn-sec cursor-pointer">📷<input type="file" accept="image/*" class="hidden" data-foto="${caminho}"></label></div></div>`;
@@ -507,7 +510,7 @@ function campoHTML(chave, valor, caminho) {
 const abertos = new Set(["contato"]);
 function renderSite() {
   if (!siteDados) { $("editorSite").innerHTML = '<p class="text-slate-500">Carregando…</p>'; return; }
-  $("editorSite").innerHTML = Object.entries(siteDados).map(([k, v]) => `
+  $("editorSite").innerHTML = Object.entries(siteDados).filter(([k]) => !OCULTOS.has(k)).map(([k, v]) => `
     <details class="bloco-site cartao" data-secao="${k}" ${abertos.has(k) ? "open" : ""}>
       <summary class="px-5 py-4 font-bold flex items-center justify-between"><span class="flex items-center gap-3"><span class="text-xl">${(SECOES[k] || ["•"])[0]}</span>${(SECOES[k] || [0, k])[1]}</span><span class="seta">›</span></summary>
       <div class="px-5 pb-5 pt-1 space-y-3 border-t border-slate-100">${Array.isArray(v) ? campoHTML(k, v, k) : Object.entries(v).map(([c, x]) => campoHTML(c, x, `${k}.${c}`)).join("")}</div>
