@@ -29,7 +29,9 @@ const db = getFirestore(initializeApp(firebaseConfig));
 const LOJA = {
   nome: "Nosso Açaí",
   whatsapp: "5517991276971", // (17) 99127-6971
-  taxaEntrega: 2.00          // padrão; o painel muda em Configurações (config/entrega.taxaEntrega)
+  taxaEntrega: 2.00,         // padrão; o painel muda em Configurações (config/entrega.taxaEntrega)
+  // PIX mostrado na tela de acompanhamento quando o pagamento é PIX
+  pix: { chave: "17981820729", mostrar: "(17) 98182-0729", tipo: "Celular", nome: "Kauê Vinicius dos Santos" }
 };
 
 // Formatos (o "id" é o campo "categoria" do produto). Produtos "Copo P/M/G" viram um item só, com os tamanhos.
@@ -673,6 +675,13 @@ function renderAcomp() {
           <span class="h">${h}</span></div>`;
       }).join("")}</div>`}
       <div class="acomp-resumo ac-resumo2"><div class="ac-r-it">${esc(d.resumo || "")}<small>${esc(d.pagamento || "")}${troco}</small></div>${valoresAcomp(d)}</div>
+      ${/pix/i.test(d.pagamento || "") && !cancelado && d.status !== "concluido" ? `
+      <div class="acomp-pix">
+        <p class="t">💠 Pague com PIX${d.total ? ` · <b>${brl(d.total)}</b>` : ""}</p>
+        <p class="k"><small>Chave PIX (${LOJA.pix.tipo})</small><b>${LOJA.pix.mostrar}</b><small>${esc(LOJA.pix.nome)}</small></p>
+        <button class="btn-pix" data-copiar-pix>📋 Copiar chave PIX</button>
+        <p class="d">Depois de pagar, envie o comprovante pelo WhatsApp da loja.</p>
+      </div>` : ""}
       <div class="acomp-acoes">
         ${zapOpcional ? `<a class="btn-opc" href="${acomp.whats}" target="_blank" rel="noopener" data-enviar-whats><span class="ic">📲</span><span><b>Enviar pedido pelo WhatsApp</b><small>Opcional · seu pedido já chegou na loja</small></span></a>`
           : `<a class="btn-sec" href="https://wa.me/${LOJA.whatsapp}?text=${encodeURIComponent(`Olá! Sobre o meu pedido${d.num ? ` #${d.num}` : ""}…`)}" target="_blank" rel="noopener">💬 Falar com a loja</a>`}
@@ -746,8 +755,26 @@ $("telaAcomp").addEventListener("click", (e) => {
     return;
   }
   if (e.target.closest("[data-enviar-whats]")) return marcarWhatsEnviado();
+  const pix = e.target.closest("[data-copiar-pix]");
+  if (pix) return copiarPix(pix);
   if (e.target.closest("[data-sair-acomp]")) fecharAcomp();
 });
+
+async function copiarPix(botao) {
+  try {
+    await navigator.clipboard.writeText(LOJA.pix.chave);
+  } catch (_) {
+    // navegadores antigos: copia por um campo temporário
+    const t = document.createElement("textarea");
+    t.value = LOJA.pix.chave;
+    document.body.appendChild(t);
+    t.select();
+    document.execCommand("copy");
+    t.remove();
+  }
+  botao.textContent = "✅ Chave copiada!";
+  setTimeout(() => { botao.textContent = "📋 Copiar chave PIX"; }, 2500);
+}
 $("barraAcomp").addEventListener("click", abrirAcomp);
 
 let pedidoPronto = null;

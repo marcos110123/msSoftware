@@ -197,6 +197,13 @@ input, textarea, select { font: inherit; color: inherit; }
 .acomp-resumo small { display: block; color: var(--suave); font-size: 11.5px; margin-top: 2px; }
 .acomp-resumo b { white-space: nowrap; font-weight: 600; }
 .acomp-acoes { display: grid; gap: 10px; margin: 18px 22px 0; }
+.acomp-pix { margin: 12px 22px 0; background: #fff; border: 1.5px dashed var(--magenta); border-radius: 18px; padding: 14px 16px; text-align: center; }
+.acomp-pix .t { margin: 0 0 8px; font-size: 14px; color: var(--tinta); } .acomp-pix .t b { color: var(--magenta2); }
+.acomp-pix .k { margin: 0 0 10px; background: var(--lilas); border-radius: 14px; padding: 10px; }
+.acomp-pix .k b { display: block; font-size: 19px; letter-spacing: .5px; color: var(--tinta); margin: 2px 0; }
+.acomp-pix .k small { display: block; font-size: 11.5px; color: var(--suave); }
+.btn-pix { width: 100%; border: 0; border-radius: 14px; padding: 12px; font-size: 14px; font-weight: 600; background: var(--magenta); color: #fff; cursor: pointer; }
+.acomp-pix .d { margin: 8px 0 0; font-size: 12px; color: var(--suave); }
 .acomp-acoes a.btn-sec { display: block; text-align: center; text-decoration: none; color: var(--tinta); }
 .btn-opc { display: flex; align-items: center; gap: 12px; text-align: left; text-decoration: none; color: var(--tinta); background: #fff; border: 1.5px dashed #d9c6d3; border-radius: 18px; padding: 12px 14px; }
 .btn-opc .ic { width: 38px; height: 38px; border-radius: 12px; background: var(--lilas); display: grid; place-items: center; font-size: 18px; flex-shrink: 0; }
