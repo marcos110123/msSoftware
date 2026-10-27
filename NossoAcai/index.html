@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=2.2.1">
+  <link rel="stylesheet" href="style.css?v=2.2.2">
 </head>
 <body>
   <div class="app">
@@ -106,8 +106,16 @@
       <label class="rot" for="telCliente">Telefone (WhatsApp)</label>
       <input class="campo" id="telCliente" type="tel" autocomplete="tel" placeholder="(17) 99999-9999">
       <div id="blocoEndereco">
-        <label class="rot" for="enderecoCliente">Endereço de entrega</label>
-        <textarea class="campo" id="enderecoCliente" rows="2" placeholder="Rua, número, bairro e ponto de referência"></textarea>
+        <label class="rot" for="endRua">Rua</label>
+        <input class="campo" id="endRua" autocomplete="address-line1" placeholder="Ex.: Rua São Paulo">
+        <div style="display:grid;grid-template-columns:1fr 2fr;gap:10px">
+          <div><label class="rot" for="endNumero">Número</label>
+            <input class="campo" id="endNumero" inputmode="numeric" placeholder="Ex.: 123"></div>
+          <div><label class="rot" for="endBairro">Bairro</label>
+            <input class="campo" id="endBairro" placeholder="Ex.: Centro"></div>
+        </div>
+        <label class="rot" for="endRef">Complemento / ponto de referência <small>(opcional)</small></label>
+        <input class="campo" id="endRef" placeholder="Ex.: casa de esquina, portão azul">
       </div>
       <label class="rot" for="formaPagamento">Forma de pagamento</label>
       <select class="campo" id="formaPagamento">
@@ -164,7 +172,7 @@
 
   <script>
     if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});
-    const versaoSistema = "2.2.1"; // mude a cada publicação para forçar atualização do script
+    const versaoSistema = "2.2.2"; // mude a cada publicação para forçar atualização do script
     const s = document.createElement("script");
     s.type = "module";
     s.src = `script.js?v=${versaoSistema}`;

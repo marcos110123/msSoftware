@@ -553,7 +553,10 @@ $("jReceber").addEventListener("click", (e) => {
   const salvo = lerJSON("cliente", {});
   if (!$("nomeCliente").value) $("nomeCliente").value = salvo.nome || "";
   if (!$("telCliente").value) $("telCliente").value = salvo.tel || "";
-  if (!$("enderecoCliente").value) $("enderecoCliente").value = salvo.endereco || "";
+  // endereço em partes (rua, número, bairro obrigatórios); quem salvou no formato antigo (texto único) começa do zero
+  const ed = salvo.end || {};
+  [["endRua", ed.rua], ["endNumero", ed.numero], ["endBairro", ed.bairro], ["endRef", ed.ref]]
+    .forEach(([id, v]) => { if (!$(id).value) $(id).value = v || ""; });
   atualizarCarrinho();
   esconder("jReceber");
   mostrar("jDados");
@@ -782,20 +785,25 @@ let pedidoPronto = null;
 $("btnContinuar").addEventListener("click", () => {
   const nome = $("nomeCliente").value.trim();
   const tel = $("telCliente").value.trim();
-  const endereco = $("enderecoCliente").value.trim();
+  const end = { rua: $("endRua").value.trim(), numero: $("endNumero").value.trim(), bairro: $("endBairro").value.trim(), ref: $("endRef").value.trim() };
+  const endereco = `${end.rua}, ${end.numero} - ${end.bairro}${end.ref ? ` (${end.ref})` : ""}`;
   const pagamento = $("formaPagamento").value;
   const entrega = tipoPedido === "entrega";
   const valorFinal = totalProdutos() + taxaAtual();
   if (!nome) return avisar("Informe seu nome.");
   if (tel.replace(/\D/g, "").length < 10) return avisar("Informe um telefone válido com DDD.");
-  if (entrega && !endereco) return avisar("Informe o endereço de entrega.");
+  if (entrega) {
+    const falta = [["endRua", end.rua.length >= 3, "a rua"], ["endNumero", !!end.numero, "o número (se não tiver, escreva S/N)"], ["endBairro", end.bairro.length >= 2, "o bairro"]]
+      .find(([, ok]) => !ok);
+    if (falta) { $(falta[0]).focus(); return avisar(`Informe ${falta[2]} do endereço de entrega.`); }
+  }
   if (!pagamento) return avisar("Selecione a forma de pagamento.");
   let valorTroco = null;
   if ($("precisaTroco").checked) {
     valorTroco = parseFloat(String($("valorTroco").value).replace(",", "."));
     if (!(valorTroco > valorFinal)) return avisar(`O valor para troco deve ser maior que ${brl(valorFinal)}.`);
   }
-  gravarJSON("cliente", { nome, tel, endereco });
+  gravarJSON("cliente", { nome, tel, end: entrega ? end : (lerJSON("cliente", {}).end || {}) });
   pedidoPronto = { tipo: tipoPedido, nome, tel, endereco: entrega ? endereco : "", pagamento, valorTroco,
                    taxa: taxaAtual(), totalProdutos: totalProdutos(), valorFinal, itens: carrinho.map((i) => ({ ...i })) };
 
