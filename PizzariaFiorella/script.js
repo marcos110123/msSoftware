@@ -2,7 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebas
 import {
   getFirestore,
   collection,
-  addDoc,
+  setDoc,
   getDoc,
   doc,
   onSnapshot,
@@ -464,9 +464,16 @@ window.confirmarDadosEntrega = function () {
 
 // ----------------------
 // Envio Pedido (Firestore + WhatsApp)
+// Trava contra pedido duplicado: o botão bloqueia enquanto envia e o código do pedido é gerado
+// uma vez só; se o cliente tentar de novo depois de um erro, grava no mesmo pedido em vez de criar outro.
+let enviandoPedido = false;
+let idPedidoPendente = null;
+let tentativasPedido = 0;
+
 document
   .getElementById("btnConfirmarPedido")
   .addEventListener("click", async () => {
+    if (enviandoPedido) return;
     if (tipoPedidoSelecionado === "entrega" && entregaPausada) return mostrarAlerta(AVISO_SEM_ENTREGA);
     const nome = document.getElementById("confNomeCliente").textContent;
     const tel = document.getElementById("confTelefoneCliente").textContent;
@@ -485,22 +492,10 @@ document
     );
     const valorFinal = totalProdutos + taxa;
 
-    try {
-      await addDoc(collection(db, "orders"), {
-        items: carrinho,
-        totalProdutos: totalProdutos.toFixed(2),
-        taxaEntrega: taxa,
-        totalFinal: valorFinal.toFixed(2),
-        precisaTroco: precisaTroco,
-        valorTroco: valorTroco,
-        status: "pendente",
-        createdAt: serverTimestamp(),
-        formaPagamento,
-        nomeCliente: nome,
-        telefoneCliente: tel,
-        enderecoCliente: tipoPedidoSelecionado === "entrega" ? endereco : "",
-        tipo: tipoPedidoSelecionado,
-      });
+    // chamada depois que o pedido está gravado: abre o WhatsApp e limpa o carrinho
+    const pedidoEnviado = () => {
+      idPedidoPendente = null;
+      tentativasPedido = 0;
 
       // --- WhatsApp ---
       const mensagem = mensagemPedidoWhats({
@@ -529,8 +524,49 @@ document
 
       document.getElementById("modalConfirmacao").classList.add("hidden");
       document.getElementById("modalSucessoPedido").classList.remove("hidden");
+    };
+
+    const btn = document.getElementById("btnConfirmarPedido");
+    const textoBtn = btn.innerHTML;
+    enviandoPedido = true;
+    btn.disabled = true;
+    btn.style.opacity = "0.6";
+    btn.innerHTML = "Enviando...";
+
+    try {
+      if (!idPedidoPendente) { idPedidoPendente = doc(collection(db, "orders")).id; tentativasPedido = 0; }
+      tentativasPedido++;
+
+      await setDoc(doc(db, "orders", idPedidoPendente), {
+        items: carrinho,
+        totalProdutos: totalProdutos.toFixed(2),
+        taxaEntrega: taxa,
+        totalFinal: valorFinal.toFixed(2),
+        precisaTroco: precisaTroco,
+        valorTroco: valorTroco,
+        status: "pendente",
+        createdAt: serverTimestamp(),
+        formaPagamento,
+        nomeCliente: nome,
+        telefoneCliente: tel,
+        enderecoCliente: tipoPedidoSelecionado === "entrega" ? endereco : "",
+        tipo: tipoPedidoSelecionado,
+      });
+
+      pedidoEnviado();
     } catch (e) {
-      mostrarAlerta("Erro ao enviar pedido. Tente novamente.");
+      console.error(e);
+      // Nova tentativa do MESMO pedido recusada: o primeiro envio já tinha chegado (só a resposta se perdeu).
+      if (tentativasPedido > 1 && e?.code === "permission-denied") {
+        pedidoEnviado();
+      } else {
+        mostrarAlerta("Erro ao enviar pedido. Verifique a internet e toque em Confirmar de novo (não duplica).");
+      }
+    } finally {
+      enviandoPedido = false;
+      btn.disabled = false;
+      btn.style.opacity = "";
+      btn.innerHTML = textoBtn;
     }
   });
 
