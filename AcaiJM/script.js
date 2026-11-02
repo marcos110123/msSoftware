@@ -29,8 +29,7 @@ const db = getFirestore(initializeApp(firebaseConfig));
 const LOJA = {
   nome: "Açaí JM",
   whatsapp: "5517976036595", // (17) 97603-6595
-  taxaEntrega: 3.00,
-  soEntrega: true          // a JM não tem retirada: pula a tela "Como deseja receber?"
+  taxaEntrega: 3.00
 };
 
 // Formatos (o "id" é o campo "categoria" do produto). Produtos "Copo P/M/G" viram um item só, com os tamanhos.
@@ -52,7 +51,8 @@ const grupos = new Map();
 let carrinho = lerJSON("jm_carrinho", []);
 let tipoPedido = null;
 let lojaAberta = true;
-let entregaPausada = false; // painel pausa só as entregas (config/estadoPedidos.entregaPausada); retirada continua
+let entregaPausada = false; // painel pausa só as entregas (config/estadoPedidos.entregaPausada)
+let retiradaAtiva = false;  // painel liga a retirada (config/estadoPedidos.retiradaAtiva); desligada = só entrega
 
 // ----------------------
 // Helpers
@@ -651,11 +651,12 @@ $("btnAvancar").addEventListener("click", async () => {
     const snap = await getDoc(doc(db, "config", "estadoPedidos"));
     lojaAberta = snap.exists() ? snap.data().recebendo !== false : true;
     entregaPausada = snap.exists() && snap.data().entregaPausada === true;
+    retiradaAtiva = snap.exists() && snap.data().retiradaAtiva === true;
     renderEntrega();
   } catch (err) { console.warn("Não foi possível verificar o status da loja:", err); }
   if (!lojaAberta) return avisar("A loja está fechada para pedidos no momento.");
-  if (LOJA.soEntrega) {
-    if (entregaPausada) return avisar(AVISO_SEM_ENTREGA);
+  if (!retiradaAtiva) {   // só entrega: pula a tela "Como deseja receber?"
+    if (entregaPausada) return avisar(avisoSemEntrega());
     esconder("jSacola");
     return escolherTipo("entrega");
   }
@@ -666,7 +667,7 @@ $("btnAvancar").addEventListener("click", async () => {
 $("jReceber").addEventListener("click", (e) => {
   const b = e.target.closest("[data-tipo]");
   if (!b) return;
-  if (b.dataset.tipo === "entrega" && entregaPausada) return avisar(AVISO_SEM_ENTREGA);
+  if (b.dataset.tipo === "entrega" && entregaPausada) return avisar(avisoSemEntrega());
   escolherTipo(b.dataset.tipo);
 });
 
@@ -675,6 +676,8 @@ function escolherTipo(tipo) {
   const entrega = tipoPedido === "entrega";
   $("blocoEndereco").classList.toggle("oculto", !entrega);
   $("linhaTaxa").classList.toggle("oculto", !entrega);
+  // só entrega: o "Voltar" dos dados volta para a sacola
+  document.querySelector("#jDados [data-voltar]").dataset.voltar = retiradaAtiva ? "jReceber" : "jSacola";
   const salvo = lerJSON("jm_cliente", {});
   if (!$("nomeCliente").value) $("nomeCliente").value = salvo.nome || "";
   if (!$("telCliente").value) $("telCliente").value = salvo.tel || "";
@@ -683,8 +686,6 @@ function escolherTipo(tipo) {
   esconder("jReceber");
   mostrar("jDados");
 }
-// só entrega: o "Voltar" dos dados volta para a sacola
-if (LOJA.soEntrega) document.querySelector('#jDados [data-voltar="jReceber"]')?.setAttribute("data-voltar", "jSacola");
 
 $("formaPagamento").addEventListener("change", () => {
   const dinheiro = $("formaPagamento").value === "Dinheiro";
@@ -955,7 +956,8 @@ function mensagemPedidoWhats(p) {
 $("btnEnviar").addEventListener("click", async () => {
   const btn = $("btnEnviar");
   if (btn.disabled || !pedidoPronto) return;
-  if (pedidoPronto.tipo === "entrega" && entregaPausada) return avisar(AVISO_SEM_ENTREGA);
+  if (pedidoPronto.tipo === "entrega" && entregaPausada) return avisar(avisoSemEntrega());
+  if (pedidoPronto.tipo === "retirada" && !retiradaAtiva) return avisar("A retirada no balcão não está disponível no momento. Volte e escolha entrega.");
   btn.disabled = true;
   const d = pedidoPronto;
   try {
@@ -1049,10 +1051,11 @@ onSnapshot(doc(db, "config", "estadoPedidos"), (snap) => {
   $("pontoAberto").classList.toggle("off", !lojaAberta);
   $("textoAberto").textContent = lojaAberta ? "Aberto agora" : "Fechado agora";
   entregaPausada = snap.exists() && snap.data().entregaPausada === true;
+  retiradaAtiva = snap.exists() && snap.data().retiradaAtiva === true;
   renderEntrega();
 });
 
-const AVISO_SEM_ENTREGA = LOJA.soEntrega ? "As entregas estão pausadas no momento. Tente novamente em instantes." : "As entregas estão pausadas no momento. Você pode pedir para retirar no balcão.";
+const avisoSemEntrega = () => retiradaAtiva ? "As entregas estão pausadas no momento. Você pode pedir para retirar no balcão." : "As entregas estão pausadas no momento. Tente novamente em instantes.";
 function renderEntrega() {
   const taxa = LOJA.taxaEntrega ? brl(LOJA.taxaEntrega) : "grátis";
   $("textoTaxa").textContent = entregaPausada ? "indisponível" : taxa;
@@ -1060,6 +1063,7 @@ function renderEntrega() {
   $("btnTipoEntrega").disabled = entregaPausada;
   $("blocoTempo").classList.toggle("oculto", entregaPausada || !tempoEntregaTxt);
   $("avisoEntrega").classList.toggle("oculto", !entregaPausada || !lojaAberta);
+  $("avisoEntrega").textContent = retiradaAtiva ? "🛵 Entregas pausadas no momento. Você pode retirar no balcão!" : "🛵 Entregas pausadas no momento. Volte daqui a pouco!";
 }
 
 onSnapshot(doc(db, "config", "entrega"), (snap) => {
