@@ -340,13 +340,13 @@ group-hover:scale-110 transition duration-500">
     <button
       data-card="cervejas"
       onclick="mostrarSecao('cervejas')"
-      class="relative group overflow-hidden rounded-3xl
+      class="col-span-2 sm:col-span-1 relative group overflow-hidden rounded-3xl
 border-2 border-red-500/70
 shadow-[0_0_30px_rgba(239,68,68,0.15)]
 hover:scale-[1.03]
 transition duration-300"
     >
-      <img src="img/longs2-leve.jpg" alt="cervejas" class="w-full h-52 object-cover
+      <img src="img/longs2-leve.jpg" alt="cervejas" class="w-full h-40 sm:h-52 object-cover
 group-hover:scale-110 transition duration-500">
       <div class="absolute bottom-0 bg-black/70 text-white w-full text-center py-2 text-sm">
         Cervejas
@@ -381,7 +381,7 @@ to-red-400">
       Bebidas
     </span>
   </h2>
-  <div class="produtos-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto"></div>
+  <div class="produtos-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-w-6xl mx-auto"></div>
 </section>
 
 
@@ -395,7 +395,7 @@ to-red-400">
       Cervejas
     </span>
   </h2>
-  <div class="produtos-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto"></div>
+  <div class="produtos-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-w-6xl mx-auto"></div>
 </section>
 
 <section id="esfihas-doces" class="section-produto py-10 px-4 bg-[#450a0a]/60 backdrop-blur-sm hidden">
@@ -410,7 +410,7 @@ to-red-400">
   </h2>
 
 
-  <div class="produtos-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto"></div>
+  <div class="produtos-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-w-6xl mx-auto"></div>
 </section>
 
 <section id="mais-vendidas" class="section-produto py-10 px-4 bg-[#450a0a]/60 backdrop-blur-sm hidden">
@@ -423,7 +423,7 @@ to-red-400">
       Lançamentos
     </span>
   </h2>
-  <div class="produtos-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto"></div>
+  <div class="produtos-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-w-6xl mx-auto"></div>
 </section>
 
 
@@ -440,7 +440,7 @@ to-red-400">
     
   </h2>
 
-  <div class="produtos-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto"></div>
+  <div class="produtos-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-w-6xl mx-auto"></div>
 </section>
 
 
@@ -483,7 +483,7 @@ to-red-400">
 <footer class="bg-[#450a0a]/70 backdrop-blur-md border-t border-red-500/20 text-white text-center py-5 space-y-2 text-sm">
 
   <p class="text-red-100">
-    © 2025 Esfirras em Casa. Desenvolvido por
+    © <span id="anoAtual">2026</span> Esfirras em Casa. Desenvolvido por
     <span class="font-bold text-[#f87171]">
       MSSoftware
     </span>
@@ -524,7 +524,8 @@ if ('serviceWorker' in navigator) {
 </script>
 
 <script>
-  const versaoSistema = "1.0.1"; // Atualize aqui também!
+  const versaoSistema = "1.0.2"; // Atualize aqui também!
+  document.addEventListener("DOMContentLoaded", () => { const a = document.getElementById("anoAtual"); if (a) a.textContent = new Date().getFullYear(); });
 
   const script = document.createElement("script");
   script.type = "module";

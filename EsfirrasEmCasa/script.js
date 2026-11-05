@@ -72,6 +72,7 @@ let pararAcomp = null;
 
 // taxa de entrega: vem do painel (config/entrega); 2,00 até carregar
 let taxaEntregaFixa = 2.0;
+const brlV = (v) => "R$ " + Number(v || 0).toFixed(2).replace(".", ",");
 
 // ----------------------
 // Carregar produtos
@@ -112,29 +113,19 @@ function carregarProdutosDoFirestore() {
 
       const card = document.createElement("div");
 
-      card.className = "menu-item bg-gray-800 rounded-lg shadow-lg p-4";
+      card.className = "menu-item flex gap-3 items-stretch bg-[#2a0606]/85 border border-red-900/70 rounded-2xl p-3 shadow-lg";
 
       card.innerHTML = `
-  <img src="${fotoDoProduto(produto.imagem)}" 
-       alt="${produto.nome}" 
-       class="w-full h-48 object-cover rounded-md shadow-lg" 
-       loading="lazy" 
-       decoding="async">
-
-  <h3 class="text-xl font-semibold mt-4 text-white">
-    ${produto.nome}
-  </h3>
-
-  <p class="text-gray-300">
-    ${produto.descricao || ""}
-  </p>
-
-  <p class="text-red-500 font-bold mt-2">
-    R$ ${Number(produto.preco).toFixed(2)}
-  </p>
-
-  <button 
-    onclick="${
+  <img src="${fotoDoProduto(produto.imagem)}"
+       alt="${produto.nome}"
+       class="w-24 h-24 flex-none object-cover rounded-xl"
+       loading="lazy" decoding="async">
+  <div class="flex-1 min-w-0 flex flex-col">
+    <h3 class="text-base font-bold text-white leading-tight">${produto.nome}</h3>
+    <p class="text-xs text-red-100/70 mt-0.5 line-clamp-2">${produto.descricao || ""}</p>
+    <div class="mt-auto pt-2 flex items-center justify-between gap-2">
+      <span class="text-amber-300 font-extrabold">${brlV(produto.preco)}</span>
+      <button onclick="${
       produto.categoria && produto.categoria.startsWith("esfihas")
         ? `abrirModalObservacao(
             '${produto.nome}',
@@ -147,12 +138,9 @@ function carregarProdutosDoFirestore() {
             ''
           )`
     }"
-
-    class="mt-4 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
-
-    Adicionar ao Carrinho
-
-  </button>
+        class="bg-red-600 hover:bg-red-700 active:scale-95 text-white text-sm font-semibold px-3 py-1.5 rounded-full">+ Adicionar</button>
+    </div>
+  </div>
 `;
 
       container.appendChild(card);
@@ -176,6 +164,14 @@ carregarProdutosDoFirestore();
 // ----------------------
 // Seções
 // ----------------------
+// rola até o título da categoria e confere de novo depois que as fotos carregam
+function rolarAteSecao(el) {
+  const ir = (suave) => window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 8, behavior: suave ? "smooth" : "auto" });
+  ir(true);
+  [500, 1100].forEach((ms) => setTimeout(() => {
+    if (secaoAtiva === el.id && Math.abs(el.getBoundingClientRect().top - 8) > 40) ir(true);
+  }, ms));
+}
 function mostrarSecao(id) {
   const secoes = document.querySelectorAll(".section-produto");
   if (secaoAtiva === id) {
@@ -187,8 +183,8 @@ function mostrarSecao(id) {
   const secaoSelecionada = document.getElementById(id);
   if (secaoSelecionada) {
     secaoSelecionada.style.display = "block";
-    secaoSelecionada.scrollIntoView({ behavior: "smooth" });
     secaoAtiva = id;
+    rolarAteSecao(secaoSelecionada);
   }
 }
 
@@ -252,7 +248,7 @@ function atualizarCarrinho() {
       div.innerHTML = `
   <div class="flex-1">
     <span>${item.nome} x${item.quantidade}</span> - 
-    <span>R$ ${item.subtotal.toFixed(2)}</span>
+    <span>${brlV(item.subtotal)}</span>
     ${item.observacao ? `<br><small class="text-gray-400">Obs: ${item.observacao}</small>` : ""}
   </div>
   <button class="bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700" 
@@ -270,7 +266,7 @@ function atualizarCarrinho() {
   total = carrinho.reduce((sum, item) => sum + item.subtotal, 0);
   const taxaEntrega = tipoPedidoSelecionado === "entrega" ? taxaEntregaFixa : 0;
 
-  document.getElementById("total").textContent = total.toFixed(2);
+  document.getElementById("total").textContent = total.toFixed(2).replace(".", ",");
   document.getElementById("totalComEntregaPreview").textContent = (
     total + taxaEntrega
   )
@@ -396,7 +392,7 @@ window.confirmarDadosEntrega = function () {
   listaItens.innerHTML = "";
   carrinho.forEach((item) => {
     const li = document.createElement("li");
-    li.textContent = `${item.nome} x${item.quantidade} - R$ ${item.subtotal.toFixed(2)}`;
+    li.textContent = `${item.nome} x${item.quantidade} - ${brlV(item.subtotal)}`;
     if (item.observacao) {
       li.innerHTML += `<br><small>Obs: ${item.observacao}</small>`;
     }
@@ -420,7 +416,7 @@ window.confirmarDadosEntrega = function () {
   }
 
   document.getElementById("valorTotalConfirmacao").textContent =
-    `Total: R$ ${valorFinal.toFixed(2)}`;
+    `Total: ${brlV(valorFinal)}`;
 
   document.getElementById("modalDadosEntrega").classList.add("hidden");
   document.getElementById("modalConfirmacao").classList.remove("hidden");
@@ -754,7 +750,7 @@ document.getElementById("modalObservacao").classList.remove("hidden");
       esquerda.appendChild(texto);
 
       const preco = document.createElement("span");
-      preco.textContent = `+ R$ ${parseFloat(item.valor).toFixed(2)}`;
+      preco.textContent = `+ ${brlV(item.valor)}`;
 
       preco.className = "text-gray-600 text-xs";
 
