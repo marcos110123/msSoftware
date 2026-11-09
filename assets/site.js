@@ -24,8 +24,13 @@ export const PADRAO = {
     botao: "💬 Quero uma demonstração",
     botao2: "Ver cardápios no ar",
     vantagens: ["Sem taxa por pedido", "Painel no computador e no celular", "Suporte pelo WhatsApp"],
-    imagem: "assets/mock-fiorella.jpg",
-    imagem2: "assets/mock-gatini.jpg"
+    celulares: [
+      { nome: "La Brasa", imagem: "assets/mock-labrasa.jpg", link: "https://labrasa.site" },
+      { nome: "Esfirras em Casa", imagem: "assets/mock-esfirras.jpg", link: "EsfirrasEmCasa/" },
+      { nome: "Pizzaria Fiorella", imagem: "assets/mock-fiorella.jpg", link: "PizzariaFiorella/" },
+      { nome: "Gatini", imagem: "assets/mock-gatini.jpg", link: "Gatini/" },
+      { nome: "Nosso Açaí", imagem: "assets/mock-nossoacai.jpg", link: "NossoAcai/" }
+    ]
   },
   clientes: {
     etiqueta: "Quem já usa", titulo: "Lojas que vendem com a MsSoftware",
@@ -151,6 +156,20 @@ const cab = (s, classe = "mb-12") => `
     ${s.subtitulo ? `<p class="suave mt-4 text-lg">${esc(s.subtitulo)}</p>` : ""}
   </div>`;
 
+// celulares do topo: o do meio em destaque, os vizinhos inclinados; botões com o nome de cada loja
+const posicao = (i, atual, n) => { let p = (i - atual + n) % n; if (p > n / 2) p -= n; return p; };
+const vitrine = (cel) => `
+      <div class="vitrine" data-vitrine>
+        <div class="palco">
+          ${cel.map((c, i) => `<a class="celular" data-i="${i}" data-pos="${posicao(i, 0, cel.length)}" href="${esc(c.link)}" target="_blank" rel="noopener" aria-label="Abrir o cardápio ${esc(c.nome)}">
+            <img src="${esc(c.imagem)}" alt="Cardápio ${esc(c.nome)}"${i > 1 && i < cel.length - 1 ? ' loading="lazy"' : ""}></a>`).join("")}
+        </div>
+        <div class="vitrine-botoes">
+          ${cel.map((c, i) => `<button type="button" class="vitrine-botao${i === 0 ? " ativo" : ""}" data-i="${i}">${esc(c.nome)}</button>`).join("")}
+        </div>
+        ${cel[0]?.link ? `<a class="ao-vivo" href="${esc(cel[0].link)}" target="_blank" rel="noopener">Ver ao vivo: <b>${esc(cel[0].nome)}</b> <span aria-hidden="true">↗</span></a>` : ""}
+      </div>`;
+
 export const SECOES = {
   inicio: (d) => `
     <div class="grade-fundo absolute inset-0 pointer-events-none"></div>
@@ -166,11 +185,7 @@ export const SECOES = {
         ${lista(d.topo.vantagens).length ? `<ul class="vantagens mt-8 flex flex-wrap justify-center lg:justify-start gap-x-6 gap-y-2">
           ${lista(d.topo.vantagens).map((v) => `<li>✓ ${esc(v)}</li>`).join("")}</ul>` : ""}
       </div>
-      <div class="vitrine-celulares" aria-hidden="true">
-        ${d.topo.imagem2 ? `<div class="celular celular-tras"><img src="${esc(d.topo.imagem2)}" alt="" loading="lazy"></div>` : ""}
-        ${d.topo.imagem ? `<div class="celular celular-frente"><img src="${esc(d.topo.imagem)}" alt=""></div>` : ""}
-        <div class="aviso-pedido"><span class="sino">🔔</span><div><b>Novo pedido!</b><small>Entrega · PIX · comanda impressa</small></div></div>
-      </div>
+      ${vitrine(lista(d.topo.celulares).length ? d.topo.celulares : PADRAO.topo.celulares)}
     </div>`,
   clientes: (d) => `
     <p class="text-center text-sm font-semibold uppercase tracking-widest suave mb-6 px-5">${esc(d.clientes.titulo)}</p>
@@ -294,6 +309,29 @@ function animar() {
   }, { threshold: 0.12 });
   document.querySelectorAll(".surgir:not(.visivel)").forEach((el) => observador.observe(el));
 }
+let timerVitrine;
+function iniciarVitrine() {
+  clearInterval(timerVitrine);
+  const v = document.querySelector("[data-vitrine]");
+  if (!v) return;
+  const cels = [...v.querySelectorAll(".celular")], botoes = [...v.querySelectorAll(".vitrine-botao")], aoVivo = v.querySelector(".ao-vivo");
+  const n = cels.length;
+  let atual = 0, parado = false;
+  const mostrar = (k) => {
+    atual = (k + n) % n;
+    cels.forEach((c, i) => { c.dataset.pos = posicao(i, atual, n); c.tabIndex = i === atual ? 0 : -1; });
+    botoes.forEach((b, i) => { b.classList.toggle("ativo", i === atual); b.setAttribute("aria-pressed", String(i === atual)); });
+    if (aoVivo) { aoVivo.href = cels[atual].getAttribute("href"); aoVivo.querySelector("b").textContent = botoes[atual].textContent; }
+  };
+  botoes.forEach((b, i) => b.addEventListener("click", () => { parado = true; mostrar(i); }));
+  // celular de lado: traz para o meio (só o do meio abre o cardápio)
+  cels.forEach((c, i) => c.addEventListener("click", (e) => { if (i !== atual) { e.preventDefault(); parado = true; mostrar(i); } }));
+  v.addEventListener("mouseenter", () => { parado = true; });
+  v.addEventListener("mouseleave", () => { parado = false; });
+  mostrar(0);
+  if (n > 1 && !matchMedia("(prefers-reduced-motion: reduce)").matches)
+    timerVitrine = setInterval(() => { if (!parado && !document.hidden) mostrar(atual + 1); }, 3800);
+}
 function carrossel() {
   // carrossel sem emendas: duplica as logos uma vez
   const trilho = document.getElementById("trilho");
@@ -318,15 +356,15 @@ async function lerConteudo() {
 }
 
 export async function iniciarSite() {
-  carrossel();
+  carrossel(); iniciarVitrine();
   animar();
   try {
     const salvo = await lerConteudo();
-    if (salvo) { aplicar(completar(salvo)); carrossel(); animar(); }
+    if (salvo) { aplicar(completar(salvo)); carrossel(); iniciarVitrine(); animar(); }
   } catch (e) {
     console.warn("Conteúdo do painel indisponível; mantendo o padrão.", e);
   }
 }
 
 // prévia do painel: desenha a página com o conteúdo que está sendo editado
-export function previsualizar(dados) { aplicar(completar(dados)); carrossel(); document.querySelectorAll(".surgir").forEach((e) => e.classList.add("visivel")); }
+export function previsualizar(dados) { aplicar(completar(dados)); carrossel(); iniciarVitrine(); document.querySelectorAll(".surgir").forEach((e) => e.classList.add("visivel")); }

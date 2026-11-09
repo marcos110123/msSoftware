@@ -68,22 +68,31 @@
     #cabecalho a.link:hover { color: #fff; }
     #menuCelular { background: var(--topo); }
 
-    /* Celulares do topo */
-    .vitrine-celulares { position: relative; height: 560px; max-width: 470px; margin: 0 auto; width: 100%; }
-    .celular { position: absolute; width: 250px; border-radius: 40px; padding: 10px; background: #0b0f1a;
-      box-shadow: 0 40px 80px rgba(0,0,0,.45), inset 0 0 0 2px #2a3350; }
+    /* Celulares do topo: 3 em perspectiva + botões das lojas */
+    .vitrine { width: 100%; max-width: 560px; margin: 0 auto; }
+    .palco { position: relative; height: 580px; perspective: 1500px; }
+    .celular { position: absolute; left: 50%; top: 0; width: 250px; margin-left: -125px; border-radius: 40px; padding: 10px; background: #0b0f1a;
+      box-shadow: 0 40px 80px rgba(0,0,0,.45), inset 0 0 0 2px #2a3350; transition: transform .8s cubic-bezier(.2,.75,.2,1), opacity .6s, filter .6s; }
     .celular img { display: block; width: 100%; border-radius: 31px; aspect-ratio: 9 / 19.5; object-fit: cover; object-position: top; }
-    .celular-frente { right: 4%; top: 0; z-index: 2; animation: flutuar 6s ease-in-out infinite; }
-    .celular-tras { left: 2%; top: 70px; transform: rotate(-6deg) scale(.9); opacity: .9; }
-    .aviso-pedido { position: absolute; z-index: 3; left: 0; bottom: 70px; display: flex; gap: 12px; align-items: center; background: #fff; color: var(--texto);
-      padding: 12px 16px 12px 12px; border-radius: 18px; box-shadow: 0 20px 40px rgba(0,0,0,.3); animation: flutuar 6s ease-in-out infinite -3s; }
-    .aviso-pedido .sino { width: 42px; height: 42px; border-radius: 14px; background: #dcfce7; display: grid; place-items: center; font-size: 20px; }
-    .aviso-pedido b { display: block; font-size: 14px; } .aviso-pedido small { color: var(--texto-suave); font-size: 12px; }
-    @keyframes flutuar { 0%, 100% { translate: 0 0; } 50% { translate: 0 -10px; } }
+    .celular[data-pos="0"] { z-index: 3; transform: none; }
+    .celular[data-pos="-1"] { z-index: 2; transform: translateX(-64%) translateY(46px) rotateY(24deg) rotate(-3deg) scale(.82); filter: brightness(.55) saturate(.8); cursor: pointer; }
+    .celular[data-pos="1"] { z-index: 2; transform: translateX(64%) translateY(46px) rotateY(-24deg) rotate(3deg) scale(.82); filter: brightness(.55) saturate(.8); cursor: pointer; }
+    .celular[data-pos="-2"] { z-index: 1; opacity: 0; pointer-events: none; transform: translateX(-110%) translateY(70px) rotateY(30deg) scale(.66); }
+    .celular[data-pos="2"] { z-index: 1; opacity: 0; pointer-events: none; transform: translateX(110%) translateY(70px) rotateY(-30deg) scale(.66); }
+    .celular[data-pos="-1"]:hover, .celular[data-pos="1"]:hover { filter: brightness(.75); }
+    .vitrine-botoes { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 10px; }
+    .vitrine-botao { font-size: 14px; font-weight: 500; padding: 7px 16px; border-radius: 999px; border: 1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.06); color: var(--topo-suave); transition: background .25s, color .25s, border-color .25s; }
+    .vitrine-botao:hover { border-color: rgba(255,255,255,.35); color: #fff; }
+    .vitrine-botao.ativo { background: linear-gradient(90deg, #3b82f6, #6366f1); border-color: transparent; color: #fff; box-shadow: 0 8px 22px rgba(59,130,246,.35); }
+    .ao-vivo { display: table; margin: 16px auto 0; font-size: 14.5px; color: var(--topo-suave); padding-bottom: 3px; border-bottom: 1px solid rgba(255,255,255,.25); }
+    .ao-vivo b { color: #fff; } .ao-vivo:hover { border-color: #fff; }
     @media (max-width: 640px) {
-      .vitrine-celulares { height: 440px; max-width: 340px; }
-      .celular { width: 190px; border-radius: 32px; padding: 8px; } .celular img { border-radius: 25px; }
-      .aviso-pedido { bottom: 30px; }
+      .palco { height: 445px; }
+      .celular { width: 190px; margin-left: -95px; border-radius: 32px; padding: 8px; } .celular img { border-radius: 25px; }
+      .celular[data-pos="-1"] { transform: translateX(-52%) translateY(36px) rotateY(24deg) rotate(-3deg) scale(.8); }
+      .celular[data-pos="1"] { transform: translateX(52%) translateY(36px) rotateY(-24deg) rotate(3deg) scale(.8); }
+      .vitrine-botao { font-size: 13px; padding: 6px 13px; }
     }
 
     /* Faixa de clientes */
@@ -137,7 +146,8 @@
     .surgir.visivel { opacity: 1; transform: none; }
     @media (prefers-reduced-motion: reduce) {
       .surgir { opacity: 1; transform: none; transition: none; }
-      .trilho, .celular-frente, .aviso-pedido { animation: none; }
+      .trilho { animation: none; }
+      .celular { transition: none; }
       html { scroll-behavior: auto; }
     }
   </style>
@@ -191,10 +201,20 @@
         <ul class="vantagens mt-8 flex flex-wrap justify-center lg:justify-start gap-x-6 gap-y-2">
           <li>✓ Sem taxa por pedido</li><li>✓ Painel no computador e no celular</li><li>✓ Suporte pelo WhatsApp</li></ul>
       </div>
-      <div class="vitrine-celulares" aria-hidden="true">
-        <div class="celular celular-tras"><img src="assets/mock-gatini.jpg" alt="" loading="lazy"></div>
-        <div class="celular celular-frente"><img src="assets/mock-fiorella.jpg" alt=""></div>
-        <div class="aviso-pedido"><span class="sino">🔔</span><div><b>Novo pedido!</b><small>Entrega · PIX · comanda impressa</small></div></div>
+      
+      <div class="vitrine" data-vitrine>
+        <div class="palco">
+          <a class="celular" data-i="0" data-pos="0" href="https://labrasa.site" target="_blank" rel="noopener" aria-label="Abrir o cardápio La Brasa">
+            <img src="assets/mock-labrasa.jpg" alt="Cardápio La Brasa"></a><a class="celular" data-i="1" data-pos="1" href="EsfirrasEmCasa/" target="_blank" rel="noopener" aria-label="Abrir o cardápio Esfirras em Casa">
+            <img src="assets/mock-esfirras.jpg" alt="Cardápio Esfirras em Casa"></a><a class="celular" data-i="2" data-pos="2" href="PizzariaFiorella/" target="_blank" rel="noopener" aria-label="Abrir o cardápio Pizzaria Fiorella">
+            <img src="assets/mock-fiorella.jpg" alt="Cardápio Pizzaria Fiorella" loading="lazy"></a><a class="celular" data-i="3" data-pos="-2" href="Gatini/" target="_blank" rel="noopener" aria-label="Abrir o cardápio Gatini">
+            <img src="assets/mock-gatini.jpg" alt="Cardápio Gatini" loading="lazy"></a><a class="celular" data-i="4" data-pos="-1" href="NossoAcai/" target="_blank" rel="noopener" aria-label="Abrir o cardápio Nosso Açaí">
+            <img src="assets/mock-nossoacai.jpg" alt="Cardápio Nosso Açaí"></a>
+        </div>
+        <div class="vitrine-botoes">
+          <button type="button" class="vitrine-botao ativo" data-i="0">La Brasa</button><button type="button" class="vitrine-botao" data-i="1">Esfirras em Casa</button><button type="button" class="vitrine-botao" data-i="2">Pizzaria Fiorella</button><button type="button" class="vitrine-botao" data-i="3">Gatini</button><button type="button" class="vitrine-botao" data-i="4">Nosso Açaí</button>
+        </div>
+        <a class="ao-vivo" href="https://labrasa.site" target="_blank" rel="noopener">Ver ao vivo: <b>La Brasa</b> <span aria-hidden="true">↗</span></a>
       </div>
     </div><!--/SECAO:inicio--></section>
 
@@ -491,7 +511,7 @@
   }));
 </script>
 <script type="module">
-  import { iniciarSite } from "./assets/site.js?v=2";
+  import { iniciarSite } from "./assets/site.js?v=3";
   iniciarSite();
 </script>
 </body>

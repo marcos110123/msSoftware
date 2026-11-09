@@ -3,7 +3,7 @@ import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from
 import {
   getFirestore, collection, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-import { PADRAO, completar } from "../assets/site.js?v=2";
+import { PADRAO, completar } from "../assets/site.js?v=3";
 import { gerarPix } from "./pix.js?v=1";
 
 // ----------------------
@@ -462,7 +462,7 @@ const OCULTOS = new Set(["versao"]);
 // listas que vêm da aba Clientes (não se edita aqui)
 const DA_ABA_CLIENTES = new Set(["projetos.itens", "clientes.logos"]);
 const ROTULOS = {
-  vantagens: "Vantagens (abaixo dos botões)", imagem2: "Imagem do celular de trás", loja: "Loja",
+  vantagens: "Vantagens (abaixo dos botões)", imagem2: "Imagem do celular de trás", celulares: "Celulares do topo (o 1º começa no meio)", loja: "Loja",
   whatsapp: "WhatsApp (com DDD)", mensagem: "Mensagem inicial do WhatsApp", whatsappTexto: "WhatsApp como aparece no rodapé", email: "E-mail", instagram: "Instagram (@)",
   chip: "Faixa pequena", titulo: "Título", destaque: "Título em destaque (azul)", subtitulo: "Subtítulo", botao: "Botão", botao2: "Segundo botão",
   etiqueta: "Etiqueta (acima do título)", itens: "Itens", icone: "Ícone (emoji)", texto: "Texto", nome: "Nome", link: "Link", imagem: "Imagem",
