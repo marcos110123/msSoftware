@@ -816,8 +816,7 @@ $("btnContinuar").addEventListener("click", () => {
   $("confDados").innerHTML = `
     <b>${esc(nome)}</b> · ${esc(tel)}<br>
     ${entrega ? `🛵 Entrega em ${esc(endereco)}` : "🏃 Retirada no balcão"}<br>
-    💳 ${esc(pagamento)}${valorTroco ? ` · troco para ${brl(valorTroco)}` : ""}${pagamento === "PIX"
-      ? `<br>💠 Chave PIX: <b>${esc(LOJA.pix.mostrar)}</b> (${esc(LOJA.pix.nome)})<br>📲 <b>Envie o comprovante no WhatsApp para confirmar o pedido.</b>` : ""}`;
+    💳 ${esc(pagamento)}${valorTroco ? ` · troco para ${brl(valorTroco)}` : ""}`;
   $("confItens").innerHTML = pedidoPronto.itens.map((it, i) => linhaItem(it, i, false)).join("");
   $("confResumo").innerHTML = `
     <p><span>Produtos</span><span>${brl(pedidoPronto.totalProdutos)}</span></p>
