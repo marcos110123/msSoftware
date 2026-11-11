@@ -565,8 +565,13 @@ $("jReceber").addEventListener("click", (e) => {
 $("formaPagamento").addEventListener("change", () => {
   const dinheiro = $("formaPagamento").value === "Dinheiro";
   $("blocoTroco").classList.toggle("oculto", !dinheiro);
+  $("blocoPix").classList.toggle("oculto", $("formaPagamento").value !== "PIX");
   if (!dinheiro) { $("precisaTroco").checked = false; $("valorTroco").value = ""; esconder("valorTroco"); }
 });
+$("pixTipo").textContent = LOJA.pix.tipo;
+$("pixChaveTxt").textContent = LOJA.pix.mostrar;
+$("pixNome").textContent = LOJA.pix.nome;
+$("blocoPix").addEventListener("click", (e) => { const b = e.target.closest("[data-copiar-pix]"); if (b) copiarPix(b); });
 $("precisaTroco").addEventListener("change", () => $("valorTroco").classList.toggle("oculto", !$("precisaTroco").checked));
 
 // ----------------------
@@ -683,7 +688,8 @@ function renderAcomp() {
         <p class="t">💠 Pague com PIX${d.total ? ` · <b>${brl(d.total)}</b>` : ""}</p>
         <p class="k"><small>Chave PIX (${LOJA.pix.tipo})</small><b>${LOJA.pix.mostrar}</b><small>${esc(LOJA.pix.nome)}</small></p>
         <button class="btn-pix" data-copiar-pix>📋 Copiar chave PIX</button>
-        <p class="d">Depois de pagar, envie o comprovante pelo WhatsApp da loja.</p>
+        <a class="btn-pix zap" href="https://wa.me/${LOJA.whatsapp}?text=${encodeURIComponent(`Olá! Segue o comprovante do PIX do meu pedido${d.num ? ` #${d.num}` : ""} (${brl(d.total || 0)}).`)}" target="_blank" rel="noopener">📲 Enviar comprovante no WhatsApp</a>
+        <p class="pix-obs">📲 <b>Envie o comprovante no WhatsApp da loja</b> para confirmar o pedido.</p>
       </div>` : ""}
       <div class="acomp-acoes">
         ${zapOpcional ? `<a class="btn-opc" href="${acomp.whats}" target="_blank" rel="noopener" data-enviar-whats><span class="ic">📲</span><span><b>Enviar pedido pelo WhatsApp</b><small>Opcional · seu pedido já chegou na loja</small></span></a>`
@@ -810,7 +816,8 @@ $("btnContinuar").addEventListener("click", () => {
   $("confDados").innerHTML = `
     <b>${esc(nome)}</b> · ${esc(tel)}<br>
     ${entrega ? `🛵 Entrega em ${esc(endereco)}` : "🏃 Retirada no balcão"}<br>
-    💳 ${esc(pagamento)}${valorTroco ? ` · troco para ${brl(valorTroco)}` : ""}`;
+    💳 ${esc(pagamento)}${valorTroco ? ` · troco para ${brl(valorTroco)}` : ""}${pagamento === "PIX"
+      ? `<br>💠 Chave PIX: <b>${esc(LOJA.pix.mostrar)}</b> (${esc(LOJA.pix.nome)})<br>📲 <b>Envie o comprovante no WhatsApp para confirmar o pedido.</b>` : ""}`;
   $("confItens").innerHTML = pedidoPronto.itens.map((it, i) => linhaItem(it, i, false)).join("");
   $("confResumo").innerHTML = `
     <p><span>Produtos</span><span>${brl(pedidoPronto.totalProdutos)}</span></p>
@@ -851,6 +858,7 @@ function mensagemPedidoWhats(p) {
   l.push(LINHA);
   if (ent) l.push(`Subtotal: ${r(p.produtos)}`, `Entrega: ${r(p.taxa)}`);
   l.push(`*Total: ${r(p.total)}*`, "", `💳 *Pagamento:* ${p.pagamento || "-"}`);
+  if (/pix/i.test(p.pagamento || "")) l.push("      _Envio o comprovante do PIX em seguida._");
   if (p.troco) l.push(`      _Troco para ${r(p.troco)} (levar ${r(p.troco - p.total)})_`);
   l.push("", `👤 *${p.nome}*`, `📞 ${p.tel}`);
   if (ent && p.endereco) l.push(`📍 ${p.endereco}`);

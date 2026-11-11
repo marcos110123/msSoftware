@@ -129,6 +129,12 @@
         <label class="troco"><input type="checkbox" id="precisaTroco"> Precisa de troco?</label>
         <input class="campo oculto" id="valorTroco" type="number" step="0.01" inputmode="decimal" placeholder="Troco para quanto?">
       </div>
+      <div class="acomp-pix pix-checkout oculto" id="blocoPix">
+        <p class="t">💠 Pagamento via PIX</p>
+        <p class="k"><small>Chave PIX (<span id="pixTipo"></span>)</small><b id="pixChaveTxt"></b><small id="pixNome"></small></p>
+        <button type="button" class="btn-pix" data-copiar-pix>📋 Copiar chave PIX</button>
+        <p class="pix-obs">📲 <b>Envie o comprovante no WhatsApp da loja</b> para confirmar o pedido.</p>
+      </div>
       <div class="resumo">
         <p><span>Produtos</span><span id="resProdutos">R$ 0,00</span></p>
         <p id="linhaTaxa"><span>Entrega</span><span id="resTaxa">R$ 0,00</span></p>
@@ -172,7 +178,7 @@
 
   <script>
     if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});
-    const versaoSistema = "2.2.2"; // mude a cada publicação para forçar atualização do script
+    const versaoSistema = "2.2.3"; // mude a cada publicação para forçar atualização do script
     const s = document.createElement("script");
     s.type = "module";
     s.src = `script.js?v=${versaoSistema}`;
