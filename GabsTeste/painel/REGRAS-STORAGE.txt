@@ -1,0 +1,22 @@
+REGRAS DO FIREBASE STORAGE — fotos dos produtos (Fiorella Pizzaria)
+===================================================================
+Firebase Console → projeto pizzaria-fiorella-a1a98 → Storage → aba "Regras" → apagar tudo, colar o bloco abaixo → Publicar.
+
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Fotos dos produtos: o cardápio (qualquer pessoa) pode VER;
+    // só quem está logado no painel pode ENVIAR ou APAGAR.
+    match /produtos/{arquivo} {
+      allow read: if true;
+      allow delete: if request.auth != null;
+      allow create, update: if request.auth != null
+        && request.resource.size < 2 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+    // qualquer outra pasta: bloqueada
+    match /{tudo=**} {
+      allow read, write: if false;
+    }
+  }
+}

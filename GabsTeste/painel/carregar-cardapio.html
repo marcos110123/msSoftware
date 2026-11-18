@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Carregar cardápio · Gab's (teste)</title>
+<style>
+  body{font-family:system-ui,Segoe UI,Arial,sans-serif;background:#0d1424;color:#eef2fb;margin:0;padding:32px 16px}
+  .box{max-width:520px;margin:0 auto;background:#16203a;border-radius:16px;padding:24px;box-shadow:0 20px 50px rgba(0,0,0,.4)}
+  h1{font-size:22px;margin:0 0 6px} p{color:#aab6d3;font-size:14px;line-height:1.5}
+  label{display:block;font-size:13px;margin:14px 0 4px;color:#cdd6ee}
+  input{width:100%;box-sizing:border-box;padding:11px 12px;border-radius:10px;border:1px solid #2c3a63;background:#0d1424;color:#fff;font-size:15px}
+  button{margin-top:18px;width:100%;padding:13px;border:0;border-radius:12px;background:#e2332b;color:#fff;font-weight:800;font-size:16px;cursor:pointer}
+  button:disabled{opacity:.5;cursor:default}
+  #log{margin-top:18px;font-size:13px;white-space:pre-wrap;color:#9fe0b5}
+</style>
+</head>
+<body>
+<div class="box">
+  <h1>Carregar o cardápio do Gab's</h1>
+  <p>Entre com o login do painel (o usuário que você criou no Firebase <b>gabs-teste</b>) e clique em carregar.
+     Isso grava os produtos, abre a loja e define o tempo de entrega. Pode rodar de novo: ele sobrescreve os mesmos produtos.</p>
+  <label for="email">E-mail</label><input id="email" type="email" autocomplete="username">
+  <label for="senha">Senha</label><input id="senha" type="password" autocomplete="current-password">
+  <button id="btn">Entrar e carregar cardápio</button>
+  <div id="log"></div>
+</div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getFirestore, doc, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+import { firebaseConfig } from "./js/config.js";
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app), db = getFirestore(app);
+const IMG = "/GabsTeste/img/prod/";
+const log = (t) => (document.getElementById("log").textContent += t + "\n");
+const slug = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+
+// Pizzas (broto = "preco P", grande = "preco G"), preços do Hubt/Anota AI do Gab's
+const pizzas = [
+  ["Gab's", "Molho de tomate, contra filé, catupiry, muçarela, alho crocante, batata palha e azeitona", 36.99],
+  ["Calabresa", "Molho de tomate, calabresa, cebola, muçarela, azeitonas e orégano", 30.99],
+  ["Calabresa com catupiry", "Molho de tomate, calabresa moída, catupiry, azeitonas e orégano", 32.99],
+  ["Frango com catupiry", "Molho de tomate, frango desfiado, catupiry, muçarela, azeitona e orégano", 32.99],
+  ["Margherita", "Molho de tomate, muçarela, tomate, manjericão, azeitonas e orégano", 32.99],
+  ["Muçarela", "Molho de tomate, muçarela, tomate, azeitonas e orégano", 32.99],
+  ["Portuguesa", "Molho de tomate, apresuntado, ovo, palmito, milho, ervilha, cebola, muçarela, azeitona e orégano", 32.99],
+  ["4 Queijos", "Molho de tomate, cheddar, catupiry, parmesão, muçarela, azeitona e orégano", 33.99],
+  ["3 Queijos", "Molho de tomate, muçarela, catupiry, parmesão, azeitonas e orégano", 32.99],
+  ["Bacon", "Molho de tomate, muçarela, bacon, azeitona e orégano", 32.99],
+  ["Brócolis com bacon", "Molho de tomate, brócolis, bacon, muçarela, azeitona e orégano", 33.99],
+  ["Palmito", "Molho de tomate, palmito, catupiry, muçarela, azeitona e orégano", 33.99],
+  ["Atum", "Molho de tomate, muçarela, atum, cebola, azeitona e orégano", 33.99],
+  ["Napolitana", "Molho de tomate, muçarela, parmesão, alho frito, azeitona e orégano", 31.99],
+  ["Contra filé", "Molho de tomate, contra filé, catupiry, muçarela, azeitona e alho frito", 36.99],
+  ["Costela ao alho", "Molho de tomate, costela, catupiry, muçarela, azeitona e alho frito", 36.99],
+  ["Lombo canadense", "Molho de tomate, lombo canadense, catupiry, muçarela, azeitonas e orégano", 36.99],
+  ["3 Carnes", "Molho de tomate, presunto, calabresa, bacon, muçarela, azeitona e orégano", 33.99],
+  ["4 Carnes", "Molho de tomate, apresuntado, calabresa, bacon, lombo, muçarela, azeitonas e orégano", 32.99],
+  ["Frango, milho e bacon", "Molho de tomate, muçarela, frango, milho, bacon, azeitonas e orégano", 33.99],
+  ["Suprema", "Molho de tomate, milho, requeijão, bacon, muçarela, azeitonas e orégano", 32.99],
+];
+const doces = [
+  ["Chocolate preto", "Chocolate ao leite", 32.99],
+  ["Chocolate branco", "Chocolate branco", 32.99],
+  ["2 Amores", "Chocolate branco e chocolate preto", 32.99],
+  ["Romeu e Julieta", "Muçarela e goiabada", 32.99],
+  ["Doce de leite", "Doce de leite", 31.99],
+];
+const esfihas = [
+  ["Esfiha de carne", "Carne moída temperada", 4.0], ["Esfiha de muçarela", "Muçarela e tomate", 4.5],
+  ["Esfiha de frango com catupiry", "Frango e catupiry", 5.0], ["Esfiha de calabresa com queijo", "Calabresa e muçarela", 5.0],
+  ["Esfiha de carne com queijo", "Carne e muçarela", 5.5], ["Esfiha de bacon", "Muçarela e bacon", 5.5],
+  ["Esfiha 4 queijos", "Muçarela, parmesão, cheddar e catupiry", 5.5], ["Esfiha de brócolis", "Brócolis, bacon e muçarela", 5.5],
+  ["Esfiha de atum", "Atum e muçarela", 5.5], ["Esfiha de costela com catupiry", "Costela e catupiry", 6.0],
+  ["Esfiha de contra filé com queijo", "Contra filé e muçarela", 6.0], ["Esfiha de palmito", "Palmito e muçarela", 5.5],
+  ["Esfiha de doce de leite", "Doce de leite", 5.0], ["Esfiha Romeu e Julieta", "Muçarela e goiabada", 5.0],
+];
+const calzones = [
+  ["Calzone de Contra Filé", "Contra filé, muçarela e alho frito", 25], ["Calzone de Costela", "Costela, muçarela e alho frito", 25],
+  ["Calzone de Portuguesa", "Apresuntado, ovo, palmito, milho, cebola, ervilha e muçarela", 26], ["Calzone de Frango com Catupiry", "Frango temperado e catupiry", 22],
+  ["Calzone de Calabresa", "Calabresa e muçarela", 22], ["Calzone 4 Queijos", "Muçarela, parmesão, catupiry e cheddar", 24],
+  ["Calzone de Pepperoni", "Muçarela e pepperoni", 27], ["Calzone Brócolis Especial", "Muçarela, brócolis, contra filé, bacon, catupiry e alho frito", 29.99],
+  ["Calzone de Nutella", "Nutella original", 34.99], ["Calzone 2 Amores", "Chocolate ao leite e chocolate branco", 24],
+];
+const bebidas = [
+  ["Coca-Cola lata 350ml", 6], ["Coca-Cola Zero lata 350ml", 6], ["Coca-Cola Zero 2L", 14], ["Sprite 2L", 14],
+  ["Guaraná Poty 2L", 10], ["Água sem gás 510ml", 3], ["Água com gás 510ml", 4], ["Suco Frupic cítricas 450ml", 7], ["Monster lata", 14],
+];
+const cervejas = [["Skol Latão", 8], ["Kaiser Latão", 7], ["Brahma lata", 6], ["Antarctica lata 350ml", 6], ["Skol lata", 6]];
+
+function produtos() {
+  const L = [];
+  const base = (nome, categoria, descricao, imagem) => ({ nome, categoria, descricao, imagem: IMG + imagem, status: "ativo", promocao: false, criadoEm: serverTimestamp() });
+  pizzas.forEach(([n, d, p]) => L.push({ ...base(n, "pizzas-salgadas", d, "pizza.jpg"), "preco P": p, "preco G": +(p + 16).toFixed(2), preco: +(p + 16).toFixed(2) }));
+  doces.forEach(([n, d, p]) => L.push({ ...base(n, "pizzas-doces", d, "doce.jpg"), "preco P": p, "preco G": +(p + 16).toFixed(2), preco: +(p + 16).toFixed(2) }));
+  esfihas.forEach(([n, d, p], i) => L.push({ ...base(n, "entradas", d, /doce|julieta/i.test(n) ? "doce.jpg" : i % 2 ? "esfiha2.jpg" : "esfiha.jpg"), preco: p }));
+  calzones.forEach(([n, d, p]) => L.push({ ...base(n, "massas", d, "calzone.jpg"), preco: p }));
+  bebidas.forEach(([n, p]) => L.push({ ...base(n, "bebidas", "", "bebida.jpg"), preco: p }));
+  cervejas.forEach(([n, p]) => L.push({ ...base(n, "cervejas", "", "cerveja.jpg"), preco: p }));
+  return L;
+}
+
+document.getElementById("btn").onclick = async () => {
+  const btn = document.getElementById("btn"); btn.disabled = true;
+  try {
+    await signInWithEmailAndPassword(auth, document.getElementById("email").value.trim(), document.getElementById("senha").value);
+    log("✓ Login ok");
+    const L = produtos(), lote = writeBatch(db);
+    L.forEach((p) => lote.set(doc(db, "produtos", slug(p.categoria + "-" + p.nome)), p));
+    lote.set(doc(db, "config", "estadoPedidos"), { recebendo: true, entregaPausada: false }, { merge: true });
+    lote.set(doc(db, "config", "entrega"), { tempoEntrega: "40 a 60 min" }, { merge: true });
+    await lote.commit();
+    log(`✓ ${L.length} produtos gravados\n✓ Loja aberta para pedidos\n✓ Tempo de entrega: 40 a 60 min\n\nPronto! Abra o cardápio e o painel.`);
+  } catch (e) {
+    log("✗ Erro: " + (e.code || e.message));
+    btn.disabled = false;
+  }
+};
+</script>
+</body>
+</html>
