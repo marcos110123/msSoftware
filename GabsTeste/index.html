@@ -175,7 +175,7 @@ text-white py-10 shadow-2xl">
   id="btn-promocao"
   data-card="promoção"
   onclick="mostrarSecao('promocoes')"
-  class="relative group overflow-hidden rounded-3xl
+  class="hidden relative group overflow-hidden rounded-3xl
 border-2 border-yellow-400
 shadow-[0_0_25px_rgba(255,210,31,0.22)]
 hover:scale-[1.03]
@@ -192,7 +192,7 @@ group-hover:scale-110 transition duration-500">
   id="btn-combos"
   data-card="combos"
   onclick="mostrarSecao('combos')"
-  class="relative group overflow-hidden rounded-3xl
+  class="hidden relative group overflow-hidden rounded-3xl
 border-2 border-yellow-400
 shadow-[0_0_25px_rgba(255,210,31,0.22)]
 hover:scale-[1.03]
@@ -585,7 +585,7 @@ transition z-50 flex items-center gap-2 font-bold" text-white px-5 py-3 rounded-
 
 
 <script>
-const versaoSistema = "1.0.5"; // altere quando subir atualização
+const versaoSistema = "1.0.6"; // altere quando subir atualização
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', async () => {
