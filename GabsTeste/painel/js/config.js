@@ -38,6 +38,7 @@ export const LOJA = {
 // Páginas do menu do topo (a ordem aqui é a ordem na tela)
 export const PAGINAS = [
   { id: "pedidos",    nome: "Pedidos",      icone: "📋", href: "admin.html" },
+  { id: "nfce",       nome: "Emitir nota",  icone: "🧾", href: "emissaonfc.html" },
   { id: "produtos",   nome: "Produtos",     icone: "📦", href: "admin-produtos.html" },
   { id: "relatorios", nome: "Relatórios",   icone: "📊", href: "relatorios.html" },
   { id: "historico",  nome: "Histórico",  icone: "🗂️", href: "historico.html" },
@@ -71,6 +72,7 @@ export const IMAGEM_PADRAO_PRODUTO = "img/logo-gabs.png";
 // Nota fiscal (NFC-e)
 export const NFCE = {
   urlEmissao: "",
+  demonstracao: true, // amostra: a tela funciona, mas não emite nota nenhuma
   urlConsulta: "https://www.nfce.fazenda.sp.gov.br/consulta"
 };
 
