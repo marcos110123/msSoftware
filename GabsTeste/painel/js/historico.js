@@ -2,9 +2,9 @@
 import {
   collection, query, where, orderBy, getDocs, Timestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { db, iniciarPagina, $, esc, reaisPonto, dataISO, janelaDoDia, diaDeTrabalho, avisar, exigirSenha } from "./base.js";
-import { LOJA } from "./config.js";
-import { imprimirPedido } from "./impressao.js";
+import { db, iniciarPagina, $, esc, reaisPonto, dataISO, janelaDoDia, diaDeTrabalho, avisar, exigirSenha } from "./base.js?v=20261118b";
+import { LOJA } from "./config.js?v=20261118b";
+import { imprimirPedido } from "./impressao.js?v=20261118b";
 
 // ----------------------------------------------------------------------
 // Estado

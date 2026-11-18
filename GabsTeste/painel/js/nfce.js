@@ -4,8 +4,8 @@
 import {
   collection, getDocs, query, where, doc, updateDoc, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { db, iniciarPagina, esc, abrirJanela, confirmar, exigirSenha } from "./base.js";
-import { NFCE, LOJA } from "./config.js";
+import { db, iniciarPagina, esc, abrirJanela, confirmar, exigirSenha } from "./base.js?v=20261118b";
+import { NFCE, LOJA } from "./config.js?v=20261118b";
 
 window.todosPedidos = [];
 window.pedidoSelecionado = null;

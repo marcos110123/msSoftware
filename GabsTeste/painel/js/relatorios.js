@@ -2,8 +2,8 @@
 import {
   collection, getDocs, query, where, Timestamp, addDoc, updateDoc, doc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { db, iniciarPagina, $, reaisPonto, dataISO, alerta, avisar, exigirSenha } from "./base.js";
-import { LOJA } from "./config.js";
+import { db, iniciarPagina, $, reaisPonto, dataISO, alerta, avisar, exigirSenha } from "./base.js?v=20261118b";
+import { LOJA } from "./config.js?v=20261118b";
 
 const linha = (rotulo, valor, extra = "") => `<div><span>${rotulo}</span><b class="num">${valor}</b></div>${extra}`;
 const semAcento = (s) => String(s ?? "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
