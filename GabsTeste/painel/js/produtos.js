@@ -2,9 +2,9 @@
 import {
   collection, getDocs, doc, getDoc, updateDoc, setDoc, deleteDoc, addDoc, query, where
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { db, iniciarPagina, $, esc, reais, reaisPonto, abrirJanela, confirmar, alerta, avisar } from "./base.js?v=1.0.2";
-import { CATEGORIAS, IMAGEM_PADRAO_PRODUTO, FOTOS } from "./config.js?v=1.0.2";
-import { prepararFoto, enviarFoto, apagarFoto } from "./fotos.js?v=1.0.2";
+import { db, iniciarPagina, $, esc, reais, reaisPonto, abrirJanela, confirmar, alerta, avisar } from "./base.js?v=1.0.3";
+import { CATEGORIAS, IMAGEM_PADRAO_PRODUTO, FOTOS } from "./config.js?v=1.0.3";
+import { prepararFoto, enviarFoto, apagarFoto } from "./fotos.js?v=1.0.3";
 
 let aba = "produtos";          // "produtos" | "adicionais"
 let produtos = [];
