@@ -7,7 +7,7 @@ import {
   signOut
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { firebaseConfig, LOJA, PAGINAS } from "./config.js?v=1.0.3";
+import { firebaseConfig, LOJA, PAGINAS } from "./config.js?v=1.0.4";
 
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
