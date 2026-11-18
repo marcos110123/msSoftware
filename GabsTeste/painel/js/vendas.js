@@ -92,7 +92,7 @@ function montar() {
 }
 
 iniciarPagina("vendas", async () => {
-  if (!(await exigirSenha(LOJA.senhaRelatorios, "as Vendas"))) return;
+  if (LOJA.senhaRelatorios && !(await exigirSenha(LOJA.senhaRelatorios, "as Vendas"))) return;
   const hoje = diaDeTrabalho();
   $("dataInicio").value = hoje;
   $("dataFim").value = hoje;

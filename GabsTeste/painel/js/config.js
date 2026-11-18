@@ -13,9 +13,9 @@ export const firebaseConfig = {
 
 export const LOJA = {
   // senha pedida para abrir Relatórios e Vendas (como no painel antigo)
-  senhaRelatorios: "1234",
+  senhaRelatorios: "",
   // senha pedida para abrir a Emissão de nota (NFC-e) (como no painel antigo)
-  senhaNotaFiscal: "1234",
+  senhaNotaFiscal: "",
   nome: "Gab's Pizzaria & Esfiharia",
   subtitulo: "Painel de pedidos (teste)",
   logo: "img/logo-gabs.png",
@@ -26,7 +26,7 @@ export const LOJA = {
   // usada enquanto nenhuma chave for salva no painel (config/pix)
   chavePixPadrao: "(chave PIX de teste)",
   // senha pedida para cancelar um pedido (como no painel antigo)
-  senhaCancelamento: "1234",
+  senhaCancelamento: "",
   taxaServico: 0.05,       // 5% das mesas
   isentoTaxaPadrao: true,  // "Não cobrar taxa de serviço" já vem marcado (como no painel antigo)
   imprimirComprovanteBaixaParcial: false, // o painel antigo da pizzaria não imprimia

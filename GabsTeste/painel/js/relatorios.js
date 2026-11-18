@@ -116,7 +116,7 @@ async function abrirCaixa() {
 }
 
 iniciarPagina("relatorios", async () => {
-  if (!(await exigirSenha(LOJA.senhaRelatorios, "os Relatórios"))) return;
+  if (LOJA.senhaRelatorios && !(await exigirSenha(LOJA.senhaRelatorios, "os Relatórios"))) return;
   $("btnFiltrar").addEventListener("click", () => {
     const inicio = $("dataInicio").value, fim = $("dataFim").value;
     if (!inicio || !fim) return alerta("Preencha ambas as datas.");
