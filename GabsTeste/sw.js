@@ -1,4 +1,4 @@
-const CACHE_VERSION = '1.0.1';
+const CACHE_VERSION = '1.0.2';
 const CACHE_NAME = `gabsteste-cache-v${CACHE_VERSION}`;
 
 // caminhos relativos à pasta do sw.js (funciona em /EsfirrasEmCasa/ e em testes locais)
@@ -38,12 +38,15 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   const req = event.request;
   if (req.method !== "GET") return;
-  if (new URL(req.url).origin !== self.location.origin) return;
+  const url = new URL(req.url);
+  if (url.origin !== self.location.origin) return;
+  // o painel (/GabsTeste/painel/) fica fora do cache do cardápio; áudio pede pedaços (206) e não pode ir pro cache
+  if (url.pathname.includes("/painel/") || req.headers.has("range")) return;
 
   event.respondWith(
     fetch(req)
       .then((res) => {
-        if (res && res.ok) {
+        if (res && res.status === 200) {
           const copia = res.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(req, copia));
         }
