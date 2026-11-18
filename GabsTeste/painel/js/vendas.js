@@ -1,7 +1,7 @@
 // VENDAS POR PRODUTO: mesma limpeza de nomes e mesma separação produtos x bebidas do painel antigo.
 import { collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { db, iniciarPagina, $, esc, diaDeTrabalho, janelaDoDia, alerta, exigirSenha } from "./base.js?v=20261118b";
-import { LOJA } from "./config.js?v=20261118b";
+import { db, iniciarPagina, $, esc, diaDeTrabalho, janelaDoDia, alerta, exigirSenha } from "./base.js?v=1.0.1";
+import { LOJA } from "./config.js?v=1.0.1";
 
 let pedidosCarregados = []; // guardados para a busca filtrar sem consultar de novo
 

@@ -3,8 +3,8 @@
 import {
   getStorage, ref, uploadBytes, getDownloadURL, deleteObject
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
-import { app } from "./base.js?v=20261118b";
-import { FOTOS } from "./config.js?v=20261118b";
+import { app } from "./base.js?v=1.0.1";
+import { FOTOS } from "./config.js?v=1.0.1";
 
 const storage = getStorage(app);
 

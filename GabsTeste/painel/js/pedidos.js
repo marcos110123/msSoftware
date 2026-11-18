@@ -5,9 +5,9 @@ import {
 import {
   db, iniciarPagina, $, esc, reaisPonto, diaDeTrabalho, janelaDoDia,
   abrirJanela, confirmar, alerta, avisar
-} from "./base.js?v=20261118b";
-import { LOJA, MENSAGENS } from "./config.js?v=20261118b";
-import { imprimirPedido } from "./impressao.js?v=20261118b";
+} from "./base.js?v=1.0.1";
+import { LOJA, MENSAGENS } from "./config.js?v=1.0.1";
+import { imprimirPedido } from "./impressao.js?v=1.0.1";
 
 // Cancelar pedido pede o MOTIVO (obrigatório) e a senha de autorização (LOJA.senhaCancelamento), como no painel antigo.
 // Resolve { motivo } só com motivo preenchido e senha certa; senha errada avisa e deixa tentar de novo. Voltar = null.
