@@ -52,10 +52,11 @@ function atualizarEntregaPausada(snap, recebendo = true) {
   if (nota) nota.classList.toggle("hidden", !entregaPausada);
 }
 
-const taxaEntregaFixa = 0.0;
+const taxaEntregaFixa = 2.0;
+const fmtR = (v) => "R$ " + Number(v || 0).toFixed(2).replace(".", ",");
 
 function arredondar99(valor) {
-  return Number((Math.ceil(valor) - 0.10).toFixed(2));
+  return Number((Math.ceil(valor) - 0.01).toFixed(2));
 }
 
 // ----------------------
@@ -69,10 +70,12 @@ function carregarProdutosDoFirestore() {
     document
       .querySelectorAll(".produtos-grid")
       .forEach((grid) => (grid.innerHTML = ""));
+    PRODUTOS = {};
 
     snapshot.forEach((docSnap) => {
       const produto = docSnap.data();
       if (produto.status !== "ativo") return;
+      PRODUTOS[docSnap.id] = produto;
 
       const secao = document.getElementById(produto.categoria);
       if (!secao) return;
@@ -89,6 +92,9 @@ function carregarProdutosDoFirestore() {
         : precoOriginal;
 
       card.className = "menu-item bg-gray-800 rounded-lg shadow-lg p-4";
+
+      // esfihas: quantidade direto no card (+ e −), sem abrir janela
+      const ehQtd = produto.categoria === "entradas" && !(produto["preco P"] && produto["preco G"]);
 
       card.innerHTML = `
   <img src="${produto.imagem || ""}" 
@@ -182,8 +188,9 @@ ${
      }
     `
 }
-
-  <button 
+${ehQtd ? htmlQtd(produto.nome, precoPromocional) : ""}
+  <button
+${ehQtd ? "hidden" : ""}
 onclick='${
         produto.categoria === "entradas" &&
         produto["preco P"] &&
@@ -243,8 +250,95 @@ btnCombos.classList.toggle(
   gridCombos.children.length === 0
 );
 
+    montarMaisPedidos();
+    atualizarQtdsNosCards();
   });
 }
+
+// ----------------------
+// Mais pedidos (carrossel da tela inicial) — nomes exatamente como no cadastro de produtos
+// ----------------------
+let PRODUTOS = {};
+const MAIS_PEDIDOS = [
+  "Gab's",
+  "Esfiha de carne",
+  "Calzone de Contra Filé",
+  "Calabresa",
+  "Chocolate preto",
+  "Esfiha de frango com catupiry",
+  "Calzone de Frango com Catupiry",
+  "Frango com catupiry",
+];
+const escAttr = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+
+function precoVitrine(p) {
+  if (p["preco P"] && p["preco G"]) return "a partir de " + fmtR(Math.min(p["preco P"], p["preco G"]));
+  return fmtR(p.promocao ? Number(p.preco || 0) * 0.8 : p.preco);
+}
+
+function montarMaisPedidos() {
+  const caixa = document.getElementById("maisPedidos");
+  const trilho = document.getElementById("mpTrilho");
+  if (!caixa || !trilho) return;
+  const ids = Object.keys(PRODUTOS);
+  const lista = MAIS_PEDIDOS
+    .map((nome) => ids.find((id) => PRODUTOS[id].nome === nome))
+    .filter(Boolean);
+  trilho.innerHTML = lista.map((id) => {
+    const p = PRODUTOS[id];
+    return `<button type="button" class="mp-card" onclick="comprarProduto('${escAttr(id)}')">
+      <img src="${escAttr(p.imagem)}" alt="${escAttr(p.nome)}" loading="lazy">
+      <span class="mp-txt">
+        <span class="mp-nome">${escAttr(p.categoria?.startsWith("pizzas") ? "Pizza " + p.nome : p.nome)}</span>
+        <span class="mp-preco mp-add">${precoVitrine(p)}</span>
+      </span>
+    </button>`;
+  }).join("");
+  caixa.classList.toggle("hidden", lista.length === 0);
+}
+
+window.comprarProduto = function (id) {
+  const p = PRODUTOS[id];
+  if (!p) return;
+  if (p.categoria?.startsWith("pizzas")) return abrirModalPizza(p);
+  if (p.categoria === "entradas" && p["preco P"] && p["preco G"]) return abrirModalEntrada(p);
+  adicionarAoCarrinho(p.nome, p.promocao ? Number(p.preco || 0) * 0.8 : Number(p.preco || 0), "");
+};
+
+// ----------------------
+// Quantidade no card (esfihas)
+// ----------------------
+function htmlQtd(nome, preco) {
+  return `<div class="qtd-box mt-4" data-qtd-nome="${escAttr(nome)}" data-preco="${Number(preco)}">
+    <button type="button" class="qtd-btn" aria-label="Tirar um" onclick="alterarQtd(this,-1)">−</button>
+    <span class="qtd-num">0</span>
+    <button type="button" class="qtd-btn mais" aria-label="Adicionar um" onclick="alterarQtd(this,1)">+</button>
+  </div>`;
+}
+
+window.alterarQtd = function (btn, delta) {
+  const box = btn.closest(".qtd-box");
+  const nome = box.dataset.qtdNome;
+  const preco = Number(box.dataset.preco);
+  if (delta > 0) return adicionarAoCarrinho(nome, preco, "", true);
+  const i = carrinho.findIndex((it) => it.nome === nome && it.observacao === "");
+  if (i < 0) return;
+  const it = carrinho[i];
+  it.quantidade -= 1;
+  it.subtotal = Number((it.subtotal - it.preco).toFixed(2));
+  if (it.quantidade <= 0) carrinho.splice(i, 1);
+  atualizarCarrinho();
+};
+
+function atualizarQtdsNosCards() {
+  document.querySelectorAll(".qtd-box").forEach((box) => {
+    const it = carrinho.find((x) => x.nome === box.dataset.qtdNome && x.observacao === "");
+    const n = it ? it.quantidade : 0;
+    box.querySelector(".qtd-num").textContent = n;
+    box.classList.toggle("ativo", n > 0);
+  });
+}
+
 carregarProdutosDoFirestore();
 
 // ----------------------
@@ -269,7 +363,7 @@ function mostrarSecao(id) {
 // ----------------------
 // Carrinho
 // ----------------------
-function adicionarAoCarrinho(nome, preco, observacao = "") {
+function adicionarAoCarrinho(nome, preco, observacao = "", silencioso = false) {
   const itemExistente = carrinho.find(
     (item) => item.nome === nome && item.observacao === observacao,
   );
@@ -283,7 +377,7 @@ function adicionarAoCarrinho(nome, preco, observacao = "") {
 
   total += preco;
   atualizarCarrinho();
-  exibirNotificacao(nome);
+  if (!silencioso) exibirNotificacao(nome);
 }
 
 function removerDoCarrinho(index) {
@@ -311,7 +405,7 @@ function atualizarCarrinho() {
       div.innerHTML = `
   <div class="flex-1">
     <span>${item.quantidade}x ${item.nome}</span> - 
-    <span>R$ ${item.subtotal.toFixed(2)}</span>
+    <span>${fmtR(item.subtotal)}</span>
     ${item.observacao ? `<br><small class="text-gray-400">Obs: ${item.observacao}</small>` : ""}
   </div>
   <button class="bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700" 
@@ -329,14 +423,17 @@ function atualizarCarrinho() {
   total = carrinho.reduce((sum, item) => sum + item.subtotal, 0);
   const taxaEntrega = tipoPedidoSelecionado === "entrega" ? taxaEntregaFixa : 0;
 
-  document.getElementById("total").textContent = total.toFixed(2);
+  document.getElementById("total").textContent = total.toFixed(2).replace(".", ",");
   document.getElementById("totalComEntregaPreview").textContent = (
     total + taxaEntrega
   )
     .toFixed(2)
     .replace(".", ",");
+  const linhaTaxa = document.getElementById("linhaTaxaEntrega");
+  if (linhaTaxa) linhaTaxa.textContent = taxaEntrega > 0 ? `Produtos ${fmtR(total)} + entrega ${fmtR(taxaEntrega)}` : "";
 
-  localStorage.setItem("carrinho", JSON.stringify(carrinho));
+  atualizarQtdsNosCards();
+  try { localStorage.setItem("carrinho", JSON.stringify(carrinho)); } catch {}
 }
 
 function abrirCarrinho() {
@@ -392,6 +489,7 @@ window.selecionarTipoPedido = function (tipo) {
     if (selectPagamento) {
       selectPagamento.value = "";
     }
+    atualizarBlocoPix();
   }
 
   document.getElementById("modalTipoPedido")?.classList.add("hidden");
@@ -410,6 +508,10 @@ window.selecionarTipoPedido = function (tipo) {
   atualizarCarrinho();
 
   document.getElementById("modalDadosEntrega")?.classList.remove("hidden");
+};
+
+window.fecharModalTipoPedido = function () {
+  document.getElementById("modalTipoPedido").classList.add("hidden");
 };
 
 window.fecharModalEntrega = function () {
@@ -445,7 +547,7 @@ window.confirmarDadosEntrega = function () {
   listaItens.innerHTML = "";
   carrinho.forEach((item) => {
     const li = document.createElement("li");
-    li.textContent = `${item.nome} x${item.quantidade} - R$ ${item.subtotal.toFixed(2)}`;
+    li.textContent = `${item.quantidade}x ${item.nome} - ${fmtR(item.subtotal)}`;
     if (item.observacao) {
       li.innerHTML += `<br><small>Obs: ${item.observacao}</small>`;
     }
@@ -455,8 +557,9 @@ window.confirmarDadosEntrega = function () {
   const taxa = tipoPedidoSelecionado === "entrega" ? taxaEntregaFixa : 0;
   const valorFinal = total + taxa;
 
-  document.getElementById("valorTotalConfirmacao").textContent =
-    `Total: R$ ${valorFinal.toFixed(2)}`;
+  document.getElementById("valorTotalConfirmacao").innerHTML =
+    (taxa > 0 ? `<span class="block text-sm font-normal text-gray-400">Produtos ${fmtR(total)} + entrega ${fmtR(taxa)}</span>` : "") +
+    `Total: ${fmtR(valorFinal)}`;
 
   document.getElementById("modalDadosEntrega").classList.add("hidden");
   document.getElementById("modalConfirmacao").classList.remove("hidden");
@@ -521,6 +624,7 @@ document
       document.getElementById("formaPagamento").value = "";
       document.getElementById("precisaTroco").checked = false;
       document.getElementById("valorTroco").value = "";
+      atualizarBlocoPix();
 
       document.getElementById("modalConfirmacao").classList.add("hidden");
       document.getElementById("modalSucessoPedido").classList.remove("hidden");
@@ -704,7 +808,7 @@ window.abrirModalPizza = async function (produto) {
     precoG *= 0.8;
 
     // arredonda para terminar em ,99
-    precoG = Math.ceil(precoG) - 0.10;
+    precoG = Math.ceil(precoG) - 0.01;
     precoG = Number(precoG.toFixed(2));
   }
 
@@ -715,14 +819,13 @@ window.abrirModalPizza = async function (produto) {
 
   document.getElementById("obsPizza").value = "";
 
-  // reset visual
-  document.getElementById("perguntaAdicionais")?.classList.add("hidden");
-
-  document.getElementById("boxAdicionaisPizza")?.classList.add("hidden");
+  // já abre com Grande + Pizza inteira marcados (o cliente só troca se quiser)
+  document.querySelector('input[name="tamanhoPizza"][value="G"]').checked = true;
+  document.querySelector('input[name="tipoPizza"][value="inteira"]').checked = true;
+  document.getElementById("tipoPizzaBox").classList.remove("hidden");
+  document.getElementById("segundoSaborBox").classList.add("hidden");
 
   saboresPizza = [produto];
-
-  await carregarAdicionaisPizza();
 };
 
 window.fecharModalPizza = function () {
@@ -763,11 +866,8 @@ window.fecharModalPizza = function () {
   // limpa referência atual
   pizzaSelecionada = null;
 };
-function perguntarAdicionais() {
-  document.getElementById("perguntaAdicionais")?.classList.remove("hidden");
-
-  document.getElementById("boxAdicionaisPizza")?.classList.add("hidden");
-}
+// Gab's não trabalha com adicionais na pizza: a pergunta foi tirada do modal
+function perguntarAdicionais() {}
 
 // botão SIM
 // botão SIM
@@ -1065,7 +1165,7 @@ if (tipo === "meio") {
     });
 
   // arredonda sempre para terminar em ,99
-  precoFinal = Math.ceil(precoFinal) - 0.10;
+  precoFinal = Math.ceil(precoFinal) - 0.01;
 
   // evita problemas de casas decimais
   precoFinal = Number(precoFinal.toFixed(2));
@@ -1160,6 +1260,44 @@ document.getElementById("precisaTroco").addEventListener("change", function () {
   }
 });
 
+// ----------------------
+// PIX no checkout: chave de config/pix (a mesma do botão "Enviar PIX" do painel)
+// ----------------------
+let chavePixLoja = "";
+onSnapshot(doc(db, "config", "pix"), (s) => {
+  chavePixLoja = s.exists() ? String(s.data().chave || "").trim() : "";
+  atualizarBlocoPix();
+});
+
+function atualizarBlocoPix() {
+  const bloco = document.getElementById("blocoPix");
+  if (!bloco) return;
+  const ehPix = document.getElementById("formaPagamento").value === "PIX";
+  bloco.classList.toggle("hidden", !ehPix);
+  document.getElementById("pixChave").textContent = chavePixLoja || "(a loja cadastra a chave no painel)";
+  document.getElementById("pixChave").classList.toggle("vazia", !chavePixLoja);
+  document.getElementById("btnCopiarPix").classList.toggle("hidden", !chavePixLoja);
+  // troco não faz sentido no PIX
+  const troco = document.getElementById("precisaTroco");
+  troco.closest(".space-y-2")?.classList.toggle("hidden", ehPix);
+  if (ehPix) { troco.checked = false; document.getElementById("valorTroco").classList.add("hidden"); }
+}
+document.getElementById("formaPagamento").addEventListener("change", atualizarBlocoPix);
+
+document.getElementById("btnCopiarPix").addEventListener("click", async () => {
+  const btn = document.getElementById("btnCopiarPix");
+  try {
+    await navigator.clipboard.writeText(chavePixLoja);
+  } catch {
+    const t = document.createElement("textarea");
+    t.value = chavePixLoja; document.body.appendChild(t); t.select();
+    try { document.execCommand("copy"); } catch {}
+    t.remove();
+  }
+  btn.textContent = "✅ Chave copiada!";
+  setTimeout(() => (btn.textContent = "📋 Copiar chave PIX"), 2000);
+});
+
 // 🔥 Buscar tempo de entrega do Firestore
 // 🔥 Listener em tempo real para tempo de entrega
 function iniciarListenerTempoEntrega() {
@@ -1171,6 +1309,9 @@ function iniciarListenerTempoEntrega() {
     } else {
       window.tempoEntregaGlobal = "";
     }
+
+    const infoTempo = document.getElementById("infoTempoEntrega");
+    if (infoTempo) infoTempo.textContent = window.tempoEntregaGlobal ? ` · ${window.tempoEntregaGlobal}` : "";
 
     // Atualiza o texto no carrinho se já existir o elemento
     const tempoEntregaEl = document.getElementById("tempoEntregaInfo");
@@ -1208,6 +1349,7 @@ function mensagemPedidoWhats(p) {
   if (ent) l.push(`Subtotal: ${r(p.produtos)}`, `Entrega: ${r(p.taxa)}`);
   l.push(`*Total: ${r(p.total)}*`, "", `💳 *Pagamento:* ${p.pagamento || "-"}`);
   if (p.troco) l.push(`      _Troco para ${r(p.troco)} (levar ${r(p.troco - p.total)})_`);
+  if (/pix/i.test(p.pagamento || "")) l.push("      _Envio o comprovante do PIX em seguida._");
   l.push("", `👤 *${p.nome}*`, `📞 ${p.tel}`);
   if (ent && p.endereco) l.push(`📍 ${p.endereco}`);
   l.push("", `Obrigado! ${p.coracao}`);
