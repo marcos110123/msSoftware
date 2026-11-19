@@ -40,7 +40,6 @@ export const PADRAO = {
       { nome: "Pizzaria Fiorella", imagem: "assets/cli-fiorella.jpg" },
       { nome: "Gatini", imagem: "assets/cli-gatini.png", inteira: true },
       { nome: "Nosso Açaí", imagem: "assets/cli-nossoacai.jpg" },
-      { nome: "Rei do Açaí", imagem: "assets/cli-acai.jpg" },
       { nome: "Result Hair", imagem: "assets/cli-resulthair.jpg", inteira: true },
       { nome: "Pousada 3 de Abril", imagem: "assets/cli-pousada.jpg" },
       { nome: "Joyce Maurieli Ateliê das Unhas", imagem: "assets/cli-joyce.jpg" },

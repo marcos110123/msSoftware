@@ -29,7 +29,6 @@ const CLIENTES_INICIAIS = [
   { id: "fiorella", nome: "Pizzaria Fiorella", logo: "assets/cli-fiorella.jpg", textoSite: "Cardápio delivery, montagem de pizza e painel com nota fiscal", cardapio: SITE + "PizzariaFiorella/", painel: PAINEIS + "fiorella", site: true, projeto: true },
   { id: "gatini", nome: "Gatini", logo: "assets/cli-gatini.png", inteira: true, textoSite: "Cardápio digital com pedidos online", cardapio: SITE + "Gatini/", painel: PAINEIS + "gatini", site: true, projeto: true },
   { id: "nossoacai", nome: "Nosso Açaí", logo: "assets/cli-nossoacai.jpg", textoSite: "Cardápio para montar o açaí e painel de pedidos", cardapio: SITE + "NossoAcai/", obs: "Painel roda no computador da loja (bat, Windows 7).", site: true, projeto: true },
-  { id: "reidoacai", nome: "Rei do Açaí", logo: "assets/cli-acai.jpg", cardapio: SITE + "ReidoAcai/", site: true },
   { id: "resulthair", nome: "Result Hair", logo: "assets/cli-resulthair.jpg", inteira: true, site: true },
   { id: "pousada3deabril", nome: "Pousada 3 de Abril", logo: "assets/cli-pousada.jpg", site: true },
   { id: "joyce", nome: "Joyce Maurieli Ateliê das Unhas", logo: "assets/cli-joyce.jpg", site: true },
