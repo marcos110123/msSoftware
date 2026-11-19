@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=1.3.2">
+<link rel="stylesheet" href="style.css?v=1.3.4">
 <!-- tema: claro (padrão) ou escuro — o cliente troca no botão ☀️/🌙 do topo e fica salvo no celular -->
 <script>try{var t=new URLSearchParams(location.search).get("tema")||localStorage.getItem("quintal-tema");if(t==="claro"||t==="escuro")document.documentElement.dataset.tema=t}catch(e){}</script>
 </head>
@@ -47,6 +47,7 @@
   <div class="aviso hidden" id="avisoEntrega">⏸️ As entregas estão pausadas no momento. Dá para pedir e retirar no balcão.</div>
 
   <div class="mesa-faixa hidden" id="faixaMesa"></div>
+  <button class="barra-mesa hidden" id="barraMesa"></button>
   <button class="barra-acomp hidden so-delivery" id="barraAcomp"></button>
 
   <!-- busca + categorias (grudam no topo) -->
@@ -74,6 +75,8 @@
 </main>
 
 <!-- barra da sacola -->
+<button class="btn-topo" id="btnTopo" aria-label="Voltar ao topo"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
+<button class="barra-pedidos-mesa hidden" id="flutMesa"></button>
 <button class="barra-sacola hidden" id="barraSacola"><span class="bs-qtd" id="bsQtd">0</span><span>Ver sacola</span><b id="bsTotal">R$ 0,00</b></button>
 
 <!-- produto (tela cheia) -->
@@ -151,6 +154,6 @@
 
 <div class="toast" id="toast"></div>
 
-<script type="module" src="app.js?v=1.3.2"></script>
+<script type="module" src="app.js?v=1.3.4"></script>
 </body>
 </html>

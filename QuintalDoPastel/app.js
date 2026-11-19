@@ -1,5 +1,5 @@
 // =====================================================================
-// Cardápio Quintal do Pastel 1.3.2 — visual do vídeo de abordagem (telas premium)
+// Cardápio Quintal do Pastel 1.3.4 — visual do vídeo de abordagem (telas premium)
 // Firestore: produtos, opcoesLanche (grupo "extras"), config/estadoPedidos, config/entrega, config/pix,
 //            orders (pedido), acompanhamento (status ao vivo, sem telefone/endereço)
 // =====================================================================
@@ -242,7 +242,11 @@ $("busca").addEventListener("input", () => {
 
 document.addEventListener("click", (e) => {
   const b = e.target.closest("[data-prod]");
-  if (b) return abrirProduto(b.dataset.prod);
+  if (b) {
+    const p = PRODUTOS[b.dataset.prod];
+    if (p && CAT[p.categoria]?.direto && !p.escolha?.opcoes?.length) return adicionarDireto(p, b);
+    return abrirProduto(b.dataset.prod);
+  }
   const c = e.target.closest("[data-cat]");
   if (c) {
     const s = $("sec-" + c.dataset.cat);
@@ -263,8 +267,13 @@ function marcarChip() {
     ch.classList.toggle("on", on);
   });
 }
+// botão "voltar ao topo"
+$("btnTopo").onclick = () => window.scrollTo({ top: 0, behavior: "smooth" });
+const mostrarBtnTopo = () => $("btnTopo").classList.toggle("on", scrollY > 700);
+const marcarBarras = () => document.body.classList.toggle("com-barra",
+  !$("barraSacola").classList.contains("hidden") || !$("flutMesa").classList.contains("hidden"));
 let rolando = false;
-addEventListener("scroll", () => { if (!rolando) { rolando = true; requestAnimationFrame(() => { marcarChip(); rolando = false; }); } }, { passive: true });
+addEventListener("scroll", () => { if (!rolando) { rolando = true; requestAnimationFrame(() => { marcarChip(); mostrarBtnTopo(); rolando = false; }); } }, { passive: true });
 
 // ---------------- telas cheias (com botão voltar do celular) ----------------
 const abertas = [];
@@ -366,6 +375,22 @@ $("btnAdd").onclick = () => {
   const bs = $("barraSacola"); bs.classList.remove("pula"); void bs.offsetWidth; bs.classList.add("pula");
 };
 
+// bebidas, sucos, pastéis doces, panquecas e porções: um toque e já vai 1 para a sacola
+function adicionarDireto(p, botao) {
+  if (p.status === "esgotado") return toast("Esse item está esgotado no momento 😕");
+  const base = nomeVitrine(p);
+  const chave = JSON.stringify([p.id, [], ""]);
+  const igual = sacola.find((i) => i.chave === chave);
+  if (igual) igual.quantidade += 1;
+  else sacola.push({ id: p.id, base, complementos: [], observacao: "", preco: Number(Number(p.preco || 0).toFixed(2)), quantidade: 1, foto: fotoDe(p), icone: CAT[p.categoria]?.icone || "🍽️", chave });
+  salvarSacola();
+  const n = (igual?.quantidade) || 1;
+  toast(`✓ ${base}${n > 1 ? ` (${n} na sacola)` : " na sacola"}`);
+  const mais = botao.querySelector(".mais");
+  if (mais) { mais.classList.add("ok"); mais.textContent = "✓"; setTimeout(() => { mais.classList.remove("ok"); mais.textContent = "+"; }, 900); }
+  const bs = $("barraSacola"); bs.classList.remove("pula"); void bs.offsetWidth; bs.classList.add("pula");
+}
+
 // nome gravado no pedido (o painel e a comanda leem "nome"): "Hot Dog Tradicional (Frango) + (Bacon) - Obs: sem cebola"
 function nomePedido(i) {
   const esc1 = i.complementos.filter((c) => c.grupo !== "Adicionais").map((c) => c.nome);
@@ -376,7 +401,7 @@ function nomePedido(i) {
 }
 
 // ---------------- sacola ----------------
-function salvarSacola() { gravarSacola(sacola); desenharSacola(); }
+function salvarSacola() { gravarSacola(sacola); desenharSacola(); if (MESA) atualizarBotoesMesa(); marcarBarras(); }
 const qtdSacola = () => sacola.reduce((s, i) => s + i.quantidade, 0);
 const subtotal = () => Number(sacola.reduce((s, i) => s + i.preco * i.quantidade, 0).toFixed(2));
 const taxaAtual = () => (tipo === "entrega" ? Number(taxaEntrega || 0) : 0);
@@ -556,25 +581,45 @@ $("btnPedido").onclick = async () => {
 function concluirMesa(itens, sub) {
   let lista = [];
   lista = ss.get("quintal-mesa-pedidos", []);
-  lista.push({ hora: Date.now(), resumo: resumo(itens), total: sub });
+  lista.push({ hora: Date.now(), resumo: resumo(itens), total: sub, itens: itens.map((i) => ({ q: i.quantidade, nome: i.nome, v: i.subtotal })) });
   ss.set("quintal-mesa-pedidos", lista);
   idPendente = null; tentativas = 0;
   sacola = []; salvarSacola();
   fecharTela("telaSacola");
-  setTimeout(() => { desenharMesa(lista); abrirTela("telaAcomp"); confete(); }, 380);
+  atualizarBotoesMesa();
+  setTimeout(() => { desenharMesa(lista, true); abrirTela("telaAcomp"); confete(); }, 380);
 }
-function desenharMesa(lista) {
+// tela com tudo o que já foi pedido nesta mesa (por este celular)
+function desenharMesa(lista, acabouDeEnviar = false) {
   const total = lista.reduce((s, p) => s + p.total, 0);
+  const hora = (t) => new Date(t).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
   $("acompCorpo").innerHTML = `
-    <div class="ac-topo"><div class="ac-ilu"><span class="pula">👨‍🍳</span></div>
-      <h3>Pedido enviado!</h3><p>Já foi para a cozinha. É só aguardar na Mesa ${MESA} 😉</p></div>
+    ${acabouDeEnviar
+      ? `<div class="ac-topo"><div class="ac-ilu"><span class="pula">👨‍🍳</span></div><h3>Pedido enviado!</h3><p>Já foi para a cozinha. É só aguardar na Mesa ${MESA} 😉</p></div>`
+      : `<div class="ac-topo"><h3>Pedidos da Mesa ${MESA}</h3><p>Tudo o que foi pedido por este celular.</p></div>`}
     <div class="card mesa-lista"><div class="rotulo">PEDIDOS DESTA MESA (NESTE CELULAR)</div>
-      ${lista.map((p) => `<div><span><small>${new Date(p.hora).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</small>${esc(p.resumo)}</span><b>${brl(p.total)}</b></div>`).join("")}
+      ${lista.map((p, k) => `<div><span><small>Pedido ${k + 1} · ${hora(p.hora)}</small>${p.itens
+        ? p.itens.map((i) => `${i.q}x ${esc(i.nome)}`).join("<br>") : esc(p.resumo)}</span><b>${brl(p.total)}</b></div>`).join("")}
       <div class="resumo"><hr><div class="total"><span>Total até agora</span><b>${brl(total)}</b></div></div></div>
     <p class="pix-obs" style="color:var(--suave);text-align:center">O pagamento é feito no caixa quando fechar a conta da mesa.</p>
     <button class="btn-linha" data-fechar="telaAcomp" style="border-style:solid">Pedir mais alguma coisa</button>
     <div style="height:30px"></div>`;
 }
+
+function atualizarBotoesMesa() {
+  if (!MESA) return;
+  const lista = ss.get("quintal-mesa-pedidos", []);
+  const total = lista.reduce((s, p) => s + p.total, 0);
+  const n = lista.length;
+  $("barraMesa").classList.toggle("hidden", !n);
+  $("barraMesa").innerHTML = `🧾<span>Ver pedidos da mesa<small>${n} ${n > 1 ? "pedidos enviados" : "pedido enviado"}</small></span><em>${brl(total)} ›</em>`;
+  // flutuante embaixo só quando a sacola está vazia (senão fica a barra da sacola)
+  $("flutMesa").classList.toggle("hidden", !n || sacola.length > 0);
+  $("flutMesa").innerHTML = `🧾 Pedidos da mesa · <b>${brl(total)}</b>`;
+}
+const abrirPedidosMesa = () => { desenharMesa(ss.get("quintal-mesa-pedidos", [])); abrirTela("telaAcomp"); };
+$("barraMesa").onclick = abrirPedidosMesa;
+$("flutMesa").onclick = abrirPedidosMesa;
 
 function resumo(itens) {
   const n = itens.slice(0, 3).map((i) => `${i.quantidade}x ${i.nome}`).join(" · ");
@@ -709,5 +754,6 @@ function avisarSaiu() {
 
 // ---------------- início ----------------
 desenharSacola();
-if (!MESA) escutarAcomps();
+if (!MESA) escutarAcomps(); else atualizarBotoesMesa();
+marcarBarras();
 if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js").catch(() => {});

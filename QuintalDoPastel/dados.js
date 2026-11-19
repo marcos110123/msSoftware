@@ -6,17 +6,18 @@
 
 // Categorias na ordem do cardápio. foto = imagem do topo da seção.
 // adicionais: aceita os adicionais (opcoesLanche grupo "extras").
+// direto: tocar no produto já põe 1 na sacola, sem a tela de opções/observação (pedido do usuário, 19/11).
 export const CATEGORIAS = [
   { id: "lanches",           nome: "Lanches",          icone: "🍔", foto: "img/xgaucho.jpg", adicionais: true },
   { id: "hotdogs",           nome: "Hot dogs",         icone: "🌭", foto: "img/dog.jpg",     adicionais: true },
   { id: "pasteis-grandes",   nome: "Pastéis grandes",  icone: "🥟", foto: "img/pastel.jpg",  adicionais: true },
   { id: "pasteis-especiais", nome: "Pastéis especiais",icone: "⭐", foto: "img/pastel.jpg",  adicionais: true },
   { id: "pasteis-pequenos",  nome: "Pastéis pequenos", icone: "🥟", foto: "img/pastel.jpg",  adicionais: true },
-  { id: "pasteis-doces",     nome: "Pastéis doces",    icone: "🍫", foto: "img/chocolate.jpg" },
-  { id: "panquecas",         nome: "Panquecas",        icone: "🥞", foto: "" },
-  { id: "porcoes",           nome: "Porções",          icone: "🍟", foto: "" },
-  { id: "sucos",             nome: "Sucos naturais",   icone: "🍊", foto: "" },
-  { id: "bebidas",           nome: "Bebidas",          icone: "🥤", foto: "" },
+  { id: "pasteis-doces",     nome: "Pastéis doces",    icone: "🍫", foto: "img/chocolate.jpg", direto: true },
+  { id: "panquecas",         nome: "Panquecas",        icone: "🥞", foto: "", direto: true },
+  { id: "porcoes",           nome: "Porções",          icone: "🍟", foto: "", direto: true },
+  { id: "sucos",             nome: "Sucos naturais",   icone: "🍊", foto: "", direto: true },
+  { id: "bebidas",           nome: "Bebidas",          icone: "🥤", foto: "", direto: true },
 ];
 
 const CARNE = { titulo: "Escolha a carne", opcoes: ["Carne", "Frango", "Misto"] };
