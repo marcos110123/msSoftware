@@ -1,5 +1,5 @@
 // =====================================================================
-// Cardápio Quintal do Pastel 1.3.0 — visual do vídeo de abordagem (telas premium)
+// Cardápio Quintal do Pastel 1.3.2 — visual do vídeo de abordagem (telas premium)
 // Firestore: produtos, opcoesLanche (grupo "extras"), config/estadoPedidos, config/entrega, config/pix,
 //            orders (pedido), acompanhamento (status ao vivo, sem telefone/endereço)
 // =====================================================================
@@ -15,33 +15,46 @@ const sem = (s) => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLo
 const CAT = Object.fromEntries(CATEGORIAS.map((c) => [c.id, c]));
 
 // ---------------- modo mesa (QR code colado na mesa: .../QuintalDoPastel/?mesa=5) ----------------
-// Vale só nesta aba (sessionStorage) e por 4 horas: quem abrir o link normal depois cai no delivery, sem "mesa presa".
+// Regras (19/11, para nunca misturar mesa e delivery):
+//  - a mesa vem SÓ do link do QR (?mesa=N); link sem ?mesa = delivery, sempre, em qualquer aba;
+//  - a mesa e a sacola dela ficam só nesta aba (sessionStorage); a sacola do delivery fica no celular (localStorage);
+//  - aba do QR reaberta depois de 4 h pergunta "Você ainda está na Mesa N?".
+const QUATRO_H = 4 * 3600 * 1000;
+const ss = {
+  get: (k, pad) => { try { return JSON.parse(sessionStorage.getItem(k)) ?? pad; } catch { return pad; } },
+  set: (k, v) => { try { sessionStorage.setItem(k, JSON.stringify(v)); } catch {} },
+  del: (...ks) => { try { ks.forEach((k) => sessionStorage.removeItem(k)); } catch {} },
+};
+let mesaConfirmar = false;
 const MESA = (() => {
-  const QUATRO_H = 4 * 3600 * 1000;
-  try {
-    const q = new URLSearchParams(location.search).get("mesa");
-    if (q && /^\d{1,3}$/.test(q) && +q >= 1 && +q <= (LOJA.totalMesas || 99)) {
-      sessionStorage.setItem("quintal-mesa", JSON.stringify({ m: String(+q), t: Date.now() }));
-      return String(+q);
-    }
-    const s = JSON.parse(sessionStorage.getItem("quintal-mesa") || "null");
-    if (s?.m && Date.now() - s.t < QUATRO_H) return s.m;
-    sessionStorage.removeItem("quintal-mesa"); sessionStorage.removeItem("quintal-mesa-pedidos");
-  } catch {}
-  return null;
+  const q = new URLSearchParams(location.search).get("mesa");
+  const valida = q && /^\d{1,3}$/.test(q) && +q >= 1 && +q <= (LOJA.totalMesas || 99);
+  if (!valida) { ss.del("quintal-mesa", "quintal-mesa-pedidos", "quintal-sacola-mesa"); return null; }
+  const m = String(+q), s = ss.get("quintal-mesa", null);
+  if (s?.m === m) {
+    if (Date.now() - s.t > QUATRO_H) mesaConfirmar = true; // mesma aba, horas depois: pergunta antes
+  } else {
+    // mesa nova nesta aba: começa do zero (sem pedidos/sacola de outra mesa)
+    ss.del("quintal-mesa-pedidos", "quintal-sacola-mesa");
+    ss.set("quintal-mesa", { m, t: Date.now() });
+  }
+  return m;
 })();
 
 const ls = {
   get: (k, pad) => { try { return JSON.parse(localStorage.getItem(k)) ?? pad; } catch { return pad; } },
   set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
 };
+// sacola separada: delivery no celular, mesa só nesta aba
+const lerSacola = () => (MESA ? ss.get("quintal-sacola-mesa", []) : ls.get("quintal-sacola", []));
+const gravarSacola = (v) => (MESA ? ss.set("quintal-sacola-mesa", v) : ls.set("quintal-sacola", v));
 
 // ---------------- estado ----------------
 let PRODUTOS = {};          // id → produto
 let EXTRAS = [];            // adicionais ativos
 let recebendo = true, entregaPausada = false;
 let taxaEntrega = LOJA.taxaPadrao, tempoEntrega = LOJA.tempoPadrao, chavePix = LOJA.pixPadrao, favorecidoPix = "";
-let sacola = ls.get("quintal-sacola", []);   // [{chave, id, nome, base, complementos, observacao, preco, quantidade}]
+let sacola = lerSacola();   // [{chave, id, nome, base, complementos, observacao, preco, quantidade}]
 let tipo = MESA ? "mesa" : null, pagamento = null;
 
 // ---------------- topo / rodapé ----------------
@@ -51,6 +64,24 @@ if (MESA) {
     <div class="mesa-txt"><strong>Pedido direto da mesa</strong>
       <div class="mesa-dicas"><span>👨‍🍳 Direto na cozinha</span><span>💳 Paga no caixa</span></div></div>`;
   document.querySelector("#telaSacola .cab-tela h2").innerHTML = `Sua sacola<i class="mesa-chip">Mesa ${MESA}</i>`;
+  if (mesaConfirmar) {
+    const fundo = document.createElement("div");
+    fundo.className = "mesa-pergunta";
+    fundo.innerHTML = `<div class="mesa-caixa"><div class="mesa-num"><small>MESA</small><b>${MESA}</b></div>
+      <h3>Você ainda está na Mesa ${MESA}?</h3><p>Este link é da mesa do Quintal. Se você está em outro lugar, peça pelo delivery.</p>
+      <button class="btn-grad" data-sim>Sim, estou na mesa</button><button class="btn-linha" data-nao>Não, quero delivery</button></div>`;
+    document.body.appendChild(fundo);
+    document.body.classList.add("travado");
+    fundo.querySelector("[data-sim]").onclick = () => {
+      ss.set("quintal-mesa", { m: MESA, t: Date.now() });
+      ss.del("quintal-mesa-pedidos", "quintal-sacola-mesa"); sacola = []; salvarSacola();
+      fundo.remove(); document.body.classList.remove("travado");
+    };
+    fundo.querySelector("[data-nao]").onclick = () => {
+      ss.del("quintal-mesa", "quintal-mesa-pedidos", "quintal-sacola-mesa");
+      location.replace(location.pathname); // mesmo cardápio, sem ?mesa = delivery
+    };
+  }
   $("faixaMesa").classList.remove("hidden");
   $("cNome").placeholder = "Seu nome (opcional)";
   $("rotuloDados").textContent = "QUEM ESTÁ PEDINDO?";
@@ -345,7 +376,7 @@ function nomePedido(i) {
 }
 
 // ---------------- sacola ----------------
-function salvarSacola() { ls.set("quintal-sacola", sacola); desenharSacola(); }
+function salvarSacola() { gravarSacola(sacola); desenharSacola(); }
 const qtdSacola = () => sacola.reduce((s, i) => s + i.quantidade, 0);
 const subtotal = () => Number(sacola.reduce((s, i) => s + i.preco * i.quantidade, 0).toFixed(2));
 const taxaAtual = () => (tipo === "entrega" ? Number(taxaEntrega || 0) : 0);
@@ -524,9 +555,9 @@ $("btnPedido").onclick = async () => {
 // pedidos feitos nesta mesa por este celular (só na sessão; o garçom/caixa fecha a conta no painel)
 function concluirMesa(itens, sub) {
   let lista = [];
-  try { lista = JSON.parse(sessionStorage.getItem("quintal-mesa-pedidos") || "[]"); } catch {}
+  lista = ss.get("quintal-mesa-pedidos", []);
   lista.push({ hora: Date.now(), resumo: resumo(itens), total: sub });
-  try { sessionStorage.setItem("quintal-mesa-pedidos", JSON.stringify(lista)); } catch {}
+  ss.set("quintal-mesa-pedidos", lista);
   idPendente = null; tentativas = 0;
   sacola = []; salvarSacola();
   fecharTela("telaSacola");
