@@ -1,5 +1,5 @@
 // =====================================================================
-// Cardápio Quintal do Pastel 1.3.5 — visual do vídeo de abordagem (telas premium)
+// Cardápio Quintal do Pastel 1.3.6 — visual do vídeo de abordagem (telas premium)
 // Firestore: produtos, opcoesLanche (grupo "extras"), config/estadoPedidos, config/entrega, config/pix,
 //            orders (pedido), acompanhamento (status ao vivo, sem telefone/endereço)
 // =====================================================================
@@ -52,6 +52,7 @@ const gravarSacola = (v) => (MESA ? ss.set("quintal-sacola-mesa", v) : ls.set("q
 // ---------------- estado ----------------
 let PRODUTOS = {};          // id → produto
 let EXTRAS = [];            // adicionais ativos
+let extrasCarregados = false;
 let recebendo = true, entregaPausada = false;
 let taxaEntrega = LOJA.taxaPadrao, tempoEntrega = LOJA.tempoPadrao, chavePix = LOJA.pixPadrao, favorecidoPix = "";
 let sacola = lerSacola();   // [{chave, id, nome, base, complementos, observacao, preco, quantidade}]
@@ -126,12 +127,15 @@ onSnapshot(collection(db, "produtos"), (snap) => {
   PRODUTOS = {};
   snap.forEach((d) => { PRODUTOS[d.id] = { id: d.id, ...d.data() }; });
   desenharCardapio();
+  conferirSacola();
 }, (e) => { console.error(e); $("secoes").innerHTML = `<p class="carregando">Não foi possível carregar o cardápio. Verifique a internet.</p>`; });
 
 onSnapshot(query(collection(db, "opcoesLanche"), where("grupo", "==", "extras")), (snap) => {
   EXTRAS = [];
   snap.forEach((d) => { const x = d.data(); if (x.status !== "esgotado" && x.status !== "inativo") EXTRAS.push({ id: d.id, ...x }); });
   EXTRAS.sort((a, b) => (a.ordem ?? 99) - (b.ordem ?? 99) || a.nome.localeCompare(b.nome));
+  extrasCarregados = true;
+  conferirSacola();
 });
 
 onSnapshot(doc(db, "config", "estadoPedidos"), (s) => {
@@ -180,12 +184,12 @@ const ordenar = (a, b) => (a.ordem ?? 999) - (b.ordem ?? 999) || a.nome.localeCo
 function desenharCardapio() {
   const termo = sem($("busca").value.trim());
   const todos = Object.values(PRODUTOS).filter(visivel);
-  const filtra = (p) => !termo || sem(p.nome + " " + p.descricao + " " + (CAT[p.categoria]?.nome || "")).includes(termo);
+  const filtra = (p) => !termo || sem(nomeVitrine(p) + " " + p.nome + " " + (p.descricao || "") + " " + (CAT[p.categoria]?.nome || "")).includes(termo);
 
   // destaque da casa (X-Gaúcho)
   const top = PRODUTOS[LOJA.destaqueId];
   $("destaqueCasa").innerHTML = top && visivel(top) && !termo ? `
-    <button class="dest-grande" data-prod="${top.id}">
+    <button class="dest-grande" data-prod="${esc(top.id)}">
       <div class="dest-foto">${tile(top, "")}<span class="selo">🔥 DESTAQUE DA CASA</span>${top.selo ? `<span class="selo dir">${esc(top.selo)}</span>` : ""}
         <div class="dest-nome">${esc(top.nome)}</div></div>
       <div class="dest-corpo"><p>${esc(top.descricao)}</p>
@@ -197,7 +201,7 @@ function desenharCardapio() {
     .sort((a, b) => (!!b.imagem - !!a.imagem) || ordenar(a, b)).slice(0, 10);
   $("blocoDestaques").classList.toggle("hidden", !dest.length || !!termo);
   $("carrossel").innerHTML = dest.map((p, i) => `
-    <button class="mini" data-prod="${p.id}" style="animation-delay:${0.05 * i}s">
+    <button class="mini" data-prod="${esc(p.id)}" style="animation-delay:${0.05 * i}s">
       <div class="mini-foto">${tile(p, "")}${i === 0 ? `<span class="selo">MAIS PEDIDO</span>` : p.selo ? `<span class="selo">${esc(p.selo)}</span>` : ""}</div>
       <div class="mini-corpo"><strong>${esc(nomeVitrine(p))}</strong><div class="mini-pe"><b>${brl(p.preco)}</b><span class="mais">+</span></div></div>
     </button>`).join("");
@@ -211,7 +215,7 @@ function desenharCardapio() {
     html += `<section class="secao" id="sec-${c.id}">
       <div class="secao-cab"><h3><span>${c.icone}</span>${esc(c.nome)}</h3><small>${itens.length} ${itens.length > 1 ? "opções" : "opção"}</small></div>
       <div class="lista">${itens.map((p) => `
-        <button class="item ${p.status === "esgotado" ? "esgotado" : ""} com-foto" data-prod="${p.id}">
+        <button class="item ${p.status === "esgotado" ? "esgotado" : ""} com-foto" data-prod="${esc(p.id)}">
           <div class="item-txt"><strong>${esc(nomeLista(p))}${p.maisVendido ? ` <em class="tag">🔥 Mais pedido</em>` : ""}</strong>${p.descricao ? `<p>${esc(p.descricao)}</p>` : ""}<b>${brl(p.preco)}</b></div>
           ${tile(p)}
           <span class="mais" aria-hidden="true">+</span>
@@ -321,7 +325,7 @@ function desenharGrupos() {
   }
   if (CAT[prod.categoria]?.adicionais && EXTRAS.length) {
     h += `<div class="grupo"><div class="grupo-cab"><div><strong>Turbine seu pedido</strong><small>Adicionais opcionais</small></div><span class="etiqueta">${marcados.size ? marcados.size + " ✓" : "OPCIONAL"}</span></div>
-      <div class="opcoes">${EXTRAS.map((x) => `<button class="opcao caixa ${marcados.has(x.id) ? "on" : ""}" data-extra="${x.id}"><i class="marca"></i><span>${esc(x.nome)}</span><em>+ ${brl(x.valor)}</em></button>`).join("")}</div></div>`;
+      <div class="opcoes">${EXTRAS.map((x) => `<button class="opcao caixa ${marcados.has(x.id) ? "on" : ""}" data-extra="${esc(x.id)}"><i class="marca"></i><span>${esc(x.nome)}</span><em>+ ${brl(x.valor)}</em></button>`).join("")}</div></div>`;
   }
   $("prodGrupos").innerHTML = h;
   atualizarBotaoAdd();
@@ -400,6 +404,30 @@ function nomePedido(i) {
 }
 
 // ---------------- sacola ----------------
+// A sacola fica guardada no celular: ao abrir o cardápio ela é conferida com o que está no ar agora
+// (item tirado/esgotado sai da sacola; preço mudado no painel é atualizado), para o pedido nunca ir com preço velho.
+function conferirSacola() {
+  if (!sacola.length || !Object.keys(PRODUTOS).length) return;
+  let removidos = 0, mudou = 0;
+  sacola = sacola.filter((i) => {
+    const p = PRODUTOS[i.id];
+    if (!p || p.status !== "ativo") { removidos++; return false; }
+    const comps = i.complementos.map((c) => {
+      if (c.grupo !== "Adicionais" || !extrasCarregados) return c;
+      const x = EXTRAS.find((e) => e.nome === c.nome);
+      return x ? { ...c, preco: Number(x.valor || 0) } : null; // adicional que saiu do cardápio
+    });
+    if (comps.some((c) => c === null)) { removidos++; return false; }
+    const novo = Number((Number(p.preco || 0) + comps.reduce((s, c) => s + Number(c.preco || 0), 0)).toFixed(2));
+    if (novo !== i.preco) { i.preco = novo; mudou++; }
+    i.complementos = comps;
+    return true;
+  });
+  if (!removidos && !mudou) return;
+  salvarSacola();
+  toast(removidos ? `Sua sacola foi atualizada: ${removidos} ${removidos > 1 ? "itens indisponíveis saíram" : "item indisponível saiu"}`
+    : "Atualizamos os preços da sua sacola");
+}
 function salvarSacola() { gravarSacola(sacola); desenharSacola(); if (MESA) atualizarBotoesMesa(); marcarBarras(); }
 const qtdSacola = () => sacola.reduce((s, i) => s + i.quantidade, 0);
 const subtotal = () => Number(sacola.reduce((s, i) => s + i.preco * i.quantidade, 0).toFixed(2));
@@ -430,13 +458,18 @@ $("barraSacola").onclick = () => { desenharSacola(); abrirTela("telaSacola"); };
 
 // dados do cliente guardados no celular
 const cli = ls.get("quintal-cliente", {});
+const formatarTel = (v) => {
+  const d = String(v || "").replace(/\D/g, "").slice(0, 11);
+  return d.length > 6 ? `(${d.slice(0, 2)}) ${d.slice(2, d.length - 4)}-${d.slice(-4)}` : d.length > 2 ? `(${d.slice(0, 2)}) ${d.slice(2)}` : d;
+};
+if (cli.tel) cli.tel = formatarTel(cli.tel);
 [["cNome", "nome"], ["cTel", "tel"], ["cRua", "rua"], ["cNum", "numero"], ["cBairro", "bairro"], ["cRef", "ref"]].forEach(([id, k]) => {
   $(id).value = cli[k] || "";
   $(id).addEventListener("input", () => { cli[k] = $(id).value; ls.set("quintal-cliente", cli); $(id).classList.remove("erro"); });
 });
 $("cTel").addEventListener("input", () => {
-  const d = $("cTel").value.replace(/\D/g, "").slice(0, 11);
-  $("cTel").value = d.length > 6 ? `(${d.slice(0, 2)}) ${d.slice(2, d.length - 4)}-${d.slice(-4)}` : d.length > 2 ? `(${d.slice(0, 2)}) ${d.slice(2)}` : d;
+  $("cTel").value = formatarTel($("cTel").value);
+  cli.tel = $("cTel").value; ls.set("quintal-cliente", cli);
 });
 
 $("tipoPedido").addEventListener("click", (e) => {
@@ -494,7 +527,8 @@ function validar() {
   if (MESA) return "";
   if (!tipo) return "Escolha: entrega ou retirada.";
   if (tipo === "entrega" && entregaPausada) return "As entregas estão pausadas. Escolha retirar no balcão.";
-  const req = [["cNome", 2, "Digite seu nome."], ["cTel", 14, "Digite seu WhatsApp com DDD."]];
+  if ($("cTel").value.replace(/\D/g, "").length < 10) { $("cTel").classList.add("erro"); $("cTel").focus(); return "Digite seu WhatsApp com DDD."; }
+  const req = [["cNome", 2, "Digite seu nome."]];
   if (tipo === "entrega") req.push(["cRua", 3, "Digite a rua."], ["cNum", 1, "Digite o número (ou S/N)."], ["cBairro", 2, "Digite o bairro."]);
   for (const [id, min, msg] of req) {
     if ($(id).value.trim().length < min) { $(id).classList.add("erro"); $(id).focus(); return msg; }
