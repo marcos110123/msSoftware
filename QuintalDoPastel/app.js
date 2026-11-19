@@ -1,5 +1,5 @@
 // =====================================================================
-// Cardápio Quintal do Pastel 1.2.0 — visual do vídeo de abordagem (telas premium)
+// Cardápio Quintal do Pastel 1.3.0 — visual do vídeo de abordagem (telas premium)
 // Firestore: produtos, opcoesLanche (grupo "extras"), config/estadoPedidos, config/entrega, config/pix,
 //            orders (pedido), acompanhamento (status ao vivo, sem telefone/endereço)
 // =====================================================================
@@ -14,6 +14,23 @@ const esc = (t) => String(t ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "
 const sem = (s) => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 const CAT = Object.fromEntries(CATEGORIAS.map((c) => [c.id, c]));
 
+// ---------------- modo mesa (QR code colado na mesa: .../QuintalDoPastel/?mesa=5) ----------------
+// Vale só nesta aba (sessionStorage) e por 4 horas: quem abrir o link normal depois cai no delivery, sem "mesa presa".
+const MESA = (() => {
+  const QUATRO_H = 4 * 3600 * 1000;
+  try {
+    const q = new URLSearchParams(location.search).get("mesa");
+    if (q && /^\d{1,3}$/.test(q) && +q >= 1 && +q <= (LOJA.totalMesas || 99)) {
+      sessionStorage.setItem("quintal-mesa", JSON.stringify({ m: String(+q), t: Date.now() }));
+      return String(+q);
+    }
+    const s = JSON.parse(sessionStorage.getItem("quintal-mesa") || "null");
+    if (s?.m && Date.now() - s.t < QUATRO_H) return s.m;
+    sessionStorage.removeItem("quintal-mesa"); sessionStorage.removeItem("quintal-mesa-pedidos");
+  } catch {}
+  return null;
+})();
+
 const ls = {
   get: (k, pad) => { try { return JSON.parse(localStorage.getItem(k)) ?? pad; } catch { return pad; } },
   set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
@@ -25,9 +42,19 @@ let EXTRAS = [];            // adicionais ativos
 let recebendo = true, entregaPausada = false;
 let taxaEntrega = LOJA.taxaPadrao, tempoEntrega = LOJA.tempoPadrao, chavePix = LOJA.pixPadrao, favorecidoPix = "";
 let sacola = ls.get("quintal-sacola", []);   // [{chave, id, nome, base, complementos, observacao, preco, quantidade}]
-let tipo = null, pagamento = null;
+let tipo = MESA ? "mesa" : null, pagamento = null;
 
 // ---------------- topo / rodapé ----------------
+if (MESA) {
+  document.body.classList.add("modo-mesa");
+  $("faixaMesa").innerHTML = `<div class="mesa-num"><small>MESA</small><b>${MESA}</b></div>
+    <div class="mesa-txt"><strong>Pedido direto da mesa</strong>
+      <div class="mesa-dicas"><span>👨‍🍳 Direto na cozinha</span><span>💳 Paga no caixa</span></div></div>`;
+  document.querySelector("#telaSacola .cab-tela h2").innerHTML = `Sua sacola<i class="mesa-chip">Mesa ${MESA}</i>`;
+  $("faixaMesa").classList.remove("hidden");
+  $("cNome").placeholder = "Seu nome (opcional)";
+  $("rotuloDados").textContent = "QUEM ESTÁ PEDINDO?";
+}
 $("lojaNome").textContent = LOJA.nome;
 $("lojaSub").textContent = LOJA.subtitulo;
 const linkWhats = (txt) => `https://wa.me/${LOJA.whats}${txt ? "?text=" + encodeURIComponent(txt) : ""}`;
@@ -394,7 +421,7 @@ function desenharCheckout() {
   $("linhaTaxa").classList.toggle("hidden", tipo !== "entrega");
   $("rTaxa").textContent = taxaAtual() ? brl(taxaAtual()) : "Grátis";
   $("rTotal").textContent = brl(subtotal() + taxaAtual());
-  $("btnPedidoTxt").textContent = enviando ? "Enviando…" : `Fazer pedido · ${brl(subtotal() + taxaAtual())}`;
+  $("btnPedidoTxt").textContent = enviando ? "Enviando…" : MESA ? `Enviar para a cozinha · ${brl(subtotal())}` : `Fazer pedido · ${brl(subtotal() + taxaAtual())}`;
 }
 
 async function copiar(t) {
@@ -409,6 +436,7 @@ let enviando = false, idPendente = null, tokenPendente = null, tentativas = 0;
 function validar() {
   if (!sacola.length) return "Sua sacola está vazia.";
   if (!recebendo) return "A loja está fechada agora. Os pedidos voltam quando abrirmos 🙂";
+  if (MESA) return "";
   if (!tipo) return "Escolha: entrega ou retirada.";
   if (tipo === "entrega" && entregaPausada) return "As entregas estão pausadas. Escolha retirar no balcão.";
   const req = [["cNome", 2, "Digite seu nome."], ["cTel", 14, "Digite seu WhatsApp com DDD."]];
@@ -439,6 +467,27 @@ $("btnPedido").onclick = async () => {
   }));
 
   enviando = true; $("btnPedido").disabled = true; desenharCheckout();
+  if (MESA) {
+    // pedido de mesa: sem entrega, pagamento e acompanhamento — o painel fecha a conta da mesa
+    try {
+      if (!idPendente) { idPendente = doc(collection(db, "orders")).id; tentativas = 0; }
+      tentativas++;
+      const nome = $("cNome").value.trim();
+      await setDoc(doc(db, "orders", idPendente), {
+        mesa: MESA, items: itens, total: sub, totalProdutos: sub.toFixed(2), totalFinal: sub.toFixed(2),
+        ...(nome && { nomeCliente: nome, cliente: nome }),
+        status: "pendente", createdAt: serverTimestamp(), origem: "cardapio-mesa",
+      });
+      concluirMesa(itens, sub);
+    } catch (e) {
+      console.error(e);
+      if (tentativas > 1 && e?.code === "permission-denied") concluirMesa(itens, sub);
+      else toast("Não foi possível enviar. Confira a internet e toque de novo (não duplica).");
+    } finally {
+      enviando = false; $("btnPedido").disabled = false; desenharCheckout();
+    }
+    return;
+  }
   try {
     if (!idPendente) { idPendente = doc(collection(db, "orders")).id; tokenPendente = doc(collection(db, "acompanhamento")).id; tentativas = 0; }
     tentativas++;
@@ -471,6 +520,30 @@ $("btnPedido").onclick = async () => {
     enviando = false; $("btnPedido").disabled = false; desenharCheckout();
   }
 };
+
+// pedidos feitos nesta mesa por este celular (só na sessão; o garçom/caixa fecha a conta no painel)
+function concluirMesa(itens, sub) {
+  let lista = [];
+  try { lista = JSON.parse(sessionStorage.getItem("quintal-mesa-pedidos") || "[]"); } catch {}
+  lista.push({ hora: Date.now(), resumo: resumo(itens), total: sub });
+  try { sessionStorage.setItem("quintal-mesa-pedidos", JSON.stringify(lista)); } catch {}
+  idPendente = null; tentativas = 0;
+  sacola = []; salvarSacola();
+  fecharTela("telaSacola");
+  setTimeout(() => { desenharMesa(lista); abrirTela("telaAcomp"); confete(); }, 380);
+}
+function desenharMesa(lista) {
+  const total = lista.reduce((s, p) => s + p.total, 0);
+  $("acompCorpo").innerHTML = `
+    <div class="ac-topo"><div class="ac-ilu"><span class="pula">👨‍🍳</span></div>
+      <h3>Pedido enviado!</h3><p>Já foi para a cozinha. É só aguardar na Mesa ${MESA} 😉</p></div>
+    <div class="card mesa-lista"><div class="rotulo">PEDIDOS DESTA MESA (NESTE CELULAR)</div>
+      ${lista.map((p) => `<div><span><small>${new Date(p.hora).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</small>${esc(p.resumo)}</span><b>${brl(p.total)}</b></div>`).join("")}
+      <div class="resumo"><hr><div class="total"><span>Total até agora</span><b>${brl(total)}</b></div></div></div>
+    <p class="pix-obs" style="color:var(--suave);text-align:center">O pagamento é feito no caixa quando fechar a conta da mesa.</p>
+    <button class="btn-linha" data-fechar="telaAcomp" style="border-style:solid">Pedir mais alguma coisa</button>
+    <div style="height:30px"></div>`;
+}
 
 function resumo(itens) {
   const n = itens.slice(0, 3).map((i) => `${i.quantidade}x ${i.nome}`).join(" · ");
@@ -605,5 +678,5 @@ function avisarSaiu() {
 
 // ---------------- início ----------------
 desenharSacola();
-escutarAcomps();
+if (!MESA) escutarAcomps();
 if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js").catch(() => {});

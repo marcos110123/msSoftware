@@ -280,3 +280,22 @@ img { display: block; }
 .toast.on { opacity: 1; transform: translate(-50%, 0); }
 
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+/* ---------- modo mesa (QR code da mesa: ?mesa=N) ---------- */
+body.modo-mesa .so-delivery { display: none !important; }
+.mesa-faixa { position: relative; display: flex; align-items: center; gap: 0; margin: 14px 14px 0; border-radius: 18px; background: var(--card); border: 1px solid var(--linha); box-shadow: var(--sombra); animation: aparece .45s ease both; }
+/* recortes de "comanda" nas laterais */
+.mesa-faixa::before, .mesa-faixa::after { content: ""; position: absolute; top: 50%; width: 16px; height: 16px; margin-top: -8px; border-radius: 50%; background: var(--fundo); border: 1px solid var(--linha); }
+.mesa-faixa::before { left: 74px; top: 0; margin-top: -9px; clip-path: inset(50% 0 0 0); }
+.mesa-faixa::after { left: 74px; top: 100%; margin-top: -7px; clip-path: inset(0 0 50% 0); }
+.mesa-num { width: 82px; flex-shrink: 0; align-self: stretch; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px 0; border-right: 2px dashed var(--linha); }
+.mesa-num small { font-size: 10px; font-weight: 800; letter-spacing: 2.5px; color: var(--destaque); }
+.mesa-num b { font-family: var(--mont); font-weight: 900; font-size: 34px; line-height: 1; margin-top: 2px; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.mesa-txt { flex: 1; min-width: 0; padding: 12px 14px; }
+.mesa-txt strong { display: block; font-family: var(--mont); font-weight: 900; font-size: 15.5px; }
+.mesa-txt .mesa-dicas { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
+.mesa-txt .mesa-dicas span { font-size: 10.5px; font-weight: 700; color: var(--suave); background: var(--fundo2); border-radius: 999px; padding: 4px 7px; white-space: nowrap; }
+.mesa-chip { font-style: normal; font-size: 12px; font-weight: 800; color: #fff; background: var(--grad); border-radius: 999px; padding: 4px 10px; margin-left: 8px; vertical-align: 3px; }
+.mesa-lista div { display: flex; justify-content: space-between; gap: 10px; padding: 8px 0; font-size: 13.5px; }
+.mesa-lista div + div { border-top: 1px solid var(--linha); }
+.mesa-lista small { color: var(--suave); display: block; }

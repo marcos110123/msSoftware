@@ -1,5 +1,5 @@
 // Rede primeiro (sempre a versão nova quando há internet); cache só como reserva
-const CACHE = "quintal-cache-v1.2.0";
+const CACHE = "quintal-cache-v1.3.0";
 self.addEventListener("install", (e) => self.skipWaiting());
 self.addEventListener("activate", (e) => e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim())));
 self.addEventListener("fetch", (e) => {
