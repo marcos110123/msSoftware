@@ -1,5 +1,5 @@
 // =====================================================================
-// Cardápio Quintal do Pastel 1.3.4 — visual do vídeo de abordagem (telas premium)
+// Cardápio Quintal do Pastel 1.3.5 — visual do vídeo de abordagem (telas premium)
 // Firestore: produtos, opcoesLanche (grupo "extras"), config/estadoPedidos, config/entrega, config/pix,
 //            orders (pedido), acompanhamento (status ao vivo, sem telefone/endereço)
 // =====================================================================
@@ -62,7 +62,7 @@ if (MESA) {
   document.body.classList.add("modo-mesa");
   $("faixaMesa").innerHTML = `<div class="mesa-num"><small>MESA</small><b>${MESA}</b></div>
     <div class="mesa-txt"><strong>Pedido direto da mesa</strong>
-      <div class="mesa-dicas"><span>👨‍🍳 Direto na cozinha</span><span>💳 Paga no caixa</span></div></div>`;
+      <div class="mesa-dicas" id="mesaDicas"></div></div>`;
   document.querySelector("#telaSacola .cab-tela h2").innerHTML = `Sua sacola<i class="mesa-chip">Mesa ${MESA}</i>`;
   if (mesaConfirmar) {
     const fundo = document.createElement("div");
@@ -270,8 +270,7 @@ function marcarChip() {
 // botão "voltar ao topo"
 $("btnTopo").onclick = () => window.scrollTo({ top: 0, behavior: "smooth" });
 const mostrarBtnTopo = () => $("btnTopo").classList.toggle("on", scrollY > 700);
-const marcarBarras = () => document.body.classList.toggle("com-barra",
-  !$("barraSacola").classList.contains("hidden") || !$("flutMesa").classList.contains("hidden"));
+const marcarBarras = () => document.body.classList.toggle("com-barra", !$("barraSacola").classList.contains("hidden"));
 let rolando = false;
 addEventListener("scroll", () => { if (!rolando) { rolando = true; requestAnimationFrame(() => { marcarChip(); mostrarBtnTopo(); rolando = false; }); } }, { passive: true });
 
@@ -606,20 +605,15 @@ function desenharMesa(lista, acabouDeEnviar = false) {
     <div style="height:30px"></div>`;
 }
 
+// dicas da faixa da mesa: antes do 1º pedido "Direto na cozinha"; depois vira o botão "Meus pedidos (N)"
 function atualizarBotoesMesa() {
   if (!MESA) return;
-  const lista = ss.get("quintal-mesa-pedidos", []);
-  const total = lista.reduce((s, p) => s + p.total, 0);
-  const n = lista.length;
-  $("barraMesa").classList.toggle("hidden", !n);
-  $("barraMesa").innerHTML = `🧾<span>Ver pedidos da mesa<small>${n} ${n > 1 ? "pedidos enviados" : "pedido enviado"}</small></span><em>${brl(total)} ›</em>`;
-  // flutuante embaixo só quando a sacola está vazia (senão fica a barra da sacola)
-  $("flutMesa").classList.toggle("hidden", !n || sacola.length > 0);
-  $("flutMesa").innerHTML = `🧾 Pedidos da mesa · <b>${brl(total)}</b>`;
+  const n = ss.get("quintal-mesa-pedidos", []).length;
+  $("mesaDicas").innerHTML = (n ? "" : "<span>👨‍🍳 Direto na cozinha</span>") + "<span>💳 Paga no caixa</span>"
+    + (n ? `<button type="button" class="mesa-ver" id="btnMeusPedidos">🧾 Meus pedidos (${n})</button>` : "");
+  const b = $("btnMeusPedidos");
+  if (b) b.onclick = () => { desenharMesa(ss.get("quintal-mesa-pedidos", [])); abrirTela("telaAcomp"); };
 }
-const abrirPedidosMesa = () => { desenharMesa(ss.get("quintal-mesa-pedidos", [])); abrirTela("telaAcomp"); };
-$("barraMesa").onclick = abrirPedidosMesa;
-$("flutMesa").onclick = abrirPedidosMesa;
 
 function resumo(itens) {
   const n = itens.slice(0, 3).map((i) => `${i.quantidade}x ${i.nome}`).join(" · ");

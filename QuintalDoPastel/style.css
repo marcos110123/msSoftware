@@ -313,12 +313,8 @@ body.modo-mesa .so-delivery { display: none !important; }
 .mais { transition: background .2s, transform .2s; }
 .mais.ok { background: var(--verde); color: #06291a; transform: scale(1.15); box-shadow: 0 4px 10px rgba(54,210,122,.4); }
 
-/* "Pedidos da mesa": abaixo da faixa e flutuante quando a sacola está vazia */
-.barra-mesa { display: flex; align-items: center; gap: 10px; width: calc(100% - 28px); margin: 10px 14px 0; padding: 12px 14px; border-radius: 16px; background: var(--card); border: 1.5px solid var(--destaque); color: var(--texto); text-align: left; font-weight: 800; font-size: 14px; box-shadow: var(--sombra); }
-.barra-mesa em { margin-left: auto; font-style: normal; color: var(--destaque); white-space: nowrap; }
-.barra-mesa small { display: block; font-weight: 600; font-size: 12px; color: var(--suave); }
-.barra-pedidos-mesa { position: fixed; left: 50%; bottom: max(14px, env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 30; display: flex; align-items: center; gap: 8px; padding: 0 18px; height: 50px; border-radius: 999px; background: var(--topo1); color: #fff; font-weight: 800; font-size: 14.5px; box-shadow: 0 12px 26px rgba(0,0,0,.35); border: 1.5px solid rgba(255,199,44,.5); white-space: nowrap; animation: sobeBarra .35s ease both; }
-.barra-pedidos-mesa b { color: var(--destaque2); }
+/* chip "Meus pedidos" dentro da faixa da mesa (abre a lista; o total só aparece lá dentro) */
+.mesa-txt .mesa-dicas button.mesa-ver { font-size: 10.5px; font-weight: 800; color: #fff; background: var(--grad); border-radius: 999px; padding: 4px 8px; white-space: nowrap; box-shadow: 0 4px 10px rgba(232,49,31,.3); }
 
 /* voltar ao topo: aparece depois de rolar; sobe acima da barra da sacola quando ela aparece */
 .btn-topo { position: fixed; right: max(14px, calc(50% - 266px)); bottom: max(16px, env(safe-area-inset-bottom)); z-index: 31; width: 46px; height: 46px; border-radius: 23px; background: var(--card); color: var(--destaque); border: 1px solid var(--linha); box-shadow: 0 10px 24px rgba(0,0,0,.25); display: flex; align-items: center; justify-content: center; opacity: 0; transform: translateY(16px) scale(.8); pointer-events: none; transition: opacity .25s, transform .25s, bottom .25s; }
