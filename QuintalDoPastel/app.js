@@ -1,5 +1,5 @@
 // =====================================================================
-// Cardápio Quintal do Pastel 1.4.1 — visual do vídeo de abordagem (telas premium)
+// Cardápio Quintal do Pastel 1.4.2 — visual do vídeo de abordagem (telas premium)
 // Firestore: produtos, opcoesLanche (grupo "extras"), config/estadoPedidos, config/entrega, config/pix,
 //            orders (pedido), acompanhamento (status ao vivo, sem telefone/endereço)
 // 1.4.0 (20/11): finalização em etapas + taxa POR REGIÃO (config/entrega.bairros, editada no painel;
@@ -726,9 +726,10 @@ $("btnPedido").onclick = async () => {
     let token = tokenPendente;
     try {
       await setDoc(doc(db, "acompanhamento", token), {
-        status: "enviado", tipo, total: totalFinal, subtotal: sub, taxaEntrega: taxa, pagamento,
+        // 1.4.2: já nasce "Em preparo" (a dona não tem tempo de confirmar cada pedido no painel)
+        status: "preparando", tipo, total: totalFinal, subtotal: sub, taxaEntrega: taxa, pagamento,
         valorTroco: precisaTroco ? valorTroco : null, resumo: resumo(itens), tempoEntrega,
-        criadoEm: serverTimestamp(), horarios: { enviado: serverTimestamp() },
+        criadoEm: serverTimestamp(), horarios: { enviado: serverTimestamp(), preparando: serverTimestamp() },
       });
     } catch (e) { if (tentativas === 1) { console.warn("Acompanhamento indisponível:", e); token = null; } }
 
@@ -869,7 +870,7 @@ function desenharBarraAcomp() {
   b.classList.toggle("hidden", !ativos.length);
   if (!ativos.length) return;
   const d = dadosAcomp[ativos[0].token];
-  b.innerHTML = `🛵 ${ativos.length > 1 ? ativos.length + " pedidos em andamento" : "Acompanhar pedido"}<em>${d ? ETQ[d.status] || "" : "Enviado"} ›</em>`;
+  b.innerHTML = `🛵 ${ativos.length > 1 ? ativos.length + " pedidos em andamento" : "Acompanhar pedido"}<em>${d ? ETQ[d.status] || "" : "Em preparo"} ›</em>`;
 }
 $("barraAcomp").onclick = () => { atual = acomps.find((a) => !["concluido", "cancelado"].includes(dadosAcomp[a.token]?.status))?.token || atual; abrirTela("telaAcomp"); desenharAcomp(); };
 
@@ -885,7 +886,7 @@ function faixaTempo(t) {
 function desenharAcomp() {
   const a = acomps.find((x) => x.token === atual) || acomps[0];
   if (!a) return;
-  const d = dadosAcomp[a.token] || { status: "enviado", tipo: a.tipo, pagamento: a.pagamento, total: a.total, horarios: {} };
+  const d = dadosAcomp[a.token] || { status: "preparando", tipo: a.tipo, pagamento: a.pagamento, total: a.total, horarios: {} };
   const ent = (d.tipo || a.tipo) === "entrega";
   let st = d.status || "enviado";
   if (!ent && st === "saiu") st = "pronto";
