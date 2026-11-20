@@ -1,5 +1,5 @@
 // =====================================================================
-// Cardápio Quintal do Pastel 1.4.0 — visual do vídeo de abordagem (telas premium)
+// Cardápio Quintal do Pastel 1.4.1 — visual do vídeo de abordagem (telas premium)
 // Firestore: produtos, opcoesLanche (grupo "extras"), config/estadoPedidos, config/entrega, config/pix,
 //            orders (pedido), acompanhamento (status ao vivo, sem telefone/endereço)
 // 1.4.0 (20/11): finalização em etapas + taxa POR REGIÃO (config/entrega.bairros, editada no painel;
@@ -569,7 +569,7 @@ function faltando() {
 function atualizarEtapas() {
   const f = faltando(), ordem = ["modo", "end", "dados", "pag"];
   const at = f?.passo ? ordem.indexOf(f.passo) : f ? 0 : 4;
-  const nomes = ["Receber", tipo === "retirada" ? "Retirada" : "Endereço", "Dados", "Pagamento"];
+  const nomes = [tipo === "retirada" ? "Retirada" : tipo === "entrega" ? "Entrega" : "Como receber", tipo === "retirada" ? "Local" : "Endereço", "Seus dados", "Pagamento"];
   $("passos").innerHTML = nomes.map((n, i) => `<div class="${i < at ? "ok" : ""}"><i><b></b></i><span>${i < at ? "✓ " : ""}${n}</span></div>`).join("");
   document.querySelectorAll("#telaSacola [data-passo]").forEach((el) => {
     const i = ordem.indexOf(el.dataset.passo), ok = i < at;
