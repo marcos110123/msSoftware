@@ -20,6 +20,14 @@ export const LOJA = {
   instagram: "quintaldopastel_sales",
   coracao: "🧡",
   taxaPadrao: 3,              // só se config/entrega.taxaEntrega sumir (no Firebase: R$ 3,00)
+  // taxa por região (mesmas regiões da La Brasa; Cidade R$ 3 — pedido do usuário 20/11).
+  // Valem enquanto o painel não salvar config/entrega.bairros (lá o dono edita).
+  bairrosPadrao: [
+    { nome: "Cidade", taxa: 3 }, { nome: "Cervinho", taxa: 10 }, { nome: "Irapuã", taxa: 15 },
+    { nome: "Baobá", taxa: 20 }, { nome: "Eco Park", taxa: 20 }, { nome: "Lago Azul", taxa: 20 },
+    { nome: "Richileu", taxa: 20 }, { nome: "Riviera", taxa: 20 }, { nome: "Torres", taxa: 20 },
+    { nome: "Morumbi", taxa: 25 },
+  ],
   tempoPadrao: "40–60 min",   // usada enquanto config/entrega.tempoEntrega não for gravada
   pixPadrao: "",              // usada enquanto config/pix.chave não for gravada
   destaqueId: "lanches-x-gaucho", // produto do cartão grande "Destaque da casa"

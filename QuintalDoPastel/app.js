@@ -1,7 +1,9 @@
 // =====================================================================
-// Cardápio Quintal do Pastel 1.3.6 — visual do vídeo de abordagem (telas premium)
+// Cardápio Quintal do Pastel 1.4.0 — visual do vídeo de abordagem (telas premium)
 // Firestore: produtos, opcoesLanche (grupo "extras"), config/estadoPedidos, config/entrega, config/pix,
 //            orders (pedido), acompanhamento (status ao vivo, sem telefone/endereço)
+// 1.4.0 (20/11): finalização em etapas + taxa POR REGIÃO (config/entrega.bairros, editada no painel;
+//               sem nada salvo vale LOJA.bairrosPadrao) + acompanhamento novo (topo da marca, previsão em horário)
 // =====================================================================
 import { initializeApp, getFirestore, collection, doc, setDoc, onSnapshot, serverTimestamp, query, where } from "./fb.js";
 import { firebaseConfig, LOJA } from "./config.js";
@@ -57,6 +59,11 @@ let recebendo = true, entregaPausada = false;
 let taxaEntrega = LOJA.taxaPadrao, tempoEntrega = LOJA.tempoPadrao, chavePix = LOJA.pixPadrao, favorecidoPix = "";
 let sacola = lerSacola();   // [{chave, id, nome, base, complementos, observacao, preco, quantidade}]
 let tipo = MESA ? "mesa" : null, pagamento = null;
+// regiões de entrega com a taxa de cada uma (Firebase config/entrega.bairros; sem nada salvo, LOJA.bairrosPadrao)
+const ordenarBairros = (l) => l.slice().sort((a, b) => a.taxa - b.taxa || a.nome.localeCompare(b.nome, "pt-BR"));
+let BAIRROS = ordenarBairros(LOJA.bairrosPadrao || []);
+let bairro = null, verTodosBairros = false;
+let troco = null, trocoOutro = "";   // troco: null (não respondeu) | "nao" | número | "outro" (digita o valor)
 
 // ---------------- topo / rodapé ----------------
 if (MESA) {
@@ -84,8 +91,8 @@ if (MESA) {
     };
   }
   $("faixaMesa").classList.remove("hidden");
-  $("cNome").placeholder = "Seu nome (opcional)";
-  $("rotuloDados").textContent = "QUEM ESTÁ PEDINDO?";
+  $("lblNome").textContent = "Seu nome (opcional)";
+  $("rotuloDados").textContent = "Quem está pedindo?";
 }
 $("lojaNome").textContent = LOJA.nome;
 $("lojaSub").textContent = LOJA.subtitulo;
@@ -156,9 +163,13 @@ onSnapshot(doc(db, "config", "entrega"), (s) => {
   if (d.tempoEntrega) tempoEntrega = d.tempoEntrega;
   const t = Number(d.taxaEntrega ?? d.taxa);
   if (!Number.isNaN(t) && (d.taxaEntrega != null || d.taxa != null)) taxaEntrega = t;
+  const lista = (Array.isArray(d.bairros) ? d.bairros : [])
+    .map((b) => ({ nome: String(b?.nome || "").trim(), taxa: Number(b?.taxa) }))
+    .filter((b) => b.nome && Number.isFinite(b.taxa) && b.taxa >= 0);
+  BAIRROS = ordenarBairros(lista.length ? lista : LOJA.bairrosPadrao || []);
+  if (bairro && !BAIRROS.some((b) => b.nome === bairro)) bairro = null;
   $("statTempo").textContent = tempoEntrega;
-  $("statTaxa").textContent = taxaEntrega ? brl(taxaEntrega) : "Grátis";
-  $("endTempo").textContent = "🛵 " + tempoEntrega;
+  $("statTaxa").textContent = textoTaxaMin();
   desenharCheckout();
 });
 
@@ -431,7 +442,14 @@ function conferirSacola() {
 function salvarSacola() { gravarSacola(sacola); desenharSacola(); if (MESA) atualizarBotoesMesa(); marcarBarras(); }
 const qtdSacola = () => sacola.reduce((s, i) => s + i.quantidade, 0);
 const subtotal = () => Number(sacola.reduce((s, i) => s + i.preco * i.quantidade, 0).toFixed(2));
-const taxaAtual = () => (tipo === "entrega" ? Number(taxaEntrega || 0) : 0);
+// taxa da região escolhida (sem regiões cadastradas, vale a taxa única antiga)
+const taxaAtual = () => {
+  if (tipo !== "entrega") return 0;
+  if (!BAIRROS.length) return Number(taxaEntrega || 0);
+  return Number(BAIRROS.find((b) => b.nome === bairro)?.taxa || 0);
+};
+const taxaMin = () => (BAIRROS.length ? Math.min(...BAIRROS.map((b) => b.taxa)) : Number(taxaEntrega || 0));
+const textoTaxaMin = () => (taxaMin() ? (BAIRROS.length > 1 && new Set(BAIRROS.map((b) => b.taxa)).size > 1 ? "a partir de " : "") + brl(taxaMin()) : "Grátis");
 
 function desenharSacola() {
   const n = qtdSacola();
@@ -456,60 +474,187 @@ $("listaSacola").addEventListener("click", (e) => {
 });
 $("barraSacola").onclick = () => { desenharSacola(); abrirTela("telaSacola"); };
 
-// dados do cliente guardados no celular
+// dados do cliente guardados no celular (quem já pediu vê "endereço de sempre" e só confirma)
 const cli = ls.get("quintal-cliente", {});
 const formatarTel = (v) => {
   const d = String(v || "").replace(/\D/g, "").slice(0, 11);
   return d.length > 6 ? `(${d.slice(0, 2)}) ${d.slice(2, d.length - 4)}-${d.slice(-4)}` : d.length > 2 ? `(${d.slice(0, 2)}) ${d.slice(2)}` : d;
 };
 if (cli.tel) cli.tel = formatarTel(cli.tel);
-[["cNome", "nome"], ["cTel", "tel"], ["cRua", "rua"], ["cNum", "numero"], ["cBairro", "bairro"], ["cRef", "ref"]].forEach(([id, k]) => {
+[["cNome", "nome"], ["cTel", "tel"], ["cRua", "rua"], ["cNum", "numero"], ["cRef", "ref"]].forEach(([id, k]) => {
   $(id).value = cli[k] || "";
-  $(id).addEventListener("input", () => { cli[k] = $(id).value; ls.set("quintal-cliente", cli); $(id).classList.remove("erro"); });
+  $(id).addEventListener("input", () => {
+    if (id === "cTel") $(id).value = formatarTel($(id).value);
+    cli[k] = $(id).value; ls.set("quintal-cliente", cli);
+    $(id).closest(".campo")?.classList.remove("erro");
+    atualizarEtapas();
+  });
 });
-$("cTel").addEventListener("input", () => {
-  $("cTel").value = formatarTel($("cTel").value);
-  cli.tel = $("cTel").value; ls.set("quintal-cliente", cli);
-});
+if (cli.regiao) bairro = cli.regiao; // conferido quando as regiões chegam do Firebase
+const telOk = () => $("cTel").value.replace(/\D/g, "").length >= 10;
+const endOk = () => !!bairro && BAIRROS.some((b) => b.nome === bairro) && $("cRua").value.trim().length >= 3 && $("cNum").value.trim().length >= 1;
+const dadosOk = () => $("cNome").value.trim().length >= 2 && telOk();
+// começa no "salvo" quando o celular já tem tudo; "Alterar" abre os campos
+let editarEnd = !(cli.rua && cli.numero && cli.regiao), editarDados = !(cli.nome && String(cli.tel || "").replace(/\D/g, "").length >= 10);
 
 $("tipoPedido").addEventListener("click", (e) => {
   const b = e.target.closest("[data-tipo]");
   if (!b || b.disabled) return;
   tipo = b.dataset.tipo; desenharCheckout();
 });
+$("bairros").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-bairro]");
+  if (!b) return;
+  bairro = b.dataset.bairro; cli.regiao = bairro; ls.set("quintal-cliente", cli);
+  $("bairros").classList.remove("erro");
+  desenharCheckout();
+});
+$("maisBairros").onclick = () => { verTodosBairros = true; desenharCheckout(); };
+$("endSalvo").addEventListener("click", (e) => { if (e.target.closest("[data-alterar]")) { editarEnd = true; desenharCheckout(); $("cRua").focus(); } });
+$("dadosSalvo").addEventListener("click", (e) => { if (e.target.closest("[data-alterar]")) { editarDados = true; desenharCheckout(); $("cNome").focus(); } });
 $("pagamento").addEventListener("click", (e) => {
   const b = e.target.closest("[data-pag]");
   if (!b) return;
-  pagamento = b.dataset.pag; desenharCheckout();
+  if (pagamento !== b.dataset.pag) { pagamento = b.dataset.pag; troco = null; }
+  desenharCheckout();
 });
-$("precisaTroco").onchange = () => desenharCheckout();
+$("pagDet").addEventListener("click", (e) => {
+  const t = e.target.closest("[data-troco]");
+  if (t) {
+    const v = t.dataset.troco;
+    troco = v === "nao" || v === "outro" ? v : Number(v);
+    desenharCheckout();
+    if (v === "outro") $("valorTroco")?.focus();
+  }
+  if (e.target.closest("#copiarPix")) copiar(chavePix);
+});
+$("pagDet").addEventListener("input", (e) => {
+  if (e.target.id !== "valorTroco") return;
+  trocoOutro = e.target.value; e.target.classList.remove("erro");
+  mostrarTroco(); atualizarEtapas();
+});
+const valorOutro = () => parseFloat(String(trocoOutro).replace(/\./g, "").replace(",", ".")) || 0;
+const valorTrocoFinal = () => (typeof troco === "number" ? troco : troco === "outro" ? valorOutro() : null);
+const totalAtual = () => Number((subtotal() + taxaAtual()).toFixed(2));
+function mostrarTroco() {
+  const el = $("trocoTxt"); if (!el) return;
+  const v = valorTrocoFinal(), tot = totalAtual();
+  el.textContent = v > tot ? `Troco para ${brl(v)} → ${tipo === "retirada" ? "você recebe" : "o entregador leva"} ${brl(v - tot)}`
+    : troco === "outro" && trocoOutro ? "O valor precisa ser maior que o total" : "";
+  el.classList.toggle("ruim", !(v > tot));
+}
+
+// o que falta para fechar o pedido (mesma ordem da tela)
+function faltando() {
+  if (!sacola.length) return { msg: "Sua sacola está vazia" };
+  if (MESA) return null;
+  if (!tipo) return { msg: "Escolha entrega ou retirada", passo: "modo" };
+  if (tipo === "entrega" && entregaPausada) return { msg: "Entregas pausadas — escolha retirar", passo: "modo" };
+  if (tipo === "entrega") {
+    if (!bairro || !BAIRROS.some((b) => b.nome === bairro)) return { msg: "Falta: escolher a sua região", passo: "end", foco: "bairros" };
+    if ($("cRua").value.trim().length < 3) return { msg: "Falta: o nome da rua", passo: "end", foco: "cRua" };
+    if (!$("cNum").value.trim()) return { msg: "Falta: o número da casa (ou S/N)", passo: "end", foco: "cNum" };
+  }
+  if ($("cNome").value.trim().length < 2) return { msg: "Falta: o seu nome", passo: "dados", foco: "cNome" };
+  if (!telOk()) return { msg: "Falta: o seu WhatsApp com DDD", passo: "dados", foco: "cTel" };
+  if (!pagamento) return { msg: "Falta: a forma de pagamento", passo: "pag" };
+  if (pagamento === "Dinheiro") {
+    if (troco === null) return { msg: "Falta: dizer se precisa de troco", passo: "pag" };
+    if (troco !== "nao" && !(valorTrocoFinal() > totalAtual())) return { msg: "O troco precisa ser maior que o total", passo: "pag", foco: "valorTroco" };
+  }
+  return null;
+}
+
+// barra de etapas + "Falta: ..." + total no botão (leve: roda a cada tecla)
+function atualizarEtapas() {
+  const f = faltando(), ordem = ["modo", "end", "dados", "pag"];
+  const at = f?.passo ? ordem.indexOf(f.passo) : f ? 0 : 4;
+  const nomes = ["Receber", tipo === "retirada" ? "Retirada" : "Endereço", "Dados", "Pagamento"];
+  $("passos").innerHTML = nomes.map((n, i) => `<div class="${i < at ? "ok" : ""}"><i><b></b></i><span>${i < at ? "✓ " : ""}${n}</span></div>`).join("");
+  document.querySelectorAll("#telaSacola [data-passo]").forEach((el) => {
+    const i = ordem.indexOf(el.dataset.passo), ok = i < at;
+    el.classList.toggle("ok", ok);
+    const n = el.querySelector(".n"); if (n) n.textContent = ok ? "✓" : i + 1;
+  });
+  $("falta").textContent = !MESA && f && sacola.length ? f.msg : "";
+  $("btnPedido").classList.toggle("bloq", !!f && !MESA);
+  $("btnPedidoTxt").textContent = enviando ? "Enviando…" : MESA ? "Enviar para a cozinha" : "Fazer pedido";
+  $("btnPedidoTot").textContent = brl(MESA ? subtotal() : totalAtual());
+}
+
+let pagChave = "";
+function desenharPagamento() {
+  document.querySelectorAll("#pagamento [data-pag]").forEach((b) => b.classList.toggle("on", b.dataset.pag === pagamento));
+  const tot = totalAtual(), onde = tipo === "retirada" ? "retirada" : "entrega";
+  const chave = [pagamento, troco, tot, chavePix, favorecidoPix, onde].join("|");
+  if (chave === pagChave) return mostrarTroco();
+  pagChave = chave;
+  let h = "";
+  if (pagamento === "PIX") {
+    h = chavePix
+      ? `<div class="det pixbox"><div class="rot">Chave PIX${favorecidoPix ? " · " + esc(favorecidoPix) : ""}</div><code>${esc(chavePix)}</code>
+          <button type="button" id="copiarPix">Copiar chave PIX</button>
+          <p>Pague ${brl(tot)} e envie o comprovante no WhatsApp da loja. Pode pagar depois de fazer o pedido.</p></div>`
+      : `<div class="det"><p>A chave PIX aparece aqui assim que a loja cadastrar. Você também pode pagar o PIX na ${onde}.</p></div>`;
+  } else if (pagamento === "Cartão") {
+    h = `<div class="det"><p>💳 ${onde === "retirada" ? "Pague no caixa" : "O entregador leva a maquininha"}: crédito ou débito.</p></div>`;
+  } else if (pagamento === "Dinheiro") {
+    const n1 = Math.ceil((tot + 0.01) / 50) * 50;
+    const ops = [["nao", "Não preciso"], [n1, "R$ " + n1], [n1 + 50, "R$ " + (n1 + 50)], ["outro", "Outro valor"]];
+    if (typeof troco === "number" && troco !== n1 && troco !== n1 + 50) troco = null; // total mudou: escolhe de novo
+    h = `<div class="det"><p>Precisa de troco?</p>
+      <div class="trocos">${ops.map(([v, l]) => `<button type="button" class="${String(troco) === String(v) ? "on" : ""}" data-troco="${v}">${l}</button>`).join("")}</div>
+      ${troco === "outro" ? `<div class="campo"><label for="valorTroco">Troco para quanto?</label><input id="valorTroco" inputmode="decimal" value="${esc(trocoOutro)}"></div>` : ""}
+      <div class="troco-txt" id="trocoTxt"></div></div>`;
+  }
+  $("pagDet").innerHTML = h;
+  mostrarTroco();
+}
 
 function desenharCheckout() {
-  document.querySelectorAll("#tipoPedido button").forEach((b) => {
+  const ent = tipo === "entrega";
+  document.querySelectorAll("#tipoPedido [data-tipo]").forEach((b) => {
     b.classList.toggle("on", b.dataset.tipo === tipo);
     b.disabled = b.dataset.tipo === "entrega" && entregaPausada;
   });
+  $("modoEntTxt").innerHTML = `${esc(tempoEntrega)}<br>taxa ${textoTaxaMin().replace("Grátis", "grátis")}`;
   $("semEntregaNota").classList.toggle("hidden", !entregaPausada);
-  $("blocoEndereco").classList.toggle("hidden", tipo !== "entrega");
-  document.querySelectorAll("#pagamento button").forEach((b) => b.classList.toggle("on", b.dataset.pag === pagamento));
-  $("blocoTroco").classList.toggle("hidden", pagamento !== "Dinheiro");
-  $("valorTroco").classList.toggle("hidden", !$("precisaTroco").checked);
-  const px = $("blocoPix");
-  px.classList.toggle("hidden", pagamento !== "PIX");
-  if (pagamento === "PIX") {
-    px.innerHTML = chavePix
-      ? `<div class="rotulo">CHAVE PIX${favorecidoPix ? " · " + esc(favorecidoPix) : ""}</div><div class="chave">${esc(chavePix)}</div>
-         <button type="button" id="copiarPix">Copiar chave PIX</button>
-         <div class="pix-obs">Pague ${brl(subtotal() + taxaAtual())} e envie o comprovante no WhatsApp da loja para confirmar o pedido.</div>`
-      : `<div class="pix-obs">A chave PIX aparece aqui assim que a loja cadastrar. Você também pode pagar o PIX na entrega/retirada.</div>`;
-    const cp = $("copiarPix");
-    if (cp) cp.onclick = () => copiar(chavePix);
+  $("blocoEndereco").classList.toggle("hidden", !ent);
+  $("blocoRetirada").classList.toggle("hidden", tipo !== "retirada");
+  $("retEnd").textContent = LOJA.endereco;
+  $("pagOnde").textContent = tipo === "retirada" ? "na retirada" : "na entrega";
+
+  // endereço: "de sempre" (salvo) ou formulário com as regiões
+  const tx = taxaAtual();
+  $("endTaxa").textContent = ent && bairro && BAIRROS.some((b) => b.nome === bairro) ? "entrega " + (tx ? brl(tx) : "grátis") : "";
+  const salvo = ent && !editarEnd && endOk();
+  $("endSalvo").innerHTML = salvo ? `<div class="rot">Entregar no endereço de sempre?</div>
+    <div class="salvo"><span class="pino">📍</span><div><strong>${esc($("cRua").value.trim())}, ${esc($("cNum").value.trim())}</strong>
+      <small>${esc(bairro)}${$("cRef").value.trim() ? " · " + esc($("cRef").value.trim()) : ""} · entrega ${tx ? brl(tx) : "grátis"}</small></div>
+      <button type="button" data-alterar>Alterar</button></div>` : "";
+  $("endForm").classList.toggle("hidden", salvo);
+  if (!salvo) {
+    const i = BAIRROS.findIndex((b) => b.nome === bairro);
+    const todos = verTodosBairros || BAIRROS.length <= 8 || i >= 6;
+    $("bairros").innerHTML = (todos ? BAIRROS : BAIRROS.slice(0, 6)).map((b) =>
+      `<button type="button" class="bairro ${b.nome === bairro ? "on" : ""}" data-bairro="${esc(b.nome)}"><span>${esc(b.nome)}</span><small>${b.taxa ? brl(b.taxa) : "grátis"}</small></button>`).join("");
+    $("maisBairros").classList.toggle("hidden", todos);
+    $("maisBairros").textContent = `Ver todas as regiões (${BAIRROS.length}) ▾`;
   }
+
+  // dados: salvos (nome + WhatsApp) ou campos
+  const dSalvo = !MESA && !editarDados && dadosOk();
+  $("dadosSalvo").innerHTML = dSalvo ? `<div class="salvo neutro"><span class="pino">👤</span><div><strong>${esc($("cNome").value.trim())}</strong>
+    <small>${esc($("cTel").value.trim())}</small></div><button type="button" data-alterar>Alterar</button></div>` : "";
+  $("dadosForm").classList.toggle("hidden", dSalvo);
+
+  desenharPagamento();
   $("rSub").textContent = brl(subtotal());
-  $("linhaTaxa").classList.toggle("hidden", tipo !== "entrega");
-  $("rTaxa").textContent = taxaAtual() ? brl(taxaAtual()) : "Grátis";
-  $("rTotal").textContent = brl(subtotal() + taxaAtual());
-  $("btnPedidoTxt").textContent = enviando ? "Enviando…" : MESA ? `Enviar para a cozinha · ${brl(subtotal())}` : `Fazer pedido · ${brl(subtotal() + taxaAtual())}`;
+  $("linhaTaxa").classList.toggle("hidden", !ent);
+  $("rTaxaRot").textContent = "Entrega" + (bairro && BAIRROS.some((b) => b.nome === bairro) ? " · " + bairro : "");
+  $("rTaxa").textContent = bairro || !BAIRROS.length ? (tx ? brl(tx) : "Grátis") : "escolha a região";
+  $("rTotal").textContent = brl(MESA ? subtotal() : totalAtual());
+  atualizarEtapas();
 }
 
 async function copiar(t) {
@@ -524,21 +669,18 @@ let enviando = false, idPendente = null, tokenPendente = null, tentativas = 0;
 function validar() {
   if (!sacola.length) return "Sua sacola está vazia.";
   if (!recebendo) return "A loja está fechada agora. Os pedidos voltam quando abrirmos 🙂";
-  if (MESA) return "";
-  if (!tipo) return "Escolha: entrega ou retirada.";
-  if (tipo === "entrega" && entregaPausada) return "As entregas estão pausadas. Escolha retirar no balcão.";
-  if ($("cTel").value.replace(/\D/g, "").length < 10) { $("cTel").classList.add("erro"); $("cTel").focus(); return "Digite seu WhatsApp com DDD."; }
-  const req = [["cNome", 2, "Digite seu nome."]];
-  if (tipo === "entrega") req.push(["cRua", 3, "Digite a rua."], ["cNum", 1, "Digite o número (ou S/N)."], ["cBairro", 2, "Digite o bairro."]);
-  for (const [id, min, msg] of req) {
-    if ($(id).value.trim().length < min) { $(id).classList.add("erro"); $(id).focus(); return msg; }
-  }
-  if (!pagamento) return "Escolha a forma de pagamento.";
-  if (pagamento === "Dinheiro" && $("precisaTroco").checked) {
-    const v = parseFloat($("valorTroco").value.replace(",", "."));
-    if (!(v > subtotal() + taxaAtual())) return "O troco precisa ser maior que o total.";
-  }
-  return "";
+  const f = faltando();
+  if (!f) return "";
+  // abre o que estava "salvo" se for ali o problema, marca o campo e rola até ele
+  if (f.passo === "end" && editarEnd === false) { editarEnd = true; desenharCheckout(); }
+  if (f.passo === "dados" && editarDados === false) { editarDados = true; desenharCheckout(); }
+  const alvo = f.foco && $(f.foco);
+  if (alvo) {
+    (alvo.closest(".campo") || alvo).classList.add("erro");
+    alvo.scrollIntoView({ behavior: "smooth", block: "center" });
+    if (alvo.tagName === "INPUT") setTimeout(() => alvo.focus({ preventScroll: true }), 250);
+  } else document.querySelector(`#telaSacola [data-passo="${f.passo}"]`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  return f.msg.replace(/^Falta: /, "Falta ");
 }
 
 $("btnPedido").onclick = async () => {
@@ -546,16 +688,16 @@ $("btnPedido").onclick = async () => {
   const erro = validar();
   if (erro) return toast(erro);
   const sub = subtotal(), taxa = taxaAtual(), totalFinal = Number((sub + taxa).toFixed(2));
-  const precisaTroco = pagamento === "Dinheiro" && $("precisaTroco").checked;
-  const valorTroco = precisaTroco ? parseFloat($("valorTroco").value.replace(",", ".")) : null;
+  const precisaTroco = pagamento === "Dinheiro" && troco !== "nao" && valorTrocoFinal() > totalFinal;
+  const valorTroco = precisaTroco ? valorTrocoFinal() : null;
   const endereco = tipo === "entrega"
-    ? `${$("cRua").value.trim()}, ${$("cNum").value.trim()} - ${$("cBairro").value.trim()}${$("cRef").value.trim() ? " (" + $("cRef").value.trim() + ")" : ""}` : "";
+    ? `${$("cRua").value.trim()}, ${$("cNum").value.trim()} - ${bairro}${$("cRef").value.trim() ? " (" + $("cRef").value.trim() + ")" : ""}` : "";
   const itens = sacola.map((i) => ({
     nome: nomePedido(i), preco: i.preco, quantidade: i.quantidade, subtotal: Number((i.preco * i.quantidade).toFixed(2)),
     observacao: i.observacao || "", complementos: i.complementos, produtoId: i.id, produto: i.base,
   }));
 
-  enviando = true; $("btnPedido").disabled = true; desenharCheckout();
+  enviando = true; $("btnPedido").disabled = true; atualizarEtapas();
   if (MESA) {
     // pedido de mesa: sem entrega, pagamento e acompanhamento — o painel fecha a conta da mesa
     try {
@@ -595,7 +737,7 @@ $("btnPedido").onclick = async () => {
       tipo, tipoPedido: tipo,
       cliente: $("cNome").value.trim(), nomeCliente: $("cNome").value.trim(),
       telefone: $("cTel").value.trim(), telefoneCliente: $("cTel").value.trim(),
-      endereco, enderecoCliente: endereco, regiao: tipo === "entrega" ? $("cBairro").value.trim() : "",
+      endereco, enderecoCliente: endereco, regiao: tipo === "entrega" ? bairro : "",
       formaPagamento: pagamento, taxaEntrega: taxa, precisaTroco, valorTroco,
       items: itens, totalProdutos: sub.toFixed(2), totalFinal: totalFinal.toFixed(2),
       status: "pendente", createdAt: serverTimestamp(), origem: "cardapio-delivery",
@@ -626,7 +768,7 @@ function concluirMesa(itens, sub) {
 function desenharMesa(lista, acabouDeEnviar = false) {
   const total = lista.reduce((s, p) => s + p.total, 0);
   const hora = (t) => new Date(t).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
-  $("acompCorpo").innerHTML = `
+  $("acompCorpo").innerHTML = `<div class="cab-tela"><button class="bolinha-s" data-fechar="telaAcomp" aria-label="Voltar">‹</button><h2>Mesa ${MESA}</h2><span></span></div><div class="pad">
     ${acabouDeEnviar
       ? `<div class="ac-topo"><div class="ac-ilu"><span class="pula">👨‍🍳</span></div><h3>Pedido enviado!</h3><p>Já foi para a cozinha. É só aguardar na Mesa ${MESA} 😉</p></div>`
       : `<div class="ac-topo"><h3>Pedidos da Mesa ${MESA}</h3><p>Tudo o que foi pedido por este celular.</p></div>`}
@@ -636,7 +778,7 @@ function desenharMesa(lista, acabouDeEnviar = false) {
       <div class="resumo"><hr><div class="total"><span>Total até agora</span><b>${brl(total)}</b></div></div></div>
     <p class="pix-obs" style="color:var(--suave);text-align:center">O pagamento é feito no caixa quando fechar a conta da mesa.</p>
     <button class="btn-linha" data-fechar="telaAcomp" style="border-style:solid">Pedir mais alguma coisa</button>
-    <div style="height:30px"></div>`;
+    <div style="height:30px"></div></div>`;
 }
 
 // dicas da faixa da mesa: antes do 1º pedido "Direto na cozinha"; depois vira o botão "Meus pedidos (N)"
@@ -678,12 +820,18 @@ function mensagemPedidoWhats(p) {
 
 function concluirEnvio(token, itens, v) {
   const msg = mensagemPedidoWhats({ tipo, itens, pagamento, nome: $("cNome").value.trim(), tel: $("cTel").value.trim(), ...v });
-  const a = { token: token || "local-" + idPendente, criado: Date.now(), whats: linkWhats(msg), tipo, pagamento, total: v.totalFinal, semAcomp: !token };
+  // o que a tela de acompanhamento mostra fica só neste celular (o Firebase guarda só a etapa)
+  const a = {
+    token: token || "local-" + idPendente, criado: Date.now(), whats: linkWhats(msg), tipo, pagamento, total: v.totalFinal, semAcomp: !token,
+    sub: v.sub, taxa: v.taxa, regiao: tipo === "entrega" ? bairro : "", endereco: v.endereco, troco: v.valorTroco, tempo: tempoEntrega,
+    itens: itens.map((i) => ({ q: i.quantidade, nome: i.nome, v: i.subtotal })),
+  };
   acomps = [a, ...acomps.filter((x) => x.token !== a.token)].slice(0, 10);
   ls.set("quintal-acomps", acomps);
   idPendente = null; tokenPendente = null; tentativas = 0;
+  troco = null; trocoOutro = ""; pagChave = "";
+  editarEnd = false; editarDados = false; // da próxima vez já aparece "endereço de sempre"
   sacola = []; salvarSacola();
-  $("valorTroco").value = ""; $("precisaTroco").checked = false;
   fecharTela("telaSacola");
   setTimeout(() => { atual = a.token; escutarAcomps(); abrirTela("telaAcomp"); desenharAcomp(); confete(); }, 380);
 }
@@ -725,37 +873,81 @@ function desenharBarraAcomp() {
 }
 $("barraAcomp").onclick = () => { atual = acomps.find((a) => !["concluido", "cancelado"].includes(dadosAcomp[a.token]?.status))?.token || atual; abrirTela("telaAcomp"); desenharAcomp(); };
 
-const hhmm = (t) => (t?.toDate ? t.toDate() : t ? new Date(t) : null)?.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) || "";
+const paraData = (t) => (t?.toDate ? t.toDate() : t ? new Date(t) : null);
+const hm = (t) => paraData(t)?.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) || "";
+const hhmm = hm;
+// "40–60 min" → [40, 60]; "50 minutos" → [50, 50]
+function faixaTempo(t) {
+  const n = String(t || "").match(/\d+/g)?.map(Number) || [];
+  return n.length ? [n[0], n[1] ?? n[0]] : null;
+}
 
 function desenharAcomp() {
   const a = acomps.find((x) => x.token === atual) || acomps[0];
   if (!a) return;
   const d = dadosAcomp[a.token] || { status: "enviado", tipo: a.tipo, pagamento: a.pagamento, total: a.total, horarios: {} };
-  const st = d.status || "enviado", ent = (d.tipo || a.tipo) === "entrega";
+  const ent = (d.tipo || a.tipo) === "entrega";
+  let st = d.status || "enviado";
+  if (!ent && st === "saiu") st = "pronto";
   const passos = ["enviado", "preparando", ent ? "saiu" : "pronto", "concluido"];
-  const idx = passos.indexOf(st);
-  const ilu = st === "saiu" ? `<span class="moto">🛵</span>` : st === "concluido" ? `<span class="pula">🧡</span>` : st === "cancelado" ? "😕"
+  const idx = passos.indexOf(st), fim = st === "concluido", cancel = st === "cancelado";
+  const ilu = st === "saiu" ? `<span class="moto">🛵</span>` : fim ? `<span class="pula">🧡</span>` : cancel ? "😕"
     : st === "pronto" ? `<span class="pula">🛍️</span>` : st === "preparando" ? `<span class="pula">👨‍🍳</span>` : `<span class="pula">📨</span>`;
   const sub = {
-    enviado: "A loja já recebeu e vai confirmar em instantes.", preparando: "Seu pedido está sendo preparado com carinho.",
+    enviado: "A loja já recebeu e vai confirmar em instantes.", preparando: "Seu pedido está sendo feito agora, fresquinho.",
     saiu: "O entregador está a caminho. Fique de olho!", pronto: "Pode vir buscar no balcão 😉",
     concluido: ent ? "Bom apetite! Obrigado pela preferência." : "Retirado. Bom apetite!", cancelado: "Fale com a loja pelo WhatsApp se tiver dúvida.",
   }[st];
+  const desc = { enviado: "Aguardando a loja confirmar", preparando: "Na cozinha", saiu: "Com o entregador", pronto: "Esperando você no balcão" };
   const h = d.horarios || {};
-  const seletor = acomps.length > 1 ? `<div class="seletor-acomp">${acomps.map((x) => `<button data-acomp="${x.token}" class="${x.token === a.token ? "on" : ""}">Pedido ${new Date(x.criado).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</button>`).join("")}</div>` : "";
-  const pix = /pix/i.test(d.pagamento || a.pagamento || "") && chavePix && !["concluido", "cancelado"].includes(st)
-    ? `<div class="card pix"><div class="rotulo">💠 PAGUE COM PIX · ${brl(d.total ?? a.total)}</div><div class="chave">${esc(chavePix)}</div>${favorecidoPix ? `<div class="pix-obs" style="color:var(--suave)">${esc(favorecidoPix)}</div>` : ""}<button data-copiar="1">Copiar chave PIX</button></div>` : "";
-  $("acompCorpo").innerHTML = `${seletor}
-    <div class="ac-topo"><div class="ac-ilu">${ilu}</div>${st === "saiu" ? `<div class="estrada"></div>` : ""}
-      <h3>${ETQ[st] || "Pedido enviado"}</h3><p>${sub}</p></div>
-    ${st !== "cancelado" ? `<div class="card"><ul class="etapas">${passos.map((p, i) => `<li class="${i < idx || st === "concluido" ? "feita" : i === idx ? "atual" : ""}"><i>${i < idx || st === "concluido" ? "✓" : i + 1}</i>${ETQ[p]}<small>${hhmm(h[p])}</small></li>`).join("")}</ul></div>` : ""}
-    ${d.resumo ? `<div class="card"><div class="rotulo">SEU PEDIDO</div><div style="font-size:14px;line-height:1.45">${esc(d.resumo)}</div>
-      <div class="resumo">${d.taxaEntrega ? `<div><span>Produtos</span><span>${brl(d.subtotal)}</span></div><div><span>Taxa de entrega</span><span>${brl(d.taxaEntrega)}</span></div>` : ""}
-      <hr><div class="total"><span>Total</span><b>${brl(d.total)}</b></div></div></div>` : ""}
-    ${pix}
-    <a class="btn-linha" href="${a.whats}" target="_blank" rel="noopener" id="btnZap">${a.enviouWhats ? "💬 Falar com a loja" : "💬 Enviar pedido no WhatsApp<small>Opcional — a loja já recebeu</small>"}</a>
-    <button class="btn-linha" data-fechar="telaAcomp" style="border-style:solid">Voltar ao cardápio</button>
-    <div style="height:30px"></div>`;
+  const criado = paraData(d.criadoEm)?.getTime() || a.criado;
+  const fx = faixaTempo(d.tempoEntrega || a.tempo);
+  let prev = "";
+  if (fim) prev = `<small>${ent ? "ENTREGUE ÀS" : "RETIRADO ÀS"}</small><strong>${hm(h.concluido) || "✓"}</strong>`;
+  else if (!cancel && ent && fx) prev = `<small>PREVISÃO DE CHEGADA</small><strong>${hm(criado + fx[0] * 60000)}${fx[1] !== fx[0] ? " – " + hm(criado + fx[1] * 60000) : ""}</strong>`;
+  else if (st === "pronto") prev = `<small>PRONTO PARA RETIRAR</small><strong>Pode vir ✓</strong>`;
+
+  const seletor = acomps.length > 1 ? `<div class="ac-seletor">${acomps.map((x) => `<button data-acomp="${x.token}" class="${x.token === a.token ? "on" : ""}">Pedido ${hm(x.criado)}</button>`).join("")}</div>` : "";
+  const total = d.total ?? a.total, taxa = d.taxaEntrega ?? a.taxa ?? 0, subt = d.subtotal ?? a.sub ?? total - taxa;
+  const pag = d.pagamento || a.pagamento || "";
+  const ehPix = /pix/i.test(pag);
+  const icoPag = ehPix ? "💠" : /cart/i.test(pag) ? "💳" : "💵";
+  const trocoV = d.valorTroco ?? a.troco;
+  const itens = a.itens?.length
+    ? a.itens.map((i) => `<div><span><i>${i.q}x</i> ${esc(i.nome)}</span><span>${brl(i.v)}</span></div>`).join("")
+    : d.resumo ? `<div><span>${esc(d.resumo)}</span></div>` : "";
+  const mapa = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(LOJA.nome + ", " + LOJA.endereco);
+
+  $("acompCorpo").innerHTML = `
+    <div class="ac-heroi ${fim ? "ok" : cancel ? "cancel" : ""}">
+      <div class="ac-top"><button class="ac-voltar" data-fechar="telaAcomp" aria-label="Voltar">‹</button>
+        <span>Pedido das ${hm(a.criado)}</span><b>${ent ? "🛵 Entrega" : "🛍️ Retirada"}</b></div>
+      ${seletor}
+      <div class="ac-ilu">${ilu}</div>${st === "saiu" ? `<div class="estrada"></div>` : ""}
+      <h3>${ETQ[st] || "Pedido enviado"}</h3><p>${sub}</p>
+      ${prev ? `<div class="ac-prev"><div>${prev}</div></div>` : ""}
+      ${cancel ? "" : `<div class="ac-barra">${passos.map((p, i) => `<i class="${i < idx || fim ? "f" : i === idx ? "a" : ""}"></i>`).join("")}</div>`}
+    </div>
+    <div class="ac-corpo">
+      ${cancel ? "" : `<div class="bloco"><ul class="ac-etapas">${passos.map((p, i) => {
+        const f = i < idx || fim, at = i === idx && !fim;
+        return `<li class="${f ? "f" : at ? "a" : ""}"><span class="bol">${f ? "✓" : i + 1}</span><div class="tx"><strong>${ETQ[p]}</strong>${at && desc[p] ? `<small>${desc[p]}</small>` : ""}</div><time>${f || at ? hm(h[p]) : ""}</time></li>`;
+      }).join("")}</ul></div>`}
+      <div class="bloco">${ent
+        ? `<div class="ac-info"><span class="pino">📍</span><div><strong>Entregar em</strong><small>${esc(a.endereco || "Endereço informado no pedido")}</small></div></div>`
+        : `<div class="ac-info"><span class="pino">🏪</span><div><strong>Retirar em</strong><small>${esc(LOJA.nome)}<br>${esc(LOJA.endereco)}</small><a href="${mapa}" target="_blank" rel="noopener">Abrir no mapa ›</a></div></div>`}</div>
+      <div class="bloco"><div class="bt"><strong>Seu pedido</strong>${a.itens?.length ? `<em>${a.itens.reduce((s, i) => s + i.q, 0)} itens</em>` : ""}</div>
+        <div class="ac-itens">${itens}</div>
+        <div class="tot"><span>Subtotal</span><span>${brl(subt)}</span></div>
+        ${ent ? `<div class="tot"><span>Entrega${a.regiao ? " · " + esc(a.regiao) : ""}</span><span>${taxa ? brl(taxa) : "Grátis"}</span></div>` : ""}
+        <div class="tot grande"><span>Total</span><b>${brl(total)}</b></div>
+        ${pag ? `<div class="ac-pag"><span>${icoPag} ${esc(pag)}${trocoV ? ` · troco p/ ${brl(trocoV)}` : ""}</span><span class="selo-pag">${ent ? "Pagar na entrega" : "Pagar na retirada"}</span></div>` : ""}
+      </div>
+      ${ehPix && chavePix && !fim && !cancel ? `<div class="bloco pix"><div class="rotulo">💠 PAGUE COM PIX · ${brl(total)}</div><div class="chave">${esc(chavePix)}</div>${favorecidoPix ? `<div class="pix-obs" style="color:var(--suave)">${esc(favorecidoPix)}</div>` : ""}<button data-copiar="1">Copiar chave PIX</button><div class="pix-obs">Envie o comprovante no WhatsApp da loja.</div></div>` : ""}
+      <div class="ac-btns"><a class="btn-z verde" href="${a.whats}" target="_blank" rel="noopener" id="btnZap">💬 ${a.enviouWhats ? "Falar com a loja" : "Mandar no WhatsApp"}</a>
+        <button class="btn-z linha" data-fechar="telaAcomp">Voltar ao cardápio</button></div>
+      <p class="ac-ajuda">${a.enviouWhats ? "" : "O WhatsApp é opcional: a loja já recebeu seu pedido. "}Esta tela atualiza sozinha.</p>
+    </div>`;
   $("btnZap").onclick = () => { a.enviouWhats = true; ls.set("quintal-acomps", acomps); setTimeout(desenharAcomp, 300); };
 }
 $("acompCorpo").addEventListener("click", (e) => {
