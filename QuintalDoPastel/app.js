@@ -1,5 +1,5 @@
 // =====================================================================
-// Cardápio Quintal do Pastel 1.4.2 — visual do vídeo de abordagem (telas premium)
+// Cardápio Quintal do Pastel 1.4.3 — visual do vídeo de abordagem (telas premium)
 // Firestore: produtos, opcoesLanche (grupo "extras"), config/estadoPedidos, config/entrega, config/pix,
 //            orders (pedido), acompanhamento (status ao vivo, sem telefone/endereço)
 // 1.4.0 (20/11): finalização em etapas + taxa POR REGIÃO (config/entrega.bairros, editada no painel;
@@ -197,9 +197,9 @@ function desenharCardapio() {
   const todos = Object.values(PRODUTOS).filter(visivel);
   const filtra = (p) => !termo || sem(nomeVitrine(p) + " " + p.nome + " " + (p.descricao || "") + " " + (CAT[p.categoria]?.nome || "")).includes(termo);
 
-  // destaque da casa (X-Gaúcho)
+  // destaque da casa (X-Gaúcho) — some quando esgotado/pausado (pedido do usuário 21/11)
   const top = PRODUTOS[LOJA.destaqueId];
-  $("destaqueCasa").innerHTML = top && visivel(top) && !termo ? `
+  $("destaqueCasa").innerHTML = top && top.status === "ativo" && !termo ? `
     <button class="dest-grande" data-prod="${esc(top.id)}">
       <div class="dest-foto">${tile(top, "")}<span class="selo">🔥 DESTAQUE DA CASA</span>${top.selo ? `<span class="selo dir">${esc(top.selo)}</span>` : ""}
         <div class="dest-nome">${esc(top.nome)}</div></div>
