@@ -1,12 +1,12 @@
 // =====================================================================
-// Cardápio Quintal do Pastel 1.4.3 — visual do vídeo de abordagem (telas premium)
+// Cardápio Quintal do Pastel 1.4.4 — visual do vídeo de abordagem (telas premium)
 // Firestore: produtos, opcoesLanche (grupo "extras"), config/estadoPedidos, config/entrega, config/pix,
 //            orders (pedido), acompanhamento (status ao vivo, sem telefone/endereço)
 // 1.4.0 (20/11): finalização em etapas + taxa POR REGIÃO (config/entrega.bairros, editada no painel;
 //               sem nada salvo vale LOJA.bairrosPadrao) + acompanhamento novo (topo da marca, previsão em horário)
 // =====================================================================
 import { initializeApp, getFirestore, collection, doc, setDoc, onSnapshot, serverTimestamp, query, where } from "./fb.js";
-import { firebaseConfig, LOJA } from "./config.js";
+import { firebaseConfig, LOJA } from "./config.js?v=1.4.4";
 import { CATEGORIAS } from "./dados.js";
 
 const db = getFirestore(initializeApp(firebaseConfig));

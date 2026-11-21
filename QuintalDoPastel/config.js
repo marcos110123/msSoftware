@@ -30,6 +30,6 @@ export const LOJA = {
   ],
   tempoPadrao: "40–60 min",   // usada enquanto config/entrega.tempoEntrega não for gravada
   pixPadrao: "",              // usada enquanto config/pix.chave não for gravada
-  destaqueId: "lanches-x-gaucho", // produto do cartão grande "Destaque da casa"
+  destaqueId: "", // cartão grande "Destaque da casa" DESLIGADO (21/11, pedido do usuário); fica só o carrossel dos mais pedidos. Para voltar: "lanches-x-gaucho"
   totalMesas: 20,             // QR code das mesas: ?mesa=1 até ?mesa=20 (número fora disso é ignorado)
 };
