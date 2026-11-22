@@ -1,0 +1,126 @@
+/* =========================================================
+   Lista compacta (1.0.9): produtos em linha, carrinho embaixo, categorias no topo.
+   Mesmo padrão do labrasa.site 1.3.2, nas cores da Fiorella.
+   Tudo fica dentro de html.sk — tirando o arquivo (ou a classe), volta o visual anterior.
+   ========================================================= */
+html.sk {
+  --sk-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --sk-ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  --sk-red: #c8102e;
+  --sk-gold: #facc15;
+  --sk-card: rgba(22, 22, 24, 0.92);
+  --sk-line: rgba(255, 255, 255, 0.08);
+}
+html.sk ::selection { background: var(--sk-red); color: #fff; }
+html.sk :focus-visible { outline: 2px solid #f87171; outline-offset: 3px; }
+html.sk body { font-variant-numeric: tabular-nums; }
+
+/* ---- Toque: botões afundam um pouco ---- */
+html.sk button,
+html.sk [data-card] {
+  transition: transform 160ms var(--sk-ease-out), background-color .2s ease, box-shadow .2s ease !important;
+}
+html.sk button:active,
+html.sk [data-card]:active { transform: scale(0.97); }
+html.sk [data-card] img { transition: transform .5s var(--sk-ease-out) !important; }
+html.sk [data-card]:hover img { transform: none; }
+@media (hover: hover) and (pointer: fine) {
+  html.sk [data-card]:hover img { transform: scale(1.04); }
+}
+
+/* ---- Carrinho: sai do topo e vira barra embaixo ---- */
+html.sk #btnAbrirCarrinho { display: none !important; }
+#skBar {
+  position: fixed; left: 12px; right: 12px; bottom: 12px; z-index: 39; /* abaixo das janelas (z-40) */
+  max-width: 560px; margin: 0 auto;
+  display: none; align-items: center; justify-content: space-between; gap: 12px;
+  min-height: 56px; padding: 0 18px; border: 0; border-radius: 16px; cursor: pointer;
+  background: var(--sk-red); color: #fff;
+  font: 700 16px system-ui, -apple-system, "Segoe UI", sans-serif;
+  box-shadow: 0 12px 30px rgba(200, 16, 46, 0.4), 0 2px 8px rgba(0, 0, 0, 0.5);
+  transform: translateY(calc(100% + 24px));
+  transition: transform .45s var(--sk-ease-drawer) !important;
+}
+html.sk #skBar { display: flex; }
+html.sk #skBar.on { transform: translateY(0); }
+html.sk #skBar.on:active { transform: scale(0.98); }
+#skBar .sk-qtd {
+  display: inline-grid; place-items: center; min-width: 26px; height: 26px; padding: 0 7px; margin-right: 10px;
+  border-radius: 999px; background: #fff; color: var(--sk-red); font-size: 14px;
+  transition: transform .3s var(--sk-ease-out);
+}
+#skBar.pulo .sk-qtd { transform: scale(1.25); }
+/* aviso "Adicionado ao carrinho" sobe para não ficar atrás da barra */
+html.sk body > .fixed.bottom-4.right-4 { bottom: 84px !important; }
+html.sk footer { padding-bottom: 84px; }
+
+/* ---- Categorias: faixa que gruda no topo ---- */
+#skChips { display: none; }
+html.sk #skChips {
+  display: block; position: sticky; top: 0; z-index: 38;
+  background: rgba(15, 15, 15, 0.92); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(200, 16, 46, 0.35);
+}
+html.sk #skChips.escondido { display: none; }
+#skChips .sk-trilho {
+  display: flex; gap: 8px; overflow-x: auto; padding: 10px 14px; scrollbar-width: none; max-width: 1100px; margin: 0 auto;
+}
+#skChips .sk-trilho::-webkit-scrollbar { display: none; }
+#skChips button {
+  flex: none; min-height: 40px; padding: 0 16px; border-radius: 999px; cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.16); background: transparent; color: #e5e7eb;
+  font: 600 13px system-ui, -apple-system, "Segoe UI", sans-serif; letter-spacing: .02em; white-space: nowrap;
+}
+#skChips button[hidden] { display: none; }
+#skChips button[aria-current="true"] { background: var(--sk-red); color: #fff; border-color: var(--sk-red); }
+
+/* ---- Produtos: linha compacta em vez de cartão gigante ---- */
+html.sk .section-produto { padding-top: 28px !important; scroll-margin-top: 58px; }
+html.sk .section-produto > h2 { font-size: 26px !important; margin-bottom: 18px !important; justify-content: flex-start !important; max-width: 72rem; margin-left: auto; margin-right: auto; }
+html.sk .produtos-grid { gap: 10px !important; }
+html.sk .menu-item {
+  display: grid !important;
+  grid-template-columns: 96px 1fr auto;
+  grid-template-areas: "foto nome nome" "foto desc desc" "foto preco botao";
+  column-gap: 14px; align-items: start;
+  padding: 12px !important; border-radius: 14px !important;
+  background: var(--sk-card) !important; border: 1px solid var(--sk-line); box-shadow: none !important;
+}
+html.sk .menu-item > img {
+  grid-area: foto; width: 96px !important; height: 96px !important; border-radius: 10px !important; object-fit: cover;
+  box-shadow: none !important;
+}
+/* item sem foto (ou com o logo repetido em todos): só o texto */
+html.sk .menu-item:has(> img[src=""]),
+html.sk .menu-item:has(> img[src*="logo2"]) { grid-template-columns: 1fr auto; grid-template-areas: "nome nome" "desc desc" "preco botao"; }
+html.sk .menu-item > img[src=""],
+html.sk .menu-item > img[src*="logo2"] { display: none !important; }
+html.sk .menu-item > h3 {
+  grid-area: nome; margin: 0 !important; font-size: 15.5px !important; line-height: 1.25 !important; font-weight: 700 !important;
+}
+html.sk .menu-item > h3 + p {
+  grid-area: desc; margin-top: 4px; font-size: 13.5px !important; line-height: 1.4 !important; color: #a1a1aa !important;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+html.sk .menu-item > h3 + p:empty { display: none; }
+/* preço (P/G das pizzas, promoção ou preço simples) */
+html.sk .menu-item > :nth-child(4) { grid-area: preco; align-self: center; margin-top: 10px !important; }
+html.sk .menu-item > p:nth-child(4) { font-size: 16px !important; color: #fff !important; }
+html.sk .menu-item > :nth-child(4) span { font-size: 12.5px; padding: 3px 8px !important; }
+html.sk .menu-item > :nth-child(4) .flex { gap: 6px !important; }
+html.sk .menu-item > div:nth-child(4) > p.text-xl { font-size: 16px !important; display: inline; margin-right: 6px; }
+html.sk .menu-item > div:nth-child(4) > p.line-through { display: inline; margin-right: 6px; }
+/* botão: texto curto "Adicionar" */
+html.sk .menu-item > button:last-child {
+  grid-area: botao; align-self: end; margin: 10px 0 0 !important;
+  min-height: 40px; padding: 0 16px !important; border-radius: 999px !important; font-weight: 700;
+  font-size: 0 !important; background: var(--sk-red) !important; white-space: nowrap;
+}
+html.sk .menu-item > button:last-child::after { content: "Adicionar"; font-size: 14px; }
+html.sk .menu-item > button:last-child.sk-ok { background: #16a34a !important; }
+html.sk .menu-item > button:last-child.sk-ok::after { content: "✓ Adicionado"; }
+
+@media (prefers-reduced-motion: reduce) {
+  html.sk *, #skBar { transition-property: opacity, background-color, color !important; }
+  html.sk button:active, html.sk [data-card]:active { transform: none; }
+}
