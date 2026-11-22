@@ -1,4 +1,4 @@
-const CACHE_VERSION = '1.1.2';
+const CACHE_VERSION = '1.1.3';
 const CACHE_NAME = `fiorella-cache-v${CACHE_VERSION}`;
 
 // caminhos relativos à pasta do sw.js (funciona em /EsfirrasEmCasa/ e em testes locais)
@@ -6,11 +6,6 @@ const urlsToCache = [
   './',
   './index.html',
   `./script.js?v=${CACHE_VERSION}`,
-  `./lista-compacta.css?v=${CACHE_VERSION}`,
-  `./lista-compacta.js?v=${CACHE_VERSION}`,
-  `./ilustracoes.js?v=${CACHE_VERSION}`,
-  `./inicio.css?v=${CACHE_VERSION}`,
-  `./inicio.js?v=${CACHE_VERSION}`,
   './img/logo-192.png',
   './img/logo-512.png'
 ];
