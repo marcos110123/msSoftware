@@ -100,9 +100,12 @@
       pontos.querySelectorAll('i').forEach((p, k) => p.classList.toggle('on', k === i));
     }, { passive: true });
     let parado = false;
+    // não fica passando quando o topo está fora da tela (economiza o celular enquanto rola a lista)
+    let topoVisivel = true;
+    new IntersectionObserver(([e]) => { topoVisivel = e.isIntersecting; }).observe(car);
     car.addEventListener('pointerdown', () => { parado = true; setTimeout(() => parado = false, 8000); });
     setInterval(() => {
-      if (parado || !root.classList.contains('pv-b') || !trilho.children.length) return;
+      if (parado || !topoVisivel || document.hidden || !root.classList.contains('pv-b') || !trilho.children.length) return;
       const n = trilho.children.length, i = Math.round(trilho.scrollLeft / trilho.clientWidth);
       trilho.scrollTo({ left: ((i + 1) % n) * trilho.clientWidth, behavior: 'smooth' });
     }, 4500);

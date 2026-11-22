@@ -130,3 +130,8 @@ html.sk .menu-item > img.ilu {
   object-fit: contain !important; padding: 6px;
   background: radial-gradient(circle at 50% 42%, #3a1a1f 0%, #1c1214 70%) !important;
 }
+
+/* ---- Leveza no celular (1.1.2): sem desfoque (blur) em áreas grandes ou que acompanham a rolagem.
+   O fundo atrás é liso, então o visual fica igual e a rolagem não precisa recalcular o desfoque. ---- */
+html.sk .section-produto, html.sk footer { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+html.sk #skChips { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; background: rgba(15, 15, 15, 0.97) !important; }

@@ -343,13 +343,22 @@
     }
     const nome = (card.querySelector('h3') || {}).textContent || '';
     const desc = (card.querySelector('h3 + p') || {}).textContent || '';
-    img.src = dataUrl(desenhar(cat, nome.trim(), desc.trim()));
+    const chave = cat + '|' + nome.trim() + '|' + desc.trim();
+    let url = cache.get(chave);
+    if (!url) { url = dataUrl(desenhar(cat, nome.trim(), desc.trim())); cache.set(chave, url); }
+    img.src = url;
     img.classList.add('ilu');
   }
+  // desenho pronto fica guardado: a lista do Firebase se refaz a cada mudança e não precisa desenhar de novo
+  const cache = new Map();
+  // só desenha a categoria que está aberta (as fechadas não aparecem na tela)
   function varrer() {
-    document.querySelectorAll('.menu-item > img').forEach(img => {
-      const s = img.getAttribute('src') || '';
-      if (s === '' || s.includes('logo2')) trocar(img);
+    document.querySelectorAll('.section-produto').forEach(sec => {
+      if (getComputedStyle(sec).display === 'none') return;
+      sec.querySelectorAll('.menu-item > img').forEach(img => {
+        const s = img.getAttribute('src') || '';
+        if (s === '' || s.includes('logo2')) trocar(img);
+      });
     });
   }
   function pronto(fn) { document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', fn) : fn(); }
@@ -357,6 +366,8 @@
     if (!document.querySelector('.produtos-grid')) return;
     const obs = new MutationObserver(varrer);
     document.querySelectorAll('.produtos-grid').forEach(g => obs.observe(g, { childList: true }));
+    // ao abrir uma categoria (mostrarSecao muda o style da seção)
+    document.querySelectorAll('.section-produto').forEach(sec => obs.observe(sec, { attributes: true, attributeFilter: ['style', 'class'] }));
     varrer();
     // fotos das categorias -> ilustração no mesmo padrão
     document.querySelectorAll('nav [data-card] > img').forEach(img => {
