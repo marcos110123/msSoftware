@@ -29,7 +29,8 @@ export const PADRAO = {
       { nome: "Esfirras em Casa", imagem: "assets/mock-esfirras.jpg", link: "EsfirrasEmCasa/" },
       { nome: "Pizzaria Fiorella", imagem: "assets/mock-fiorella.jpg", link: "PizzariaFiorella/" },
       { nome: "Gatini", imagem: "assets/mock-gatini.jpg", link: "Gatini/" },
-      { nome: "Nosso Açaí", imagem: "assets/mock-nossoacai.jpg", link: "NossoAcai/" }
+      { nome: "Nosso Açaí", imagem: "assets/mock-nossoacai.jpg", link: "NossoAcai/" },
+      { nome: "Quintal do Pastel", imagem: "assets/mock-quintal.jpg", link: "QuintalDoPastel/" }
     ]
   },
   clientes: {
@@ -43,7 +44,8 @@ export const PADRAO = {
       { nome: "Result Hair", imagem: "assets/cli-resulthair.jpg", inteira: true },
       { nome: "Pousada 3 de Abril", imagem: "assets/cli-pousada.jpg" },
       { nome: "Joyce Maurieli Ateliê das Unhas", imagem: "assets/cli-joyce.jpg" },
-      { nome: "Flutuante Binu's", imagem: "assets/cli-binus.jpg" }
+      { nome: "Flutuante Binu's", imagem: "assets/cli-binus.jpg" },
+      { nome: "Quintal do Pastel", imagem: "QuintalDoPastel/img/logo.png", inteira: true }
     ]
   },
   recursos: {
@@ -75,7 +77,8 @@ export const PADRAO = {
       { nome: "Esfirras em Casa", texto: "Cardápio delivery com pedidos no WhatsApp e painel de pedidos", link: "EsfirrasEmCasa/", imagem: "assets/cli-esfirras.jpg" },
       { nome: "Pizzaria Fiorella", texto: "Cardápio delivery, montagem de pizza e painel com nota fiscal", link: "PizzariaFiorella/", imagem: "assets/cli-fiorella.jpg" },
       { nome: "Gatini", texto: "Cardápio digital com pedidos online", link: "Gatini/", imagem: "assets/cli-gatini.png" },
-      { nome: "Nosso Açaí", texto: "Cardápio para montar o açaí e painel de pedidos", link: "NossoAcai/", imagem: "assets/cli-nossoacai.jpg" }
+      { nome: "Nosso Açaí", texto: "Cardápio para montar o açaí e painel de pedidos", link: "NossoAcai/", imagem: "assets/cli-nossoacai.jpg" },
+      { nome: "Quintal do Pastel", texto: "Cardápio delivery, pedidos pelo QR code da mesa e painel de pedidos", link: "QuintalDoPastel/", imagem: "QuintalDoPastel/img/logo.png" }
     ]
   },
   planos: {
