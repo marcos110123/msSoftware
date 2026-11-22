@@ -124,3 +124,9 @@ html.sk .menu-item > button:last-child.sk-ok::after { content: "✓ Adicionado";
   html.sk *, #skBar { transition-property: opacity, background-color, color !important; }
   html.sk button:active, html.sk [data-card]:active { transform: none; }
 }
+
+/* miniatura ilustrada (ilustracoes.js) */
+html.sk .menu-item > img.ilu {
+  object-fit: contain !important; padding: 6px;
+  background: radial-gradient(circle at 50% 42%, #3a1a1f 0%, #1c1214 70%) !important;
+}
