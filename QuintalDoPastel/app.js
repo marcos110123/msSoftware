@@ -1,12 +1,12 @@
 // =====================================================================
-// Cardápio Quintal do Pastel 1.4.4 — visual do vídeo de abordagem (telas premium)
+// Cardápio Quintal do Pastel 1.4.6 — visual do vídeo de abordagem (telas premium)
 // Firestore: produtos, opcoesLanche (grupo "extras"), config/estadoPedidos, config/entrega, config/pix,
 //            orders (pedido), acompanhamento (status ao vivo, sem telefone/endereço)
 // 1.4.0 (20/11): finalização em etapas + taxa POR REGIÃO (config/entrega.bairros, editada no painel;
 //               sem nada salvo vale LOJA.bairrosPadrao) + acompanhamento novo (topo da marca, previsão em horário)
 // =====================================================================
 import { initializeApp, getFirestore, collection, doc, setDoc, onSnapshot, serverTimestamp, query, where } from "./fb.js";
-import { firebaseConfig, LOJA } from "./config.js?v=1.4.4";
+import { firebaseConfig, LOJA } from "./config.js?v=1.4.5";
 import { CATEGORIAS } from "./dados.js";
 
 const db = getFirestore(initializeApp(firebaseConfig));
@@ -245,7 +245,10 @@ function desenharCardapio() {
 // nome mostrado no cardápio: pastéis da lista ganham "Pastel de …"
 function nomeVitrine(p) {
   if (p.categoria === "pasteis-grandes" || p.categoria === "pasteis-pequenos" || p.categoria === "pasteis-doces") {
-    return /^pastel/i.test(p.nome) ? p.nome : "Pastel de " + p.nome.replace(" (pequeno)", "");
+    if (/^pastel/i.test(p.nome)) return p.nome;
+    // 1.4.6 (28/11): a categoria "Pastéis pequenos" leva o tamanho no nome (sai na comanda; antes saía igual ao grande)
+    const tam = p.categoria === "pasteis-pequenos" ? "Pastel Pequeno de " : "Pastel de ";
+    return tam + p.nome.replace(/\s*\(pequeno\)/i, "");
   }
   return p.nome;
 }
@@ -432,6 +435,7 @@ function conferirSacola() {
     const novo = Number((Number(p.preco || 0) + comps.reduce((s, c) => s + Number(c.preco || 0), 0)).toFixed(2));
     if (novo !== i.preco) { i.preco = novo; mudou++; }
     i.complementos = comps;
+    i.base = nomeVitrine(p); // nome sempre do cardápio atual (ex.: "Pastel Pequeno de …")
     return true;
   });
   if (!removidos && !mudou) return;
