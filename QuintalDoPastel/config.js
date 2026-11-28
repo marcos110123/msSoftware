@@ -28,6 +28,12 @@ export const LOJA = {
     { nome: "Richileu", taxa: 20 }, { nome: "Riviera", taxa: 20 }, { nome: "Torres", taxa: 20 },
     { nome: "Morumbi", taxa: 25 },
   ],
+  // Bordas recheadas dos pastéis (28/11): valem enquanto não houver o grupo "bordas" em opcoesLanche (painel → Adicionais)
+  bordasPadrao: [
+    { id: "borda-catupiry", nome: "Catupiry", valor: 7 }, { id: "borda-cheddar", nome: "Cheddar", valor: 7 },
+    { id: "borda-doce-de-leite", nome: "Doce de leite", valor: 7 }, { id: "borda-ninho", nome: "Ninho", valor: 7 },
+    { id: "borda-nutella", nome: "Nutella", valor: 7 }, { id: "borda-chocolate-branco", nome: "Chocolate branco", valor: 7 },
+  ],
   tempoPadrao: "40–60 min",   // usada enquanto config/entrega.tempoEntrega não for gravada
   pixPadrao: "",              // usada enquanto config/pix.chave não for gravada
   destaqueId: "", // cartão grande "Destaque da casa" DESLIGADO (21/11, pedido do usuário); fica só o carrossel dos mais pedidos. Para voltar: "lanches-x-gaucho"

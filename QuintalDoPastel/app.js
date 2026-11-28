@@ -1,13 +1,13 @@
 // =====================================================================
-// Cardápio Quintal do Pastel 1.4.6 — visual do vídeo de abordagem (telas premium)
+// Cardápio Quintal do Pastel 1.4.7 — visual do vídeo de abordagem (telas premium)
 // Firestore: produtos, opcoesLanche (grupo "extras"), config/estadoPedidos, config/entrega, config/pix,
 //            orders (pedido), acompanhamento (status ao vivo, sem telefone/endereço)
 // 1.4.0 (20/11): finalização em etapas + taxa POR REGIÃO (config/entrega.bairros, editada no painel;
 //               sem nada salvo vale LOJA.bairrosPadrao) + acompanhamento novo (topo da marca, previsão em horário)
 // =====================================================================
 import { initializeApp, getFirestore, collection, doc, setDoc, onSnapshot, serverTimestamp, query, where } from "./fb.js";
-import { firebaseConfig, LOJA } from "./config.js?v=1.4.5";
-import { CATEGORIAS } from "./dados.js";
+import { firebaseConfig, LOJA } from "./config.js?v=1.4.7";
+import { CATEGORIAS } from "./dados.js?v=1.4.7";
 
 const db = getFirestore(initializeApp(firebaseConfig));
 const $ = (id) => document.getElementById(id);
@@ -55,6 +55,7 @@ const gravarSacola = (v) => (MESA ? ss.set("quintal-sacola-mesa", v) : ls.set("q
 let PRODUTOS = {};          // id → produto
 let EXTRAS = [];            // adicionais ativos
 let extrasCarregados = false;
+let BORDAS = LOJA.bordasPadrao || []; // bordas recheadas dos pastéis (1.4.7): grupo "bordas" do Firebase, senão as do config
 let recebendo = true, entregaPausada = false;
 let taxaEntrega = LOJA.taxaPadrao, tempoEntrega = LOJA.tempoPadrao, chavePix = LOJA.pixPadrao, favorecidoPix = "";
 let sacola = lerSacola();   // [{chave, id, nome, base, complementos, observacao, preco, quantidade}]
@@ -137,10 +138,20 @@ onSnapshot(collection(db, "produtos"), (snap) => {
   conferirSacola();
 }, (e) => { console.error(e); $("secoes").innerHTML = `<p class="carregando">Não foi possível carregar o cardápio. Verifique a internet.</p>`; });
 
-onSnapshot(query(collection(db, "opcoesLanche"), where("grupo", "==", "extras")), (snap) => {
+onSnapshot(query(collection(db, "opcoesLanche"), where("grupo", "in", ["extras", "bordas"])), (snap) => {
   EXTRAS = [];
-  snap.forEach((d) => { const x = d.data(); if (x.status !== "esgotado" && x.status !== "inativo") EXTRAS.push({ id: d.id, ...x }); });
-  EXTRAS.sort((a, b) => (a.ordem ?? 99) - (b.ordem ?? 99) || a.nome.localeCompare(b.nome));
+  const bordas = [];
+  let temBordas = false;
+  snap.forEach((d) => {
+    const x = d.data();
+    if (x.grupo === "bordas") temBordas = true;
+    if (x.status === "esgotado" || x.status === "inativo") return;
+    (x.grupo === "bordas" ? bordas : EXTRAS).push({ id: d.id, ...x });
+  });
+  const ord = (a, b) => (a.ordem ?? 99) - (b.ordem ?? 99) || a.nome.localeCompare(b.nome);
+  EXTRAS.sort(ord);
+  // grupo "bordas" cadastrado no painel manda (mesmo se todas pausadas); sem nenhum, valem as do config
+  BORDAS = temBordas ? bordas.sort(ord) : (LOJA.bordasPadrao || []);
   extrasCarregados = true;
   conferirSacola();
 });
@@ -262,7 +273,7 @@ document.addEventListener("click", (e) => {
   const b = e.target.closest("[data-prod]");
   if (b) {
     const p = PRODUTOS[b.dataset.prod];
-    if (p && CAT[p.categoria]?.direto && !p.escolha?.opcoes?.length) return adicionarDireto(p, b);
+    if (p && CAT[p.categoria]?.direto && !p.escolha?.opcoes?.length && !temBorda(p)) return adicionarDireto(p, b);
     return abrirProduto(b.dataset.prod);
   }
   const c = e.target.closest("[data-cat]");
@@ -310,13 +321,15 @@ function fecharTela(id, doHistorico = false) {
 addEventListener("popstate", () => { const id = abertas[abertas.length - 1]; if (id) fecharTela(id, true); });
 
 // ---------------- produto ----------------
-let prod = null, escolha = null, marcados = new Set(), qtd = 1;
+let prod = null, escolha = null, marcados = new Set(), qtd = 1, borda = null;
+const temBorda = (p) => !!CAT[p?.categoria]?.borda && BORDAS.length > 0;
+const bordaEscolhida = () => (borda ? BORDAS.find((b) => b.id === borda) || null : null);
 
 function abrirProduto(id) {
   const p = PRODUTOS[id];
   if (!p) return;
   if (p.status === "esgotado") return toast("Esse item está esgotado no momento 😕");
-  prod = p; escolha = null; marcados = new Set(); qtd = 1;
+  prod = p; escolha = null; marcados = new Set(); qtd = 1; borda = null;
   const img = $("prodImg");
   const foto = p.imagem; // sem foto própria: logo da casa (logo-cheia)
   img.src = foto || "img/logo.webp";
@@ -337,6 +350,11 @@ function desenharGrupos() {
       <span class="etiqueta ${escolha ? "ok" : ""}">${escolha ? "✓ PRONTO" : "OBRIGATÓRIO"}</span></div>
       <div class="opcoes">${prod.escolha.opcoes.map((o) => `<button class="opcao ${escolha === o ? "on" : ""}" data-escolha="${esc(o)}"><i class="marca"></i><span>${esc(o)}</span></button>`).join("")}</div></div>`;
   }
+  if (temBorda(prod)) {
+    const b = bordaEscolhida();
+    h += `<div class="grupo"><div class="grupo-cab"><div><strong>Quer borda recheada?</strong><small>Escolha 1 (opcional)</small></div><span class="etiqueta ${b ? "ok" : ""}">${b ? "✓ " + esc(b.nome).toUpperCase() : "OPCIONAL"}</span></div>
+      <div class="opcoes">${BORDAS.map((x) => `<button class="opcao ${borda === x.id ? "on" : ""}" data-borda="${esc(x.id)}"><i class="marca"></i><span>${esc(x.nome)}</span><em>+ ${brl(x.valor)}</em></button>`).join("")}</div></div>`;
+  }
   if (CAT[prod.categoria]?.adicionais && EXTRAS.length) {
     h += `<div class="grupo"><div class="grupo-cab"><div><strong>Turbine seu pedido</strong><small>Adicionais opcionais</small></div><span class="etiqueta">${marcados.size ? marcados.size + " ✓" : "OPCIONAL"}</span></div>
       <div class="opcoes">${EXTRAS.map((x) => `<button class="opcao caixa ${marcados.has(x.id) ? "on" : ""}" data-extra="${esc(x.id)}"><i class="marca"></i><span>${esc(x.nome)}</span><em>+ ${brl(x.valor)}</em></button>`).join("")}</div></div>`;
@@ -348,12 +366,14 @@ function desenharGrupos() {
 $("prodGrupos").addEventListener("click", (e) => {
   const o = e.target.closest("[data-escolha]");
   if (o) { escolha = o.dataset.escolha; desenharGrupos(); return; }
+  const bd = e.target.closest("[data-borda]");
+  if (bd) { borda = borda === bd.dataset.borda ? null : bd.dataset.borda; desenharGrupos(); return; } // tocar de novo tira a borda
   const x = e.target.closest("[data-extra]");
   if (x) { marcados.has(x.dataset.extra) ? marcados.delete(x.dataset.extra) : marcados.add(x.dataset.extra); desenharGrupos(); }
 });
 
 const extrasMarcados = () => EXTRAS.filter((x) => marcados.has(x.id));
-const precoUnit = () => Number(prod.preco || 0) + extrasMarcados().reduce((s, x) => s + Number(x.valor || 0), 0);
+const precoUnit = () => Number(prod.preco || 0) + Number(bordaEscolhida()?.valor || 0) + extrasMarcados().reduce((s, x) => s + Number(x.valor || 0), 0);
 const falta = () => prod.escolha?.opcoes?.length && !escolha;
 
 function atualizarBotaoAdd() {
@@ -374,6 +394,7 @@ $("btnAdd").onclick = () => {
   }
   const complementos = [
     ...(escolha ? [{ grupo: prod.escolha.titulo || "Escolha", nome: escolha, preco: 0 }] : []),
+    ...(bordaEscolhida() ? [{ grupo: "Borda", nome: "Borda " + bordaEscolhida().nome, preco: Number(bordaEscolhida().valor || 0) }] : []),
     ...extrasMarcados().map((x) => ({ grupo: "Adicionais", nome: x.nome, preco: Number(x.valor || 0) })),
   ];
   const observacao = $("prodObs").value.trim();
@@ -427,6 +448,11 @@ function conferirSacola() {
     const p = PRODUTOS[i.id];
     if (!p || p.status !== "ativo") { removidos++; return false; }
     const comps = i.complementos.map((c) => {
+      if (c.grupo === "Borda") {
+        if (!extrasCarregados) return c;
+        const b = BORDAS.find((e) => "Borda " + e.nome === c.nome);
+        return b ? { ...c, preco: Number(b.valor || 0) } : null; // borda que saiu/pausou
+      }
       if (c.grupo !== "Adicionais" || !extrasCarregados) return c;
       const x = EXTRAS.find((e) => e.nome === c.nome);
       return x ? { ...c, preco: Number(x.valor || 0) } : null; // adicional que saiu do cardápio
